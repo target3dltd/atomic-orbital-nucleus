@@ -102,11 +102,19 @@ export default async (req) => {
         body: new URLSearchParams({ code: url.searchParams.get("code") || "", client_id: google.id, client_secret: google.secret, redirect_uri: callbackUrl(url), grant_type: "authorization_code" }),
       });
       const tj = await tr.json().catch(() => ({}));
-      if (!tr.ok || !tj.id_token) return redirect("/?error=google_token", [clearState]);
+      if (!tr.ok || !tj.id_token) {
+        // Google's reason (never includes the secret) goes to the function log, and a specific code to the page.
+        console.error("Google token exchange failed", tr.status, tj.error || "", tj.error_description || "", "redirect_uri=" + callbackUrl(url));
+        const why = tj.error === "invalid_client" ? "google_client" : tj.error === "redirect_uri_mismatch" ? "google_redirect" : "google_token";
+        return redirect("/?error=" + why, [clearState]);
+      }
       // The ID token came straight from Google over TLS, so its claims can be read without re-verifying the signature.
       const claims = JSON.parse(Buffer.from(tj.id_token.split(".")[1], "base64url").toString("utf8"));
       const email = String(claims.email || "").toLowerCase(), domain = email.split("@")[1] || "";
-      if (claims.aud !== google.id || !/^(https:\/\/)?accounts\.google\.com$/.test(claims.iss) || !claims.email_verified || !claims.sub) return redirect("/?error=google_token", [clearState]);
+      if (claims.aud !== google.id || !/^(https:\/\/)?accounts\.google\.com$/.test(claims.iss) || !claims.email_verified || !claims.sub) {
+        console.error("Google ID token rejected", { aud_ok: claims.aud === google.id, iss: claims.iss, email_verified: claims.email_verified });
+        return redirect("/?error=google_token", [clearState]);
+      }
       if (!allowedGoogleDomains().includes(domain) || (claims.hd && !allowedGoogleDomains().includes(String(claims.hd).toLowerCase()))) return redirect("/?error=google_domain&email=" + encodeURIComponent(email), [clearState]);
       const g = { gs: claims.sub, ge: email, gn: claims.name || email, gp: claims.picture || null };
       const next = st.next || "/";

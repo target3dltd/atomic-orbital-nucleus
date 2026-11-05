@@ -98,7 +98,7 @@ export const clearCookie = (secure = true, name = COOKIE, path = "/") => `${name
 // ---- Google sign-in ----
 // Turned on by setting GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET. Until then the Nucleus signs in with a Pipedrive token alone.
 export function googleConfig() {
-  const id = envGet("GOOGLE_CLIENT_ID"), secret = envGet("GOOGLE_CLIENT_SECRET");
+  const id = envGet("GOOGLE_CLIENT_ID").trim(), secret = envGet("GOOGLE_CLIENT_SECRET").trim(); // pasted values often carry a stray space or newline
   return id && secret ? { id, secret } : null;
 }
 export function allowedGoogleDomains() {
