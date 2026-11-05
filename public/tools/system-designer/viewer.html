@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--
+  TARGET3D 3D System Viewer
+  Copyright (c) 2026 Ashley Keeler. All rights reserved.
+  Unauthorised copying, modification, redistribution or hosting is prohibited.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Ashley Keeler">
+<meta name="copyright" content="Copyright (c) 2026 Ashley Keeler. All rights reserved.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TARGET3D — 3D System Viewer</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0d0d14;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+  #viewer-canvas{position:fixed;top:0;left:0;width:100%;height:100%;display:block;}
+
+  #topbar{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(15,15,26,0.92);border-bottom:1px solid #2a2a3a;display:flex;align-items:center;padding:0 16px;z-index:20;backdrop-filter:blur(6px);}
+  #topbar .brand{display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:14px;letter-spacing:.5px;}
+  #topbar .brand svg{width:22px;height:22px;}
+
+  #layers-panel{position:fixed;top:64px;right:16px;width:220px;background:rgba(15,15,26,0.92);border:1px solid #2a2a3a;border-radius:10px;padding:14px;z-index:20;color:#fff;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.4);backdrop-filter:blur(6px);}
+  #layers-panel h3{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#8ab4f8;font-weight:700;}
+  #layers-panel label{display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;font-size:12.5px;color:#ddd;}
+  #layers-panel label:last-child{margin-bottom:0;}
+  #layers-panel input[type=checkbox]{accent-color:#4a90e2;width:14px;height:14px;cursor:pointer;}
+  #layers-panel.empty{display:none;}
+
+  #loading{position:fixed;top:0;left:0;width:100%;height:100%;background:#0d0d14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;color:#8ab4f8;font-size:14px;gap:14px;}
+  #loading .spinner{width:36px;height:36px;border:3px solid #2a2a3a;border-top-color:#4a90e2;border-radius:50%;animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  #error-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,10,10,0.97);border:1px solid #a33;border-radius:10px;padding:24px 28px;color:#fdd;font-size:13px;max-width:420px;text-align:center;z-index:60;display:none;}
+  #error-box.active{display:block;}
+
+  #drop-zone{position:fixed;top:0;left:0;width:100%;height:100%;background:#0d0d14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:40;color:#8ab4f8;gap:16px;}
+  #drop-zone.hidden{display:none;}
+  #drop-zone .box{border:2px dashed #3a3a4a;border-radius:14px;padding:48px 64px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+  #drop-zone .box:hover{border-color:#4a90e2;background:rgba(74,144,226,.05);}
+  #drop-zone .box p{margin:6px 0;color:#aab;font-size:13px;}
+  #drop-zone .box strong{color:#fff;font-size:16px;}
+  #drop-zone input{display:none;}
+
+  #hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);color:#667;font-size:11px;z-index:20;text-align:center;pointer-events:none;}
+</style>
+</head>
+<body>
+
+  <div id="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#4a90e2" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4a90e2" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>TARGET3D — 3D System Viewer</span>
+    </div>
+  </div>
+
+  <div id="drop-zone">
+    <div class="box" onclick="document.getElementById('file-input').click()">
+      <strong>Drop a .glb file here</strong>
+      <p>or click to browse</p>
+      <p style="margin-top:14px;color:#556;">This is a read-only viewer — no editing, no pricing data.</p>
+      <input type="file" id="file-input" accept=".glb,.gltf">
+    </div>
+  </div>
+
+  <div id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <div>Loading model…</div>
+  </div>
+
+  <div id="error-box"></div>
+
+  <canvas id="viewer-canvas"></canvas>
+
+  <div id="layers-panel" class="empty">
+    <h3>Layers</h3>
+    <div id="layers-list"></div>
+  </div>
+
+  <div id="hint">Drag to orbit · Scroll to zoom · Right-drag to pan</div>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// TARGET3D 3D System Viewer — standalone, read-only.
+// Loads a .glb exported from the main System Designer tool and lets
+// a client orbit/zoom it. If the export included optional overlay
+// layers (FOV wireframes, coverage, camera labels, etc.), each gets
+// its own independent checkbox here, matched by the group name the
+// exporter gave it — Base_Scene itself is always shown and isn't
+// toggleable, since hiding the actual design wouldn't make sense.
+// No editing capability and no pricing/quote data of any kind is
+// present here — this file never talks to the main tool at all.
+// ══════════════════════════════════════════════════════════════
+
+const LAYER_DEFS = [
+  { nodeName: 'FOV_Wireframes',       label: 'Camera FOV Wireframes' },
+  { nodeName: 'Coverage_Overlays',    label: 'Coverage Overlays' },
+  { nodeName: 'Alignment_Crosshairs', label: 'Alignment Crosshairs' },
+  { nodeName: 'Camera_Labels',        label: 'Camera Labels' },
+  { nodeName: 'Measurement_Lines',    label: 'Measurement Lines' },
+];
+
+let scene, camera, renderer, controls;
+
+function initViewer(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a24);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
+  camera.position.set(10, 8, 10);
+
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('viewer-canvas'), antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x404050, 1.1);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(8, 12, 6);
+  scene.add(dir);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.35);
+  dir2.position.set(-8, 6, -6);
+  scene.add(dir2);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(4, 1, 4);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.update();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  animate();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function showError(msg){
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.classList.add('active');
+  document.getElementById('loading').style.display = 'none';
+}
+
+function loadModel(url){
+  document.getElementById('drop-zone').classList.add('hidden');
+  document.getElementById('loading').style.display = 'flex';
+
+  const loader = new THREE.GLTFLoader();
+  loader.load(url, function(gltf){
+    document.getElementById('loading').style.display = 'none';
+    scene.add(gltf.scene);
+    frameCameraToObject(gltf.scene);
+    buildLayerToggles(gltf.scene);
+  }, undefined, function(err){
+    console.error('GLB load error:', err);
+    showError('Could not load this 3D model. The file may be missing, moved, or not a valid .glb export from TARGET3D.');
+  });
+}
+
+function loadModelFromFile(file){
+  const url = URL.createObjectURL(file);
+  loadModel(url);
+}
+
+// Fit the camera to whatever was actually loaded, rather than assuming
+// a fixed room size — designs vary a lot (a small studio vs. a 12-pod
+// HOLOSYS layout are very different physical scales).
+function frameCameraToObject(object){
+  const box = new THREE.Box3().setFromObject(object);
+  if(box.isEmpty()) return;
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const dist = maxDim * 1.4 + 2;
+  camera.position.set(center.x + dist*0.6, center.y + dist*0.5, center.z + dist*0.6);
+  controls.target.copy(center);
+  controls.update();
+}
+
+// Find each named overlay group (if present) among the loaded scene's
+// top-level children — the exporter always nests everything one level
+// under a "TARGET3D_Design" root, so we search the whole tree by name
+// rather than assuming an exact depth.
+function buildLayerToggles(root){
+  const panel = document.getElementById('layers-panel');
+  const list = document.getElementById('layers-list');
+  list.innerHTML = '';
+  let foundAny = false;
+
+  LAYER_DEFS.forEach(def => {
+    let node = null;
+    root.traverse(o => { if(o.name === def.nodeName && !node) node = o; });
+    if(!node) return; // this layer wasn't included in the export — no checkbox for it
+    foundAny = true;
+
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = true;
+    checkbox.addEventListener('change', () => { node.visible = checkbox.checked; });
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(def.label));
+    list.appendChild(label);
+  });
+
+  panel.classList.toggle('empty', !foundAny);
+}
+
+// ── Entry point — load from ?model=URL if given, else show the drop zone ──
+initViewer();
+const params = new URLSearchParams(window.location.search);
+const modelUrl = params.get('model');
+if(modelUrl){
+  loadModel(modelUrl);
+} else {
+  document.getElementById('file-input').addEventListener('change', function(e){
+    if(e.target.files && e.target.files[0]) loadModelFromFile(e.target.files[0]);
+  });
+  // Also allow drag-and-drop directly onto the drop zone
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) loadModelFromFile(e.dataTransfer.files[0]);
+  });
+}
+</script>
+<div style="position:fixed;right:10px;bottom:6px;font-size:10px;color:#666;font-family:Arial,sans-serif;pointer-events:none;z-index:5">© 2026 Ashley Keeler</div>
+</body>
+</html>

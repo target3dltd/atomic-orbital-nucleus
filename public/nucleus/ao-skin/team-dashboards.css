@@ -1,0 +1,36 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the Team Dashboards v1.0.0 (sales, company, Performance Hub, my dashboard, plan). */
+html:not(#ao-skin){
+  --navy:var(--ao-teal-text); --navy-2:var(--ao-teal); --accent:var(--ao-orange); --accent-2:var(--ao-orange);
+  --bg:var(--ao-bg); --card:var(--ao-surface); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line);
+  --good:var(--ao-green); --good-bg:var(--ao-green-soft); --warn:#B4540B; --warn-bg:rgba(180,84,11,.10);
+  --bad:#C2362B; --bad-bg:rgba(194,54,43,.10); --info:var(--ao-teal-text); --r:8px; --sh:var(--ao-shadow);
+  color-scheme:light;
+}
+html:not(#ao-skin)[data-theme="dark"]{--warn:#F5A35C; --bad:#FF7A6E; --bad-bg:rgba(255,122,110,.14); color-scheme:dark}
+html:not(#ao-skin) body{font-family:var(--ao-font-body);background:var(--ao-bg);color:var(--ao-text)}
+html:not(#ao-skin) h1.pt, html:not(#ao-skin) .sect, html:not(#ao-skin) .big{font-family:var(--ao-font-display);font-weight:600;letter-spacing:0}
+html:not(#ao-skin) h1.pt{font-size:28px}
+html:not(#ao-skin) .card h3{font-family:var(--ao-font-body);letter-spacing:.06em}
+html:not(#ao-skin) header.top{background:var(--ao-surface);color:var(--ao-text);border-bottom:1px solid var(--ao-line);box-shadow:none;padding-top:12px}
+html:not(#ao-skin) .brand{display:flex;align-items:center;gap:12px;font:600 17px var(--ao-font-display);color:var(--ao-text)}
+html:not(#ao-skin) .brand img{height:30px;width:auto}
+html:not(#ao-skin) .brand span{color:var(--ao-muted);font-weight:600;padding-left:12px;border-left:1px solid var(--ao-line)}
+html:not(#ao-skin) .pill{background:var(--ao-sunk);color:var(--ao-muted)}
+html:not(#ao-skin) .pill b{color:var(--ao-text)}
+html:not(#ao-skin) nav.tabs a{color:var(--ao-muted);border-radius:8px 8px 0 0}
+html:not(#ao-skin) nav.tabs a:hover{background:var(--ao-sunk);color:var(--ao-text)}
+html:not(#ao-skin) nav.tabs a.on{background:var(--ao-bg);color:var(--ao-teal-text);box-shadow:inset 0 3px 0 var(--ao-teal)}
+html:not(#ao-skin) .btn{background:var(--ao-surface);color:var(--ao-text);border-color:var(--ao-line);box-shadow:none}
+html:not(#ao-skin) .btn:hover{border-color:var(--ao-teal-text)}
+html:not(#ao-skin) .btn.pri{background:var(--ao-teal);color:var(--ao-on-teal);border-color:var(--ao-teal)}
+html:not(#ao-skin) .card{box-shadow:none}
+html:not(#ao-skin) .card.kpi{border-top-color:var(--ao-teal)}
+html:not(#ao-skin) .bar{background:var(--ao-sunk)}
+html:not(#ao-skin) td{border-bottom-color:var(--ao-line)}
+html:not(#ao-skin) tbody tr:hover{background:var(--ao-sunk)}
+html:not(#ao-skin) .tw{background:var(--ao-surface)}
+html:not(#ao-skin) .chip.info{background:var(--ao-teal-soft)}
+html:not(#ao-skin) .chip.grey{background:var(--ao-sunk)}
+html:not(#ao-skin) input, html:not(#ao-skin) textarea, html:not(#ao-skin) select{background:var(--ao-surface);color:var(--ao-text)}
+html:not(#ao-skin) input[type=range]{accent-color:var(--ao-teal)}

@@ -1,0 +1,18 @@
+{
+  "name": "atomic-orbital-nucleus",
+  "version": "1.6.0",
+  "private": true,
+  "type": "module",
+  "description": "Atomic Orbital Nucleus: hub for processes, tools and project sites, unlocked with Google sign-in and a Pipedrive API token. Software © 2026 Ashley Keeler.",
+  "author": "Ashley Keeler",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node build/protect.mjs",
+    "test": "node tests/nucleus_test.mjs"
+  },
+  "devDependencies": {
+    "terser": "^5.36.0",
+    "html-minifier-terser": "^7.2.0",
+    "clean-css": "^5.3.3"
+  }
+}

@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Support dashboard · Nucleus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<link rel="stylesheet" href="/nucleus/dash-runtime.css">
+<script>try{var s=localStorage.getItem('theme');document.documentElement.dataset.theme=s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}addEventListener('storage',function(e){if(e.key==='theme'&&e.newValue)document.documentElement.dataset.theme=e.newValue})</script>
+<script src="/nucleus/vendor/d3-7.9.0.min.js"></script>
+<script>
+/* Where every number comes from. Pipedrive runs as the signed-in person; the support@ inbox is read by the Nucleus server. */
+window.DASH_DATASETS = {
+  support_tickets: {
+    title: "Support pipeline tickets",
+    description: "Every ticket (deal) in the Pipedrive Support pipeline with its stage, status, dates, email and open-task counts and description. Reads Pipedrive deals in pipeline 2 (Support), as you.",
+    source: { connector: "Pipedrive", tool: "getDeals", args: { custom_fields: ["d496e5747c93a62edf3c7240eff53c8a4bf2a232"], include_fields: ["last_incoming_mail_time", "last_outgoing_mail_time", "email_messages_count", "undone_activities_count"], limit: 500, pipeline_id: 2, sort_by: "add_time", sort_direction: "desc" } }
+  },
+  support_stages: {
+    title: "Support pipeline stages",
+    description: "The stages of the Pipedrive Support pipeline in order. Reads Pipedrive stages for pipeline 2 (Support), as you.",
+    source: { connector: "Pipedrive", tool: "getStages", args: { pipeline_id: 2, sort_by: "order_nr", sort_direction: "asc" } }
+  },
+  support_inbox: {
+    title: "support@ email threads",
+    description: "Up to 50 Gmail threads from the last 120 days sent to, copied to or delivered to support@target3d.co.uk, excluding out-of-office replies. Read by the Nucleus from the support@ inbox.",
+    source: { connector: "Gmail", tool: "search_threads", args: { pageSize: 50 } }
+  }
+};
+</script>
+<script src="/nucleus/dash-runtime.js"></script>
+</head>
+<body class="dash-body">
+<div id="dash-root">
+<style>
+#dash-root .sd{font-family:var(--font-anthropic-sans);display:flex;flex-direction:column;gap:var(--cds-gap-lg);color:var(--color-fg)}
+.sd b{font-weight:600;color:var(--color-fg);font-variant-numeric:tabular-nums}
+.sd-head h1{font-family:var(--font-anthropic-serif);font-weight:600;font-size:var(--cds-font-size-title);margin:0;line-height:1.2}
+.sd-take{color:var(--color-fg-muted);font-size:var(--cds-font-size-body);margin:var(--cds-gap-xs) 0 0;max-width:60rem}
+.sd-ver{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-top:6px}
+.sd-ver a{color:inherit}
+.sd-sec{display:flex;flex-direction:column;gap:var(--cds-gap-md)}
+.sd-sec>h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:var(--cds-gap-sm) 0 0}
+.sd-sec>.sd-secnote{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:calc(-1 * var(--cds-gap-sm)) 0 0}
+.sd-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr));gap:var(--cds-gap-md)}
+.sd-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0;container-type:inline-size}
+.sd-tile{border-top:3px solid var(--ao-teal)}
+.sd-tile .sd-lbl{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.sd-tile .sd-num{font-family:var(--font-anthropic-serif);font-weight:600;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums;margin-top:var(--cds-gap-xs);min-height:1.2em}
+.sd-tile .sd-tnote{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-top:var(--cds-gap-xs)}
+.sd-tile.sd-alert{border-top-color:var(--color-warn)}
+.sd-tile.sd-alert .sd-num{color:var(--color-warn)}
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:var(--cds-gap-md)}
+.sd-card h3{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.sd-note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:var(--cds-gap-xs) 0 var(--cds-gap-md)}
+.sd-stages{display:flex;flex-direction:column;gap:var(--cds-gap-sm);min-height:12rem}
+.sd-stage{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:var(--cds-pad-xs);border-radius:var(--cds-radius)}
+.sd-stage:hover,.sd-stage[aria-pressed=true]{background:color-mix(in srgb,var(--ao-teal) 9%,transparent)}
+.sd-stage:focus-visible{outline:2px solid var(--color-fg)}
+.sd-stage-top{display:flex;justify-content:space-between;gap:var(--cds-gap-sm);font-size:var(--cds-font-size-caption)}
+.sd-stage-top span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
+.sd-track{height:12px;border-radius:6px;background:var(--cds-chart-grid)}
+.sd-fill{height:12px;border-radius:6px;min-width:2px}
+.sd-chartbox{position:relative;min-height:220px}
+.sd-legend{display:flex;gap:var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-sm)}
+.sd-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.sd-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap;z-index:2}
+.sd-tip .sd-tipd{color:var(--cds-text-secondary)}
+.sd-tools{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm);align-items:center;margin-bottom:var(--cds-gap-sm)}
+.sd-chip{all:unset;cursor:pointer;font-size:var(--cds-font-size-caption);padding:2px 10px;border:1px solid var(--color-border-line);border-radius:999px;color:var(--color-fg-muted)}
+.sd-chip[aria-pressed=true]{color:var(--ao-teal-text);border-color:var(--ao-teal-text);font-weight:600}
+.sd-chip:focus-visible{outline:2px solid var(--color-fg)}
+.sd-search{font:inherit;font-size:var(--cds-font-size-caption);padding:4px 8px;border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);min-width:0;flex:1 1 10rem;max-width:18rem}
+.sd-count{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-left:auto}
+.sd-tablebox{max-height:30rem;overflow:auto;min-height:8rem}
+.sd-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.sd-table th{position:sticky;top:0;background:var(--color-panel);text-align:left;font-weight:var(--cds-font-weight-medium);color:var(--color-fg-muted);border-bottom:1px solid var(--color-border-line);padding:0;z-index:1}
+.sd-table th button{all:unset;cursor:pointer;display:block;padding:6px 8px;white-space:nowrap}
+.sd-table th button:focus-visible{outline:2px solid var(--color-fg)}
+.sd-table th[aria-sort=ascending] button::after{content:" ▲";font-size:.7em}
+.sd-table th[aria-sort=descending] button::after{content:" ▼";font-size:.7em}
+.sd-table td{padding:6px 8px;border-bottom:1px solid var(--color-border-line);vertical-align:top}
+.sd-table td.n,.sd-table th.n{text-align:right}
+.sd-table th.n button{text-align:right}
+.sd-table a{color:var(--ao-teal-text)}
+.sd-sum{display:block;color:var(--color-fg-muted);margin-top:2px;max-width:34rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-hot{color:var(--color-warn);font-weight:600}
+.sd-pill{display:inline-block;padding:0 8px;border-radius:999px;border:1px solid var(--color-border-line);white-space:nowrap}
+.sd-pill.ours{color:var(--color-warn);border-color:currentColor}
+@container (max-width:44rem){.sd-wide{display:none}}
+.sd-help summary{cursor:pointer;font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium)}
+.sd-help h4{font-size:var(--cds-font-size-body);font-weight:var(--cds-font-weight-medium);margin:var(--cds-gap-md) 0 var(--cds-gap-xs)}
+.sd-help p,.sd-help li{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);line-height:1.5;max-width:60rem}
+.sd-help ul{margin:0;padding-left:1.2rem}
+.sd-help code{font-size:.95em}
+.sd-fail{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);min-height:inherit;height:100%;text-decoration:none}
+.sd-fail::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+.sd [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.sd [data-dash-source-state=empty]{color:transparent}
+@media (prefers-reduced-motion:no-preference){.sd-fill.sd-anim{animation:sdgrow var(--cds-dur-slow) var(--cds-ease-out)}@keyframes sdgrow{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}}
+</style>
+
+<div class="sd">
+  <header class="sd-head" id="overview">
+    <h1>Target3D support dashboard</h1>
+    <p class="sd-take" id="sd-take">
+      <b class="dash-skeleton" data-source="kpis" data-field="open" data-row="0" data-fetchpriority="high">—</b> support tickets are open.
+      <b class="dash-skeleton" data-source="kpis" data-field="for_review" data-row="0">—</b> are marked complete but not yet closed,
+      <b class="dash-skeleton" data-source="kpis" data-field="customer_last" data-row="0">—</b> have a customer email as the latest message,
+      <b class="dash-skeleton" data-source="kpis" data-field="idle_14" data-row="0">—</b> have had no update in 14+ days, and
+      <b class="dash-skeleton" data-source="inbox_kpis" data-field="ours" data-row="0">—</b> support@ threads last heard from a customer or vendor.
+    </p>
+    <div class="sd-ver">v1.2.0 · <a href="#help" id="sd-helplink">Help</a></div>
+  </header>
+
+  <section class="sd-sec" id="tickets">
+    <h2>Pipedrive · Support pipeline</h2>
+    <div class="sd-tiles">
+      <div class="sd-card sd-tile"><div class="sd-lbl">Open tickets</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="open" data-row="0" data-fetchpriority="high">—</div><div class="sd-tnote">All stages, right now</div></div>
+      <div class="sd-card sd-tile"><div class="sd-lbl">Opened</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="opened_30d" data-row="0">—</div><div class="sd-tnote">Last 30 days</div></div>
+      <div class="sd-card sd-tile"><div class="sd-lbl">Closed</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="closed_30d" data-row="0">—</div><div class="sd-tnote">Last 30 days</div></div>
+      <div class="sd-card sd-tile"><div class="sd-lbl">In RMA</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="rma" data-row="0">—</div><div class="sd-tnote">Open, “RMA – In progress”</div></div>
+      <div class="sd-card sd-tile sd-alert"><div class="sd-lbl">Complete, not closed</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="for_review" data-row="0">—</div><div class="sd-tnote">Open in “For review”</div></div>
+      <div class="sd-card sd-tile sd-alert"><div class="sd-lbl">Customer emailed last</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="customer_last" data-row="0">—</div><div class="sd-tnote">Open, latest linked email is theirs</div></div>
+      <div class="sd-card sd-tile sd-alert"><div class="sd-lbl">Idle 14+ days</div><div class="sd-num dash-skeleton" data-source="kpis" data-field="idle_14" data-row="0">—</div><div class="sd-tnote">Open, no Pipedrive update</div></div>
+    </div>
+
+    <div class="sd-grid">
+      <div class="sd-card" id="stage-card">
+        <h3>Open tickets by stage</h3>
+        <p class="sd-note">Right now. Click a stage to filter the ticket list.</p>
+        <div class="sd-stages dash-skeleton" id="sd-stages" data-source="by_stage"></div>
+      </div>
+      <div class="sd-card" id="month-card">
+        <h3>Opened vs closed per month</h3>
+        <p class="sd-note">Last 9 months, by the month a ticket was created or closed.</p>
+        <div class="sd-legend" id="sd-legend"></div>
+        <div class="sd-chartbox dash-skeleton" id="sd-months" data-source="by_month"></div>
+      </div>
+    </div>
+
+    <div class="sd-card" id="ticket-card">
+      <h3>Tickets</h3>
+      <p class="sd-note">Ages are in days. “Idle” is days since the ticket was last edited in Pipedrive. Ticket IDs open the deal in Pipedrive.</p>
+      <div class="sd-tools">
+        <button class="sd-chip" data-status="Open" aria-pressed="true">Open</button>
+        <button class="sd-chip" data-status="Closed" aria-pressed="false">Closed</button>
+        <button class="sd-chip" data-status="" aria-pressed="false">All</button>
+        <button class="sd-chip" id="sd-waitchip" aria-pressed="false">Customer emailed last</button>
+        <button class="sd-chip" id="sd-stagechip" hidden aria-pressed="true"></button>
+        <input class="sd-search" id="sd-tsearch" type="search" placeholder="Search tickets" aria-label="Search tickets">
+        <span class="sd-count" id="sd-tcount"></span>
+      </div>
+      <div class="sd-tablebox">
+        <table class="sd-table" id="sd-tickets" data-source="ticket_list" data-row-key="id">
+          <thead><tr>
+            <th data-field="id" class="n"><button data-k="id">ID</button></th>
+            <th data-field="ticket"><button data-k="ticket">Ticket</button></th>
+            <th data-field="stage"><button data-k="stage_order">Stage</button></th>
+            <th data-field="days_open" class="n"><button data-k="days_open">Age</button></th>
+            <th data-field="idle_days" class="n"><button data-k="idle_days">Idle</button></th>
+            <th data-field="last_email"><button data-k="last_email">Last email</button></th>
+            <th data-field="last_from"><button data-k="last_from">From</button></th>
+            <th data-field="emails" class="n sd-wide"><button data-k="emails">Emails</button></th>
+            <th data-field="open_tasks" class="n sd-wide"><button data-k="open_tasks">Open tasks</button></th>
+            <th data-field="source" class="sd-wide"><button data-k="source">Came in via</button></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sd-sec" id="inbox">
+    <h2>Gmail · support@target3d.co.uk</h2>
+    <p class="sd-secnote">Threads sent or copied to support@ in the last 120 days, excluding out-of-office replies.</p>
+    <div class="dash-warn" id="sd-inbox-setup" hidden></div>
+    <div class="sd-tiles">
+      <div class="sd-card sd-tile"><div class="sd-lbl">Threads</div><div class="sd-num dash-skeleton" data-source="inbox_kpis" data-field="threads" data-row="0">—</div><div class="sd-tnote">Last 120 days</div></div>
+      <div class="sd-card sd-tile sd-alert"><div class="sd-lbl">Last word was theirs</div><div class="sd-num dash-skeleton" data-source="inbox_kpis" data-field="ours" data-row="0">—</div><div class="sd-tnote">Latest message from outside Target3D</div></div>
+      <div class="sd-card sd-tile"><div class="sd-lbl">With unread messages</div><div class="sd-num dash-skeleton" data-source="inbox_kpis" data-field="unread" data-row="0">—</div><div class="sd-tnote">In the support@ inbox</div></div>
+      <div class="sd-card sd-tile"><div class="sd-lbl">Threads to open</div><div class="sd-num dash-skeleton" data-source="inbox_kpis" data-field="partial" data-row="0">—</div><div class="sd-tnote">Latest message couldn't be read</div></div>
+    </div>
+    <div class="sd-card" id="inbox-card">
+      <h3>support@ threads</h3>
+      <p class="sd-note">“Next move” is ours when the latest message came from outside target3d.co.uk. Subjects open the thread in Gmail.</p>
+      <div class="sd-tools">
+        <button class="sd-chip" data-move="" aria-pressed="true">All</button>
+        <button class="sd-chip" data-move="Ours" aria-pressed="false">Ours</button>
+        <button class="sd-chip" data-move="Open thread" aria-pressed="false">Open thread</button>
+        <input class="sd-search" id="sd-isearch" type="search" placeholder="Search threads" aria-label="Search threads">
+        <span class="sd-count" id="sd-icount"></span>
+      </div>
+      <div class="sd-tablebox">
+        <table class="sd-table" id="sd-inbox" data-source="inbox_list" data-row-key="thread_id">
+          <thead><tr>
+            <th data-field="subject"><button data-k="subject">Subject</button></th>
+            <th data-field="latest_from" class="sd-wide"><button data-k="latest_from">Latest from</button></th>
+            <th data-field="latest_shown"><button data-k="latest_shown">Latest</button></th>
+            <th data-field="messages" class="n"><button data-k="messages">Msgs</button></th>
+            <th data-field="unread" class="sd-wide"><button data-k="unread">Unread</button></th>
+            <th data-field="next_move"><button data-k="next_move">Next move</button></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sd-sec" id="help">
+    <details class="sd-card sd-help" id="sd-help">
+      <summary>Help · v1.2.0</summary>
+
+      <h4>What this is</h4>
+      <p>A replacement for the Freshdesk overview. It reads two live sources every time it opens: the Pipedrive <b>Support</b> pipeline (tickets) and email threads sent or copied to <b>support@target3d.co.uk</b>. Nothing is typed in by hand. The <b>Sources</b> strip at the top shows where every number comes from, when it loaded, and lets you refresh a source or download it as CSV.</p>
+
+      <h4>Pipedrive section</h4>
+      <ul>
+        <li><b>Open tickets</b>: deals in the Support pipeline with status Open, in any stage.</li>
+        <li><b>Opened / Closed (30 days)</b>: tickets created, or marked Won, in the last 30 days. Won is treated as “closed”.</li>
+        <li><b>In RMA</b>: open tickets in the “RMA – In progress” stage.</li>
+        <li><b>Complete, not closed</b>: open tickets sitting in “Support complete – For review”. These usually only need a final check and marking as Won.</li>
+        <li><b>Idle 14+ days</b>: open tickets whose Pipedrive record hasn't been edited for 14 days or more. Emails logged against a deal do count as edits.</li>
+        <li><b>Age</b>: days from creation to today (open) or to the close date (closed). <b>Idle</b>: days since last edit; only for open tickets.</li>
+        <li><b>Customer emailed last</b> / <b>Last email · From</b>: uses the emails linked to each ticket in Pipedrive (including the support@ team inbox, once an email is linked to the deal). “Customer” means the latest linked email came in rather than went out, so a reply is probably owed. Replies sent from a mailbox that isn't synced to Pipedrive aren't counted, so a ticket can show “Customer” even though someone answered. Link or BCC replies to keep it accurate. Emails not linked to any deal aren't visible here.</li>
+        <li><b>Came in via</b>: Pipedrive's source channel, e.g. Jotform for the support form, Manual for tickets created by hand.</li>
+      </ul>
+
+      <h4>support@ section</h4>
+      <ul>
+        <li>Search used: <code>(to: OR cc: OR deliveredto: support@target3d.co.uk) newer_than:120d</code>, excluding “Out of Office” subjects, up to 50 threads.</li>
+        <li><b>Last word was theirs</b> / <b>Next move: Ours</b>: the latest message in the thread came from an address outside target3d.co.uk.</li>
+        <li>In the Nucleus the server reads every message in each thread, so the true latest message is always known. <b>Threads to open</b> only counts threads whose messages couldn't be read.</li>
+        <li><b>Unread</b> reflects the read state in the support@ inbox the Nucleus reads (the account the administrator connected), not your own mailbox.</li>
+        <li>Vendor escalations sent directly to individuals (e.g. OptiTrack, 7thSense, 4DViews support) won't appear unless support@ was copied.</li>
+      </ul>
+
+      <h4>Using it</h4>
+      <ul>
+        <li>Click a stage bar to filter the ticket list to that stage; click the stage chip to clear it.</li>
+        <li>Click any column header to sort; type in the search box to filter rows.</li>
+        <li>The Pipedrive figures are read as you, with the API token you signed in to the Nucleus with, so you need access to the Support pipeline. The support@ inbox is read once for everyone by the Nucleus server.</li>
+        <li>Open <b>Sources</b> at the top to refresh a source or download it as CSV.</li>
+      </ul>
+
+      <h4>Tips for cleaner numbers</h4>
+      <ul>
+        <li>Copy support@ on every customer-facing support reply so the inbox view stays complete.</li>
+        <li>In Pipedrive's team inbox, link each support email to its ticket (or create a ticket from it). Unlinked emails don't count towards reply tracking.</li>
+        <li>Move tickets out of “For review” promptly (mark Won) so open counts reflect real work.</li>
+      </ul>
+
+      <h4>Version history</h4>
+      <ul>
+        <li><b>v1.2.0</b> (5 Nov 2026): moved into the Atomic Orbital Nucleus. Pipedrive runs with your Nucleus sign-in; the support@ inbox is read by the Nucleus server (every message, not just the first five); Sources strip with refresh and CSV; Atomic Orbital styling.</li>
+        <li><b>v1.1.0</b> (27 Oct 2026): added reply tracking from Pipedrive's linked emails: “Customer emailed last” headline, Last email and From columns, and a filter chip on the ticket list.</li>
+        <li><b>v1.0.0</b> (27 Oct 2026): first release. Pipedrive Support pipeline KPIs, stage breakdown, monthly opened/closed, ticket table; support@ inbox KPIs and thread table; this Help section.</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+<script>
+  const parse = (a) => {
+    if (typeof a !== 'string') return a;
+    try { return JSON.parse(a); } catch (e) { throw new Error(a.slice(0, 300)); }
+  };
+
+  dash.loader('support_tickets', {
+    description: 'Pipedrive’s deal list as one row per ticket, with the description custom field unwrapped',
+    fn: ({ answer }) => {
+      const a = parse(answer);
+      if (a && a.success === false) throw new Error(a.error || a.message || 'Pipedrive reported a failure');
+      const list = Array.isArray(a) ? a : (a && a.data) || [];
+      const cf = 'd496e5747c93a62edf3c7240eff53c8a4bf2a232';
+      const columns = ['id', 'title', 'stage_id', 'status', 'created', 'updated', 'stage_changed', 'closed', 'emails', 'open_tasks', 'last_email_in', 'last_email_out', 'source', 'summary'];
+      const rows = list.map((d) => ({
+        id: d.id, title: d.title, stage_id: d.stage_id, status: d.status,
+        created: d.add_time, updated: d.update_time, stage_changed: d.stage_change_time, closed: d.close_time,
+        emails: d.email_messages_count ?? 0, open_tasks: d.undone_activities_count ?? 0,
+        last_email_in: d.last_incoming_mail_time, last_email_out: d.last_outgoing_mail_time,
+        source: d.channel_id || d.origin || null,
+        summary: d.custom_fields ? d.custom_fields[cf] ?? null : null,
+      }));
+      return { columns, rows, cut: !!(a && a.additional_data && a.additional_data.next_cursor) };
+    },
+  });
+
+  dash.loader('support_stages', {
+    description: 'Pipedrive’s stage list as one row per stage',
+    fn: ({ answer }) => {
+      const a = parse(answer);
+      if (a && a.success === false) throw new Error(a.error || a.message || 'Pipedrive reported a failure');
+      const list = Array.isArray(a) ? a : (a && a.data) || [];
+      return { columns: ['stage_id', 'stage', 'order'], rows: list.map((s) => ({ stage_id: s.id, stage: s.name, order: s.order_nr })) };
+    },
+  });
+
+  dash.loader('support_inbox', {
+    description: 'The support@ thread search as one row per thread',
+    fn: ({ answer }) => {
+      const a = parse(answer);
+      if (a && a.error) throw new Error(typeof a.error === 'string' ? a.error : JSON.stringify(a.error));
+      const threads = (a && a.threads) || [];
+      const columns = ['thread_id', 'subject', 'started', 'latest_shown', 'latest_from', 'messages', 'shown', 'unread', 'url'];
+      const rows = threads.map((t) => {
+        const msgs = t.messages || [];
+        const first = msgs[0] || {};
+        const last = msgs.reduce((m, x) => (!m || (x.date || '') > (m.date || '') ? x : m), null) || {};
+        return {
+          thread_id: t.id, subject: first.subject || last.subject || '(no subject)',
+          started: first.date || null, latest_shown: last.date || null, latest_from: last.sender || null,
+          messages: t.messageCount ?? msgs.length, shown: msgs.length,
+          unread: msgs.some((m) => (m.labelIds || []).includes('UNREAD')),
+          url: t.viewUrl || null,
+        };
+      });
+      return { columns, rows };
+    },
+  });
+
+  dash.calc('ticket_list', {
+    inputs: ['support_tickets', 'support_stages'],
+    title: 'Tickets with stage and age',
+    description: 'Each ticket with its stage name, days open (to today, or to its close date), days since its last Pipedrive edit, and whether the latest email linked to it came from the customer or from Target3D.',
+    fn: (support_tickets, support_stages) => {
+      const now = Date.now(), day = 86400000;
+      const stages = new Map(support_stages.map((s) => [s.stage_id, s]));
+      const via = { ManuallyCreated: 'Manual', WebForms: 'Web form', Chatbot: 'Chatbot' };
+      return support_tickets.map((t) => {
+        const s = stages.get(t.stage_id) || {};
+        const open = t.status === 'open';
+        const end = open ? now : Date.parse(t.closed || t.updated);
+        return {
+          id: t.id,
+          ticket: String(t.title || '').replace(/^\s*\d+\s*-+\s*/, ''),
+          stage_id: t.stage_id, stage: s.stage || 'Unknown stage', stage_order: s.order ?? 99,
+          status: open ? 'Open' : t.status === 'won' ? 'Closed' : t.status === 'lost' ? 'Lost' : t.status,
+          days_open: Math.max(0, Math.floor((end - Date.parse(t.created)) / day)),
+          idle_days: open ? Math.max(0, Math.floor((now - Date.parse(t.updated)) / day)) : null,
+          emails: t.emails, open_tasks: t.open_tasks,
+          source: via[t.source] || t.source || '—',
+          summary: t.summary, created: t.created, closed: t.closed,
+          last_email: [t.last_email_in, t.last_email_out].filter(Boolean).sort().pop() || null,
+          last_from: !t.last_email_in && !t.last_email_out ? '—'
+            : t.last_email_in && (!t.last_email_out || t.last_email_in > t.last_email_out) ? 'Customer' : 'Target3D',
+        };
+      });
+    },
+  });
+
+  dash.calc('kpis', {
+    inputs: ['ticket_list'],
+    title: 'Support headline counts',
+    description: 'Open tickets, tickets opened and closed in the last 30 days, open tickets in RMA (stage 196) and For review (stage 11), open tickets idle 14+ days, and open tickets whose latest linked email came from the customer.',
+    fn: (ticket_list) => {
+      const since = Date.now() - 30 * 86400000;
+      const open = ticket_list.filter((t) => t.status === 'Open');
+      return [{
+        open: open.length,
+        opened_30d: ticket_list.filter((t) => Date.parse(t.created) >= since).length,
+        closed_30d: ticket_list.filter((t) => t.status === 'Closed' && t.closed && Date.parse(t.closed) >= since).length,
+        rma: open.filter((t) => t.stage_id === 196).length,
+        for_review: open.filter((t) => t.stage_id === 11).length,
+        idle_14: open.filter((t) => t.idle_days >= 14).length,
+        customer_last: open.filter((t) => t.last_from === 'Customer').length,
+      }];
+    },
+  });
+
+  dash.calc('by_stage', {
+    inputs: ['support_stages', 'ticket_list'],
+    title: 'Open tickets per stage',
+    description: 'How many open tickets sit in each Support pipeline stage, in pipeline order.',
+    fn: (support_stages, ticket_list) => support_stages
+      .slice().sort((a, b) => a.order - b.order)
+      .map((s) => ({ stage_id: s.stage_id, stage: s.stage, open: ticket_list.filter((t) => t.status === 'Open' && t.stage_id === s.stage_id).length })),
+  });
+
+  dash.calc('by_month', {
+    inputs: ['ticket_list'],
+    title: 'Opened and closed per month',
+    description: 'Tickets created and tickets closed (Won) in each of the last 9 calendar months, UTC.',
+    fn: (ticket_list) => {
+      const d = new Date(), out = [];
+      for (let i = 8; i >= 0; i--) {
+        const m = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 1));
+        const key = m.toISOString().slice(0, 7);
+        out.push({
+          month: key,
+          opened: ticket_list.filter((t) => (t.created || '').slice(0, 7) === key).length,
+          closed: ticket_list.filter((t) => t.status === 'Closed' && (t.closed || '').slice(0, 7) === key).length,
+        });
+      }
+      return out;
+    },
+  });
+
+  dash.calc('inbox_list', {
+    inputs: ['support_inbox'],
+    title: 'support@ threads with next move',
+    description: 'Each thread with whose move it is: Ours when the latest message is from outside target3d.co.uk; Open thread when not every message could be read.',
+    fn: (support_inbox) => support_inbox.map((t) => {
+      const complete = t.shown >= t.messages;
+      const internal = /@target3d\.co\.uk$/i.test(String(t.latest_from || '').trim());
+      return {
+        thread_id: t.thread_id, subject: t.subject, latest_from: t.latest_from, latest_shown: t.latest_shown,
+        messages: t.messages, unread: t.unread ? 'Yes' : 'No',
+        next_move: !complete ? 'Open thread' : internal ? 'Theirs' : 'Ours',
+        url: t.url,
+      };
+    }),
+  });
+
+  dash.calc('inbox_kpis', {
+    inputs: ['inbox_list'],
+    title: 'support@ headline counts',
+    description: 'Threads in the search, threads where the next move is ours, threads with unread messages, and threads to open.',
+    fn: (inbox_list) => [{
+      threads: inbox_list.length,
+      ours: inbox_list.filter((t) => t.next_move === 'Ours').length,
+      unread: inbox_list.filter((t) => t.unread === 'Yes').length,
+      partial: inbox_list.filter((t) => t.next_move === 'Open thread').length,
+    }],
+  });
+
+  // ---------- helpers ----------
+  const fmt = d3.format(',');
+  const fmtDate = (s) => (s ? d3.utcFormat('%b %-d')(new Date(s)) : '—');
+  const BAD = new Set(['error']);
+  const failLine = (el, msg) => { const f = document.createElement('div'); f.className = 'sd-fail'; f.textContent = msg || 'Failed to load'; el.replaceChildren(f); };
+
+  // fill single-value marks
+  function fillMarks() {
+    document.querySelectorAll('.sd [data-source][data-field][data-row]').forEach((el) => {
+      const r = dash.data(el.dataset.source);
+      if (r.status === 'ok') {
+        const row = (r.data || [])[Number(el.dataset.row)];
+        const v = row ? row[el.dataset.field] : null;
+        el.textContent = v == null ? '—' : typeof v === 'number' ? fmt(v) : String(v);
+        el.classList.remove('dash-skeleton');
+      } else if (r.status === 'loading') {
+        el.classList.add('dash-skeleton'); el.textContent = '—';
+      } else { el.classList.remove('dash-skeleton'); el.textContent = '—'; }
+    });
+  }
+
+  // support@ not set up yet: say so in its section
+  function inboxSetup() {
+    const r = dash.data('support_inbox'), box = document.getElementById('sd-inbox-setup');
+    box.hidden = !(r.status === 'connect' || r.status === 'error');
+    if (!box.hidden) box.textContent = r.status === 'connect' ? 'The support@ inbox isn’t connected to the Nucleus yet, so this section is empty. An administrator can connect it in a few minutes (see the Nucleus README, “Support dashboard”). The Pipedrive section above works already.' : 'The support@ inbox didn’t load: ' + r.message;
+  }
+
+  // ---------- stage bars ----------
+  const state = { status: 'Open', stage: null, wait: false, tq: '', tsort: { k: 'idle_days', dir: -1 }, move: '', iq: '', isort: { k: 'latest_shown', dir: -1 } };
+  let animated = false;
+  function drawStages() {
+    const box = document.getElementById('sd-stages');
+    const r = dash.data('by_stage');
+    box.classList.toggle('dash-skeleton', r.status === 'loading');
+    if (BAD.has(r.status)) return failLine(box);
+    if (r.status !== 'ok') { box.replaceChildren(); return; }
+    const max = d3.max(r.data, (d) => d.open) || 1;
+    const nodes = r.data.map((d) => {
+      const b = document.createElement('button');
+      b.className = 'sd-stage'; b.type = 'button';
+      b.setAttribute('aria-pressed', String(state.stage === d.stage_id));
+      b.dataset.stage = d.stage_id;
+      const top = document.createElement('div'); top.className = 'sd-stage-top';
+      const n = document.createElement('span'); n.textContent = d.stage;
+      const c = document.createElement('span'); c.textContent = fmt(d.open);
+      top.append(n, c);
+      const tr = document.createElement('div'); tr.className = 'sd-track';
+      const fl = document.createElement('div'); fl.className = 'sd-fill' + (animated ? '' : ' sd-anim');
+      fl.style.width = (d.open / max * 100) + '%';
+      fl.style.background = d.stage_id === 11 ? 'var(--cds-chart-status-critical)' : dash.colors[0];
+      if (d.open === 0) fl.style.minWidth = '0';
+      tr.append(fl); b.append(top, tr);
+      b.addEventListener('click', () => { state.stage = state.stage === d.stage_id ? null : d.stage_id; state.stageName = d.stage; if (state.stage) state.status = 'Open'; redraw(); document.getElementById('ticket-card').scrollIntoView({ block: 'nearest' }); });
+      return b;
+    });
+    box.replaceChildren(...nodes);
+    animated = true;
+  }
+
+  // ---------- month chart ----------
+  function drawMonths() {
+    const box = document.getElementById('sd-months');
+    const leg = document.getElementById('sd-legend');
+    const r = dash.data('by_month');
+    box.classList.toggle('dash-skeleton', r.status === 'loading');
+    const series = [{ k: 'opened', label: 'Opened', c: dash.colors[0] }, { k: 'closed', label: 'Closed', c: dash.colors[1] }];
+    leg.replaceChildren(...series.map((s) => { const sp = document.createElement('span'); const sw = document.createElement('i'); sw.className = 'sd-sw'; sw.style.background = s.c; sp.append(sw, document.createTextNode(s.label)); return sp; }));
+    if (BAD.has(r.status)) return failLine(box);
+    box.replaceChildren();
+    if (r.status !== 'ok') return;
+    const rows = r.data;
+    const W = Math.max(260, box.clientWidth || 600), H = 220;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Tickets opened and closed per month');
+    const ymax = d3.max(rows, (d) => Math.max(d.opened, d.closed)) || 1;
+    const y = d3.scaleLinear([0, ymax], [H - 26, 10]).nice();
+    const ticks = y.ticks(Math.min(4, y.domain()[1])).filter(Number.isInteger);
+    const probe = svg.append('g').style('font-size', 'var(--cds-font-size-caption)');
+    let wide = 0; ticks.forEach((t) => { const tx = probe.append('text').text(fmt(t)); wide = Math.max(wide, tx.node().getComputedTextLength()); });
+    probe.remove();
+    const m = { l: Math.ceil(wide) + 10, r: 6, t: 10, b: 26 };
+    const x0 = d3.scaleBand(rows.map((d) => d.month), [m.l, W - m.r]).paddingInner(0.25).paddingOuter(0.1);
+    const x1 = d3.scaleBand(series.map((s) => s.k), [0, x0.bandwidth()]).padding(0.12);
+    const bw = Math.min(32, x1.bandwidth());
+    const g = svg.append('g');
+    g.selectAll('line.gr').data(ticks).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', (t) => y(t)).attr('y2', (t) => y(t)).style('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    g.selectAll('text.yt').data(ticks).join('text').attr('x', m.l - 6).attr('y', (t) => y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').text((t) => fmt(t));
+    g.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).style('stroke', 'var(--cds-chart-axis)');
+    const step = x0.step() < 34 ? 2 : 1;
+    g.selectAll('text.xt').data(rows).join('text').attr('x', (d) => x0(d.month) + x0.bandwidth() / 2).attr('y', H - 8).attr('text-anchor', 'middle').style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)')
+      .text((d, i) => ((rows.length - 1 - i) % step === 0 ? d3.utcFormat('%b')(new Date(d.month + '-01T00:00:00Z')) : ''));
+    const grp = g.selectAll('g.m').data(rows).join('g').attr('transform', (d) => `translate(${x0(d.month)},0)`);
+    series.forEach((s) => {
+      grp.append('rect').attr('class', 'bar-' + s.k)
+        .attr('x', x1(s.k) + (x1.bandwidth() - bw) / 2).attr('width', bw)
+        .attr('y', (d) => y(d[s.k])).attr('height', (d) => Math.max(0, y(0) - y(d[s.k])))
+        .attr('rx', 4).style('fill', s.c);
+    });
+    const tip = document.createElement('div'); tip.className = 'sd-tip'; tip.hidden = true; box.append(tip);
+    grp.append('rect').attr('x', 0).attr('width', x0.bandwidth()).attr('y', m.t).attr('height', y(0) - m.t).attr('fill', 'transparent')
+      .on('mouseenter', function (ev, d) {
+        grp.selectAll('rect[class^=bar]').attr('opacity', (e) => (e === d ? 1 : 0.45));
+        tip.replaceChildren();
+        const h = document.createElement('div'); h.className = 'sd-tipd'; h.textContent = d3.utcFormat('%B %Y')(new Date(d.month + '-01T00:00:00Z')); tip.append(h);
+        series.forEach((s) => { const l = document.createElement('div'); const sw = document.createElement('i'); sw.className = 'sd-sw'; sw.style.background = s.c; l.append(sw, document.createTextNode(`${s.label}: ${fmt(d[s.k])}`)); tip.append(l); });
+        tip.hidden = false;
+        const bx = box.getBoundingClientRect(), scale = bx.width / W;
+        let left = (x0(d.month) + x0.bandwidth() / 2) * scale - tip.offsetWidth / 2;
+        left = Math.max(0, Math.min(bx.width - tip.offsetWidth, left));
+        tip.style.left = left + 'px'; tip.style.top = '0px';
+      })
+      .on('mouseleave', () => { tip.hidden = true; grp.selectAll('rect[class^=bar]').attr('opacity', 1); });
+  }
+
+  // ---------- generic sortable table ----------
+  function sortRows(rows, s) {
+    return rows.slice().sort((a, b) => {
+      const x = a[s.k], y = b[s.k];
+      if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
+      return (typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y))) * s.dir;
+    });
+  }
+  function headers(table, s) {
+    table.querySelectorAll('th').forEach((th) => {
+      const k = th.querySelector('button').dataset.k;
+      th.setAttribute('aria-sort', k === s.k ? (s.dir > 0 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+  function td(text, cls) { const c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; return c; }
+
+  function drawTickets() {
+    const table = document.getElementById('sd-tickets');
+    const body = table.tBodies[0];
+    const r = dash.data('ticket_list');
+    const count = document.getElementById('sd-tcount');
+    document.querySelectorAll('[data-status]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.status === state.status)));
+    const chip = document.getElementById('sd-stagechip');
+    chip.hidden = !state.stage; chip.textContent = state.stage ? (state.stageName || 'Stage') + ' ×' : '';
+    headers(table, state.tsort);
+    if (r.status !== 'ok') {
+      body.replaceChildren(); count.textContent = '';
+      if (BAD.has(r.status)) { const tr = document.createElement('tr'); const c = document.createElement('td'); c.colSpan = 10; failLine(c, 'Failed to load: ' + r.message); tr.append(c); body.append(tr); }
+      table.classList.toggle('dash-skeleton', r.status === 'loading');
+      return;
+    }
+    table.classList.remove('dash-skeleton');
+    const q = state.tq.trim().toLowerCase();
+    document.getElementById('sd-waitchip').setAttribute('aria-pressed', String(state.wait));
+    let rows = r.data.filter((t) => (!state.status || t.status === state.status) && (!state.stage || t.stage_id === state.stage) && (!state.wait || t.last_from === 'Customer')
+      && (!q || [t.id, t.ticket, t.stage, t.source, t.summary].join(' ').toLowerCase().includes(q)));
+    rows = sortRows(rows, state.tsort);
+    count.textContent = `${fmt(rows.length)} of ${fmt(r.data.length)}`;
+    body.replaceChildren(...rows.map((t) => {
+      const tr = document.createElement('tr');
+      const idc = document.createElement('td'); idc.className = 'n';
+      const a = document.createElement('a'); a.href = 'https://app.pipedrive.com/deal/' + encodeURIComponent(t.id); a.target = '_blank'; a.rel = 'noopener'; a.textContent = String(t.id); idc.append(a);
+      const tk = document.createElement('td'); tk.append(document.createTextNode(t.ticket));
+      if (t.summary && t.summary.trim() && t.summary.trim() !== t.ticket.trim()) { const s = document.createElement('span'); s.className = 'sd-sum'; s.textContent = t.summary.replace(/\s+/g, ' ').trim(); tk.append(s); }
+      const idle = td(t.idle_days == null ? '—' : fmt(t.idle_days), 'n' + (t.idle_days >= 14 ? ' sd-hot' : ''));
+      const fromc = document.createElement('td'); const fp = document.createElement('span'); fp.className = 'sd-pill' + (t.last_from === 'Customer' && t.status === 'Open' ? ' ours' : ''); fp.textContent = t.last_from; fromc.append(t.last_from === '—' ? '—' : fp);
+      tr.append(idc, tk, td(t.stage), td(fmt(t.days_open), 'n'), idle, td(fmtDate(t.last_email)), fromc, td(fmt(t.emails), 'n sd-wide'), td(fmt(t.open_tasks), 'n sd-wide'), td(t.source, 'sd-wide'));
+      return tr;
+    }));
+  }
+
+  function drawInbox() {
+    const table = document.getElementById('sd-inbox');
+    const body = table.tBodies[0];
+    const r = dash.data('inbox_list');
+    const count = document.getElementById('sd-icount');
+    document.querySelectorAll('[data-move]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.move === state.move)));
+    headers(table, state.isort);
+    if (r.status !== 'ok') {
+      body.replaceChildren(); count.textContent = '';
+      if (BAD.has(r.status)) { const tr = document.createElement('tr'); const c = document.createElement('td'); c.colSpan = 6; failLine(c); tr.append(c); body.append(tr); }
+      table.classList.toggle('dash-skeleton', r.status === 'loading');
+      return;
+    }
+    table.classList.remove('dash-skeleton');
+    const q = state.iq.trim().toLowerCase();
+    let rows = r.data.filter((t) => (!state.move || t.next_move === state.move) && (!q || [t.subject, t.latest_from].join(' ').toLowerCase().includes(q)));
+    rows = sortRows(rows, state.isort);
+    count.textContent = `${fmt(rows.length)} of ${fmt(r.data.length)}`;
+    body.replaceChildren(...rows.map((t) => {
+      const tr = document.createElement('tr'); tr.dataset.key = t.thread_id;
+      const sc = document.createElement('td');
+      if (t.url && /^https:\/\/mail\.google\.com\//.test(t.url)) { const a = document.createElement('a'); a.href = t.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = t.subject; sc.append(a); } else sc.textContent = t.subject;
+      const mv = document.createElement('td'); const p = document.createElement('span'); p.className = 'sd-pill' + (t.next_move === 'Ours' ? ' ours' : ''); p.textContent = t.next_move; mv.append(p);
+      tr.append(sc, td(t.latest_from || '—', 'sd-wide'), td(fmtDate(t.latest_shown)), td(fmt(t.messages), 'n'), td(t.unread, 'sd-wide'), mv);
+      return tr;
+    }));
+  }
+
+  function redraw() { fillMarks(); inboxSetup(); drawStages(); drawMonths(); drawTickets(); drawInbox(); }
+
+  // ---------- controls ----------
+  document.querySelectorAll('[data-status]').forEach((b) => b.addEventListener('click', () => { state.status = b.dataset.status; if (state.status !== 'Open') state.stage = null; drawTickets(); drawStages(); }));
+  document.getElementById('sd-waitchip').addEventListener('click', () => { state.wait = !state.wait; drawTickets(); });
+  document.getElementById('sd-stagechip').addEventListener('click', () => { state.stage = null; drawTickets(); drawStages(); });
+  document.getElementById('sd-tsearch').addEventListener('input', (e) => { state.tq = e.target.value; drawTickets(); });
+  document.querySelectorAll('[data-move]').forEach((b) => b.addEventListener('click', () => { state.move = b.dataset.move; drawInbox(); }));
+  document.getElementById('sd-isearch').addEventListener('input', (e) => { state.iq = e.target.value; drawInbox(); });
+  const sorter = (tableId, key) => document.querySelectorAll(`#${tableId} th button`).forEach((b) => b.addEventListener('click', () => {
+    const s = state[key]; if (s.k === b.dataset.k) s.dir = -s.dir; else { s.k = b.dataset.k; s.dir = /ticket|stage|subject|latest_from|last_from|source|next_move|unread/.test(b.dataset.k) ? 1 : -1; }
+    tableId === 'sd-tickets' ? drawTickets() : drawInbox();
+  }));
+  sorter('sd-tickets', 'tsort'); sorter('sd-inbox', 'isort');
+  document.getElementById('sd-helplink').addEventListener('click', (e) => { e.preventDefault(); const h = document.getElementById('sd-help'); h.open = true; h.scrollIntoView(); dash.setLink('help'); });
+
+  dash.onData(redraw);
+
+  const named = document.getElementById(location.hash.slice(1));
+  if (named) { if (named.id === 'help') document.getElementById('sd-help').open = true; named.scrollIntoView(); }
+</script>
+</div>
+</body>
+</html>

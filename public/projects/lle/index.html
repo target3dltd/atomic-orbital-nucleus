@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Little Lion Repository</title>
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --sunk:#F2F2F2; --ink:#000000; --muted:#666666; --line:rgba(0,0,0,.12);
+  --blue:#33BCF2; --on-blue:#000000; --red:#EF233C; --yellow:#99FF00;
+  --green:#000000; --green-ink:#FFFFFF; --brass:#000000; --brass-soft:rgba(51,188,242,.14); --oak:#33BCF2;
+  --warn:#EF233C; --warn-soft:rgba(239,35,60,.08); --ok-soft:rgba(51,188,242,.16);
+  --chrome:#000000; --chrome-ink:#FFFFFF; --chrome-line:rgba(255,255,255,.16);
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --surface:#0B0B0B; --sunk:#161616; --ink:#F5F5F5; --muted:#999999; --line:rgba(255,255,255,.16);
+    --green:#F5F5F5; --green-ink:#000000; --brass:#F5F5F5; --brass-soft:rgba(51,188,242,.18); --oak:#33BCF2;
+    --warn:#EF233C; --warn-soft:rgba(239,35,60,.14); --ok-soft:rgba(51,188,242,.2);
+    --chrome:#000000; --chrome-ink:#F5F5F5; --chrome-line:rgba(255,255,255,.16); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --surface:#0B0B0B; --sunk:#161616; --ink:#F5F5F5; --muted:#999999; --line:rgba(255,255,255,.16);
+    --green:#F5F5F5; --green-ink:#000000; --brass:#F5F5F5; --brass-soft:rgba(51,188,242,.18); --oak:#33BCF2;
+    --warn:#EF233C; --warn-soft:rgba(239,35,60,.14); --ok-soft:rgba(51,188,242,.2);
+    --chrome:#000000; --chrome-ink:#F5F5F5; --chrome-line:rgba(255,255,255,.16); color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Lato",-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+a{color:var(--green)}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+h1,h2,h3,.cond{font-family:"Bebas Neue","Oswald",Impact,sans-serif;letter-spacing:.01em}
+
+:root{--navw:250px;--docw:clamp(330px,25vw,410px);--topbar:0px}
+.shell{display:grid;grid-template-columns:var(--navw) minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.side{background:var(--green);color:var(--green-ink);padding:24px 16px;position:sticky;top:0;height:100vh;height:100dvh;overflow:auto;overscroll-behavior:contain}
+.side .brand{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-weight:700;font-size:2rem;line-height:1;margin:0 0 2px}
+.side a.brand{display:inline-block;padding:2px 6px;margin-left:-6px;color:var(--green-ink);text-decoration:none;border-radius:0}
+.side a.brand:hover{background:rgba(255,255,255,.1)}
+.side .tag{opacity:.75;font-size:.85rem;margin-bottom:22px}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side .grp{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-size:.95rem;opacity:.65;margin:16px 8px 4px}
+.side a{color:inherit;text-decoration:none;padding:7px 10px;border-radius:0;display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.side a small{opacity:.7;font-weight:400}
+.side a:hover{background:rgba(255,255,255,.1)}
+.side a[aria-current="page"]{background:var(--green-ink);color:var(--green)}
+.side .ver{margin-top:24px;font-size:.8rem;opacity:.7}
+main{padding:32px clamp(16px,4vw,48px) 96px;width:100%;max-width:1180px;min-width:0;container:main/inline-size}
+@media (min-width:1800px){main{max-width:1320px}}
+
+/* docs panel */
+.docs{background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;z-index:30}
+.docs header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+.docs .dk{font:700 1.5rem/1 "Bebas Neue","Oswald",Impact,sans-serif;color:var(--green);margin:0}
+.docs .dsub{margin:4px 0 0;font-size:.85rem;color:var(--muted)}
+.ib{all:unset;cursor:pointer;min-width:40px;height:40px;border-radius:0;display:grid;place-items:center;font-size:1.4rem;line-height:1;color:var(--ink);background:var(--sunk)}
+.ib:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.dsearch{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dsearch input{flex:1;min-width:0;font:600 1rem "Lato",-apple-system,"Segoe UI",sans-serif;padding:10px 12px;border:2px solid var(--green);border-radius:0;background:var(--bg);color:var(--ink)}
+.dsearch select{font:600 .9rem "Lato",-apple-system,"Segoe UI",sans-serif;padding:8px;border:1.5px solid var(--line);border-radius:0;background:var(--bg);color:var(--ink)}
+.dbody{flex:1;overflow:auto;overscroll-behavior:contain;padding:6px 16px 16px;-webkit-overflow-scrolling:touch}
+.dbody h3{font-size:1.05rem;color:var(--muted);margin:16px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+.dl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.dl li{display:flex;gap:6px;align-items:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:0;padding:8px 8px 8px 12px}
+.dl li a{flex:1;min-width:0;text-decoration:none;color:inherit}
+.dl li a b{display:block;color:var(--green);font-weight:600;line-height:1.25}
+.dl li a span{display:block;font-size:.82rem;color:var(--muted);line-height:1.35}
+.dl li a i{font-style:normal;font-size:.72rem;color:var(--brass);text-transform:uppercase;letter-spacing:.04em}
+.dl li a:hover b{text-decoration:underline}
+.pin{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:0;color:var(--muted);font-size:1.05rem;flex:none}
+.pin[aria-pressed="true"]{color:var(--brass)}
+.pin:focus-visible{outline:3px solid var(--brass)}
+.tip{border-left:3px solid var(--brass);background:var(--brass-soft);border-radius:0;padding:8px 10px;margin:0 0 6px;font-size:.88rem}
+.tip b{display:block}
+.tip a{font-size:.82rem}
+details.dsec{border-bottom:1px solid var(--line)}
+details.dsec summary{cursor:pointer;padding:9px 0;font-weight:600;display:flex;justify-content:space-between}
+details.dsec summary small{color:var(--muted);font-weight:400}
+details.dsec .dl{margin-bottom:10px}
+.docs footer{border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;font:inherit;padding:9px 10px;border:1.5px solid var(--line);border-radius:0;background:var(--bg);color:var(--ink)}
+.docs footer .muted{font-size:.8rem;margin:0}
+.fab{all:unset;cursor:pointer;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--green);color:var(--green-ink);font:700 1.05rem "Bebas Neue","Oswald",Impact,sans-serif;padding:12px 18px;border-radius:0;box-shadow:0 6px 20px rgba(0,0,0,.22);z-index:25;display:flex;gap:8px;align-items:center}
+.fab:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.scrim{position:fixed;inset:0;background:rgba(10,18,16,.45);z-index:28;opacity:0;pointer-events:none;transition:opacity .2s}
+body.drawer .scrim{opacity:1;pointer-events:auto}
+.topbar{display:none}
+
+/* wide: docs inline as third column */
+@media (min-width:1280px){
+  body.docs-open .shell{grid-template-columns:var(--navw) minmax(0,1fr) var(--docw)}
+  .docs{position:sticky;top:0;height:100vh;height:100dvh}
+  body:not(.docs-open) .docs{display:none}
+  body.docs-open .fab{display:none}
+}
+/* medium + small: docs as drawer */
+@media (max-width:1279.98px){
+  .docs{position:fixed;top:0;right:0;bottom:0;width:min(420px,92vw);transform:translateX(105%);transition:transform .25s ease;box-shadow:-10px 0 30px rgba(0,0,0,.18);padding-top:env(safe-area-inset-top,0px)}
+  body.docs-open .docs{transform:none}
+  body.docs-open .fab{display:none}
+}
+@media (max-width:1100px){:root{--navw:215px}}
+/* small: topbar + nav drawer */
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(300px,86vw);z-index:30;transform:translateX(-105%);transition:transform .25s ease;padding-top:calc(20px + env(safe-area-inset-top,0px))}
+  body.nav-open .side{transform:none}
+  .topbar{display:flex;align-items:center;gap:8px;background:var(--green);color:var(--green-ink);padding:8px max(12px,env(safe-area-inset-left,0px));position:sticky;top:0;z-index:20}
+  .topbar .ib{background:rgba(255,255,255,.12);color:var(--green-ink)}
+  .topbar .tt{flex:1;min-width:0;font:700 1.3rem/1.1 "Bebas Neue","Oswald",Impact,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .tt small{display:block;font:400 .78rem "Lato",-apple-system,"Segoe UI",sans-serif;opacity:.75}
+  .topbar .db{all:unset;cursor:pointer;background:var(--green-ink);color:var(--green);font:700 1rem "Bebas Neue","Oswald",Impact,sans-serif;padding:9px 12px;border-radius:0}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--green)}
+  .fab{display:none}
+  main{padding-top:20px}
+}
+/* phones: docs as bottom sheet */
+@media (max-width:600px){
+  .docs{top:auto;left:0;width:100%;height:min(88dvh,88vh);border-left:0;border-top:1px solid var(--line);border-radius:0;transform:translateY(105%)}
+  .docs::before{content:"";width:44px;height:5px;border-radius:0;background:var(--line);margin:8px auto 0;flex:none}
+  .docs header{padding-top:8px}
+}
+@media (pointer:coarse){.side a{padding:11px 12px}.btn{padding:12px 18px}.dl li{padding:10px 8px 10px 12px}.pin{width:40px;height:40px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* content adapts to its own width, not the window (panel open or closed) */
+@container main (max-width:820px){
+  .big{gap:18px}.big b{font-size:2rem}
+  ul.doclist{columns:1}
+}
+@container main (max-width:640px){
+  .tbl{background:transparent;border:0;overflow:visible}
+  .tbl table{min-width:0}
+  .tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .tbl tbody,.tbl tr,.tbl td{display:block}
+  .tbl tr{background:var(--surface);border:1px solid var(--line);border-radius:0;margin:0 0 10px;padding:6px 0}
+  .tbl tr.sub{margin-top:-12px;border-top:1px dashed var(--line);border-radius:0}
+  .tbl td{position:relative;border:0;padding:5px 12px 5px calc(34% + 20px);overflow-wrap:anywhere;min-height:30px}
+  .tbl td::before{content:attr(data-label);position:absolute;left:12px;top:7px;width:34%;font:600 .78rem/1.25 "Lato",-apple-system,"Segoe UI",sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .tbl td.nolab{padding-left:12px}
+  .tbl td.nolab{display:block}.tbl td.nolab::before{display:none}
+  .tbl td:empty{display:none}
+  .tbl td.q{width:auto}
+  dl.kv{grid-template-columns:1fr}dl.kv dt{border-bottom:0}
+  figcaption{flex-direction:column;gap:4px}
+  .meta{gap:4px 16px}
+  .cards{grid-template-columns:1fr 1fr}
+  .search{font-size:1.05rem}
+}
+@container main (max-width:400px){
+  .cards{grid-template-columns:1fr}
+  .tbl td{padding-left:12px}.tbl td::before{position:static;display:block;width:auto;margin-bottom:1px}
+  .calc{grid-template-columns:1fr}
+}
+h1.page{font-size:clamp(2.2rem,5vw,3.4rem);line-height:1;margin:0;color:var(--green);font-weight:700}
+.kicker{color:var(--muted);margin:4px 0 0}
+.lede{max-width:70ch;margin:14px 0 22px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 26px;color:var(--muted);font-size:.95rem;margin:12px 0 0}
+.meta b{color:var(--ink);font-weight:600}
+section{margin:30px 0}
+section > h2{font-size:1.6rem;margin:0 0 10px;padding-bottom:4px;border-bottom:1.5px solid var(--line)}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:0}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:8px 10px;vertical-align:top;border-bottom:1px solid var(--line);font-size:.95rem}
+tr:last-child td{border-bottom:0}
+th{font-weight:600;font-size:.82rem;color:var(--muted);background:var(--sunk)}
+td.mono,.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86rem}
+.muted{color:var(--muted)}
+.chip{display:inline-block;font-size:.8rem;font-weight:600;padding:1px 8px;border-radius:0;background:var(--sunk);white-space:nowrap}
+.chip.flex{background:var(--ok-soft);color:var(--green)}
+.chip.trio{background:var(--brass-soft);color:var(--brass)}
+.chip.arcade,.chip.arcade5{background:var(--green);color:var(--green-ink)}
+.chip.popup{background:var(--warn-soft);color:var(--warn)}
+.flag{color:var(--warn);font-size:.86rem;margin-top:3px}
+details.cams summary{cursor:pointer;color:var(--green);font-weight:600}
+details.cams .list{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:0;padding:14px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:6px}
+a.card:hover{border-color:var(--green)}
+.card .num{font-family:"Bebas Neue","Oswald",Impact,sans-serif;color:var(--muted);font-size:1rem}
+.card .nm{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-size:1.6rem;font-weight:700;line-height:1;color:var(--green)}
+.card .mix{display:flex;flex-wrap:wrap;gap:4px}
+.card .sm{font-size:.88rem;color:var(--muted)}
+.big{display:flex;gap:30px;flex-wrap:wrap;margin:6px 0 4px}
+.big div{font-size:.9rem;color:var(--muted)}
+.big b{display:block;font:700 2.4rem/1 "Bebas Neue","Oswald",Impact,sans-serif;color:var(--ink)}
+dl.kv{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:0;margin:0}
+dl.kv dt,dl.kv dd{padding:8px 12px;border-bottom:1px solid var(--line);margin:0}
+dl.kv dt{font-weight:600;background:var(--sunk)}
+dl.kv dt:last-of-type,dl.kv dd:last-of-type{border-bottom:0}
+figure{margin:0 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:0;overflow:hidden}
+figure .zoom{display:block;overflow:auto;max-height:70vh;background:#fff;cursor:zoom-in}
+figure .zoom.on{cursor:zoom-out}
+figure img{display:block;width:100%;height:auto}
+figure .zoom.on img{width:auto;max-width:none}
+figcaption{padding:8px 12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.92rem}
+ul.doclist{list-style:none;padding:0;margin:0;columns:2 280px;column-gap:24px}
+ul.doclist li{padding:4px 0;break-inside:avoid}
+ol.time{list-style:none;padding:0;margin:0;border-left:2px solid var(--line)}
+ol.time li{padding:4px 0 10px 16px;position:relative}
+ol.time li::before{content:"";position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:0;background:var(--green)}
+ol.time b{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-size:1.05rem;display:inline-block;min-width:110px}
+.note{background:var(--sunk);border-radius:0;padding:10px 14px;font-size:.93rem;max-width:80ch}
+
+/* kit lists */
+.pegpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:22px}
+.pegpick a{background:var(--surface);border:1.5px solid var(--line);border-radius:0;padding:12px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.pegpick a[aria-current="page"]{border-color:var(--green);box-shadow:inset 0 0 0 1.5px var(--green)}
+.pegpick svg{width:100%;height:auto}
+.pegpick .n{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-weight:700;font-size:1.2rem}
+.pegpick .m{font-size:.85rem;color:var(--muted)}
+td.q{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-size:1.4rem;font-weight:700;width:64px;color:var(--green);line-height:1.1}
+td.q small{display:block;font-family:"Lato",-apple-system,"Segoe UI",sans-serif;font-size:.72rem;font-weight:400;color:var(--muted)}
+.item{font-weight:600}.model{color:var(--muted);font-size:.9rem}.inote{font-size:.86rem;color:var(--muted);margin-top:3px;max-width:60ch}
+.ev{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;padding:2px 8px;border-radius:0;white-space:nowrap;font-weight:600}
+.ev::before{content:"";width:8px;height:8px;display:inline-block}
+.ev.c{background:var(--ok-soft);color:var(--green)}.ev.c::before{background:var(--green);border-radius:0}
+.ev.s{background:var(--brass-soft);color:var(--brass)}.ev.s::before{border:2px solid var(--brass);border-radius:0;width:9px;height:9px}
+.ev.i{background:var(--warn-soft);color:var(--warn)}.ev.i::before{background:var(--warn);transform:rotate(45deg);width:7px;height:7px}
+.src{font-size:.8rem;color:var(--muted);margin-top:3px}
+
+/* order + serials */
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.calc label{background:var(--surface);border:1.5px solid var(--line);border-radius:0;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.calc .lbl{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-weight:600;font-size:1.15rem}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{all:unset;cursor:pointer;width:36px;height:36px;border-radius:0;background:var(--sunk);display:grid;place-items:center;font-size:1.3rem;font-weight:700;color:var(--ink)}
+.stepper button:focus-visible{outline:3px solid var(--brass)}
+.stepper input{width:60px;height:36px;text-align:center;font:700 1.3rem "Bebas Neue","Oswald",Impact,sans-serif;border:1.5px solid var(--line);border-radius:0;background:var(--bg);color:var(--ink)}
+.opts{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin-bottom:14px}
+.opts label{display:flex;gap:8px;align-items:center}
+.opts input[type=number]{width:70px;padding:6px;border:1.5px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font:inherit}
+.btn{all:unset;cursor:pointer;padding:9px 16px;border-radius:0;background:var(--green);color:var(--green-ink);font-weight:600}
+.btn.ghost{background:transparent;color:var(--green);box-shadow:inset 0 0 0 1.5px var(--green)}
+.btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 12px}
+textarea.csv{width:100%;min-height:150px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--sunk);color:var(--ink);border:1px solid var(--line);border-radius:0;padding:10px}
+.search{width:100%;max-width:520px;font:600 1.2rem "Lato",-apple-system,"Segoe UI",sans-serif;padding:12px 14px;border:2px solid var(--green);border-radius:0;background:var(--surface);color:var(--ink)}
+.empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:0;padding:20px;color:var(--muted)}
+mark{background:var(--brass-soft);color:var(--ink);padding:0 2px;border-radius:0}
+.gap{background:var(--surface);border-left:4px solid var(--warn);border-radius:0;padding:12px 16px;margin:0 0 12px;max-width:80ch}
+.gap h3{margin:0 0 4px;font-size:1.2rem}.gap p{margin:4px 0}.gap .ask{font-size:.92rem;color:var(--muted)}
+.prose{max-width:72ch}.prose h3{font-size:1.3rem;margin:24px 0 6px}
+.legend{display:flex;flex-direction:column;gap:8px}
+[hidden]{display:none!important}
+@media print{.side,.topbar,.docs,.fab,.scrim,.actions,.opts{display:none!important}.shell{display:block}body{background:#fff}main{max-width:none}}
+
+/* ---------- Target3D design system ---------- */
+body{font-weight:300;line-height:1.6}
+b,strong,th,.item{font-weight:700}
+h1,h2,h3,.cond{font-weight:400;text-transform:uppercase;letter-spacing:.02em}
+h1.page{color:var(--ink);font-weight:400;line-height:.95;font-size:clamp(2.6rem,6vw,4rem)}
+section > h2{font-size:clamp(1.6rem,3vw,2rem);border-bottom:1px solid var(--line);color:var(--ink)}
+.kicker{text-transform:uppercase;letter-spacing:.08em;font-size:.8rem;font-weight:700;color:var(--muted)}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--blue);text-decoration-thickness:2px;text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:3px solid var(--blue)!important;outline-offset:2px}
+.side,.topbar{background:var(--chrome);color:var(--chrome-ink)}
+.side{border-right:1px solid var(--chrome-line)}
+.side .logo{display:block;width:180px;max-width:100%;margin:4px 0 26px}
+.side .logo img{display:block;width:100%;height:auto}
+.side a{text-decoration:none;font-weight:400;color:var(--chrome-ink)}
+.side a:hover{background:rgba(255,255,255,.08)}
+.side a[aria-current="page"]{background:var(--blue);color:var(--on-blue);font-weight:700}
+.side .grp{font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;opacity:.6}
+.side .brand,.side a.brand{font-family:"Bebas Neue","Oswald",Impact,sans-serif;font-weight:400;font-size:2.6rem;letter-spacing:.03em;padding:0;margin:0;color:var(--chrome-ink)}
+.side a.brand:hover{background:none;color:var(--blue)}
+.side .tag{text-transform:uppercase;letter-spacing:.06em;font-size:.75rem;font-weight:700;opacity:.6}
+.topbar .ib{background:rgba(255,255,255,.1);color:var(--chrome-ink)}
+.topbar .tt{font-weight:400;letter-spacing:.03em}
+.topbar .db{background:var(--blue);color:var(--on-blue);font-weight:400;letter-spacing:.04em}
+body::before{background:var(--chrome)!important}
+.btn{background:var(--blue);color:var(--on-blue);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.85rem}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.72rem;padding:2px 8px}
+.chip.flex{background:var(--blue);color:var(--on-blue)}
+.chip.trio{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip.arcade,.chip.arcade5{background:var(--ink);color:var(--surface)}
+.chip.popup{background:transparent;color:var(--ink);box-shadow:inset 3px 0 0 var(--red),inset 0 0 0 1px var(--line)}
+.flag{color:var(--ink);font-weight:400;position:relative;padding-left:14px}
+.flag::before{content:"";position:absolute;left:0;top:.5em;width:7px;height:7px;background:var(--red)}
+.gap{border-left-color:var(--red)}
+.card{border-width:1px}
+a.card,a.card:hover{text-decoration:none}
+a.card:hover{border-color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+.card .nm{color:var(--ink);font-weight:400;font-size:1.9rem}
+.card .num{text-transform:uppercase;letter-spacing:.05em;font-size:.95rem}
+.big b{font-weight:400;font-size:2.8rem}
+.note{border-left:3px solid var(--blue);background:var(--sunk)}
+th{text-transform:uppercase;letter-spacing:.05em;font-size:.72rem;color:var(--muted);font-weight:700}
+td.q{color:var(--ink);font-weight:400}
+mark{background:rgba(51,188,242,.35);color:inherit}
+ol.time li::before{background:var(--blue)}
+ol.time b{font-weight:400}
+.pegpick a[aria-current="page"]{border-color:var(--blue);box-shadow:inset 0 0 0 2px var(--blue)}
+.pegpick a{text-decoration:none}
+.pegpick .n{font-weight:400}
+.search,.dsearch input{border-color:var(--ink)}
+.stepper button{color:var(--ink)}
+.calc .lbl{font-weight:400;letter-spacing:.03em}
+.ev{font-weight:700}
+.ev.c{background:var(--ok-soft);color:var(--ink)}.ev.c::before{background:var(--blue)}
+.ev.s{background:var(--sunk);color:var(--ink)}.ev.s::before{border-color:var(--ink)}
+.ev.i{background:var(--warn-soft);color:var(--ink)}.ev.i::before{background:var(--red)}
+/* docs panel */
+.docs{background:var(--surface)}
+.docs .dk{color:var(--ink);font-weight:400;font-size:1.8rem;letter-spacing:.03em}
+.docs header{border-top:4px solid var(--blue)}
+.dbody h3{font-family:"Lato",-apple-system,"Segoe UI",sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.dl li{background:var(--surface)}
+.dl li:hover{box-shadow:inset 3px 0 0 var(--blue)}
+.dl li a{text-decoration:none}
+.dl li a b{color:var(--ink)}
+.dl li a i{color:var(--muted);font-weight:700}
+.pin[aria-pressed="true"]{color:var(--blue)}
+.tip{border-left-color:var(--blue);background:var(--brass-soft)}
+.fab{background:var(--blue);color:var(--on-blue);font-weight:400;letter-spacing:.04em;font-size:1.2rem;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.docs::before{border-radius:0}
+@container main (max-width:640px){.tbl td::before{font-weight:700}}
+.side .brand,.docs .dk,.card .nm,.topbar .tt,.fab,.pegpick .n,.calc .lbl,.big b,td.q{text-transform:uppercase}
+.topbar .tt small{text-transform:none}
+
+/* ---------- v4.2: light chrome, stronger text ---------- */
+:root{--chrome:#FFFFFF;--chrome-ink:#000000;--chrome-line:rgba(0,0,0,.12)}
+body{font-weight:400;font-size:17px;line-height:1.6;background:#FFFFFF}
+main{--muted:#4D4D4D}
+.muted,.kicker,.meta,.src,.inote,.model,figcaption{color:#4D4D4D}
+td{font-size:.98rem}
+th{color:#333;font-size:.74rem}
+.side{background:#F2F2F2;color:#000;border-right:1px solid rgba(0,0,0,.10)}
+.side a{color:#000;font-weight:400}
+.side a:hover{background:#E4E4E4}
+.side a[aria-current="page"]{background:var(--blue);color:#000;font-weight:700}
+.side .grp,.side .tag{opacity:1;color:#4D4D4D}
+.side a small{opacity:1;color:#4D4D4D}
+.side .brand,.side a.brand{color:#000}
+.side a.brand:hover{color:#000;background:none;text-decoration:underline;text-decoration-color:var(--blue)}
+.side .ver{opacity:1;color:#4D4D4D}
+.topbar{background:#FFFFFF;color:#000;border-bottom:1px solid rgba(0,0,0,.12)}
+.topbar .ib{background:#F2F2F2;color:#000}
+.topbar .tt small{color:#4D4D4D;opacity:1}
+body::before{background:#FFFFFF!important}
+/* docs panel stays light in every theme */
+.docs{--bg:#FFFFFF;--surface:#FFFFFF;--sunk:#F2F2F2;--ink:#000;--muted:#4D4D4D;--line:rgba(0,0,0,.12);--brass-soft:rgba(51,188,242,.14);background:#FFFFFF;color:#000;color-scheme:light;border-left:1px solid rgba(0,0,0,.12)}
+.docs .dsub,.dl li a span,.dbody h3,.docs footer .muted,details.dsec summary small{color:#4D4D4D}
+.scrim{background:rgba(0,0,0,.35)}
+/* v4.2.2: more breathing room between centre sections */
+main section{margin:64px 0}
+main section > h2{margin:0 0 16px;padding-bottom:8px}
+main .lede{margin:18px 0 36px}
+main .big{margin:12px 0 8px}
+main section .tbl + .tbl, main section .tbl + p, main section p + .tbl{margin-top:14px}
+main section .note{margin-top:12px}
+@container main (max-width:640px){main section{margin:44px 0}}
+/* v4.2.3: docs panel in very dark grey */
+.docs{--bg:#141414;--surface:#262626;--sunk:#333333;--ink:#F2F2F2;--muted:#B3B3B3;--line:rgba(255,255,255,.14);--brass-soft:rgba(51,188,242,.16);background:#1E1E1E;color:#F2F2F2;color-scheme:dark;border-left:0}
+.docs .dk,.dl li a b{color:#FFFFFF}
+.docs .dsub,.dl li a span,.dl li a i,.dbody h3,.docs footer .muted,details.dsec summary small{color:#B3B3B3}
+.dl li{background:#262626;border-color:rgba(255,255,255,.12)}
+.dsearch input,.dsearch select,.ask input{background:#141414;color:#F2F2F2;border-color:rgba(255,255,255,.4)}
+.dsearch input{border-color:#F2F2F2}
+.docs ::placeholder{color:#8C8C8C}
+.tip{color:#F2F2F2}
+/* v4.2.4: support card top right of overview */
+.ovhead{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:start}
+.ovhead .lede{margin-bottom:0}
+.tixcard{border-top:4px solid var(--blue)!important;gap:8px}
+.tixst{list-style:none;margin:2px 0 4px;padding:0;display:flex;flex-direction:column;gap:2px;font-size:.95rem}
+.tixst b{display:inline-block;min-width:22px}
+.tixcard .go{font-weight:700;font-size:.9rem;margin-top:4px}
+@container main (max-width:760px){.ovhead{grid-template-columns:1fr;gap:20px}}
+
+/* centre panel always white, in light and dark mode */
+body,.shell{background:#FFFFFF}
+main{--bg:#FFFFFF;--surface:#FFFFFF;--sunk:#F2F2F2;--ink:#000000;--muted:#666666;--line:rgba(0,0,0,.12);--green:#000000;--green-ink:#FFFFFF;--brass:#000000;--brass-soft:rgba(51,188,242,.14);--warn-soft:rgba(239,35,60,.08);--ok-soft:rgba(51,188,242,.16);background:#FFFFFF;color:#000000;color-scheme:light}
+/* v4.3.0 how-tos */
+.howf{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+.howjump{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 8px;font-size:.92rem}
+.howap{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+section.how p{max-width:80ch}
+ol.steps{max-width:80ch;padding-left:1.4em;margin:12px 0}
+ol.steps li{margin:0 0 8px;padding-left:4px}
+.howsrc{margin-top:12px;font-size:.92rem}
+.howsrc summary{cursor:pointer;color:var(--muted)}
+section.how .tbl{margin:12px 0}
+/* v4.5.1 overview stat boxes + peg rows */
+main .big{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px;margin:20px 0 8px}
+main .big div{background:var(--surface,#fff);border:1px solid var(--line);border-top:4px solid var(--blue);padding:14px 16px 12px;font-size:.88rem;color:var(--muted);line-height:1.3}
+main .big b{margin-bottom:6px}
+.card .mix.rows{flex-direction:column;align-items:flex-start;gap:5px}
+/* v4.7.0 throw tool */
+.chip.hq1{background:var(--blue);color:var(--on-blue)}
+.pjin{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 18px;align-items:end;margin:22px 0 6px}
+.pjin label{display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.pjin input,.pjin select{font:inherit;padding:8px 10px;border:1.5px solid var(--line);background:var(--surface,#fff);color:var(--ink);border-radius:0;min-width:0}
+.pjin .pjwide{grid-column:span 2}@media(max-width:600px){.pjin .pjwide{grid-column:auto}}
+.pjq{display:flex;gap:6px;flex-wrap:wrap}
+.pjsvg{width:100%;height:auto;max-width:760px}
+.pjsvg .ax{font-size:11px;fill:var(--muted)}.pjsvg .lb{font-size:12px;fill:var(--ink)}.pjsvg .vl{font-size:11px;fill:var(--ink)}
+.pjgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.pjc{border:1px solid var(--line);border-top:4px solid var(--blue);padding:14px 16px}
+.pjc.bad{border-top-color:var(--red)}
+.pjc h3{margin:0 0 4px}
+.pjc .kv{grid-template-columns:1fr;gap:2px 0}.pjc .kv dt{margin-top:8px;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.pjc .kv dd{margin:0}
+/* v4.8.0 explainer */
+.exctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 20px;align-items:end;margin:22px 0 16px}
+.exctl label{display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.exctl select{font:inherit;padding:8px 10px;border:1.5px solid var(--line);background:var(--surface,#fff);color:var(--ink);border-radius:0;min-width:0}
+.exctl .exrange{grid-column:span 2}@media(max-width:600px){.exctl .exrange{grid-column:auto}}
+.exctl input[type=range]{width:100%;accent-color:var(--blue)}
+.exctl .lbl{display:block;margin-bottom:6px}
+.exstage{margin-top:6px}
+#exCv{display:block;width:100%;height:auto;border:1px solid var(--line);background:#111}
+.exwall{position:relative;aspect-ratio:7/3.6;background:linear-gradient(#000 0,#000 100%);border:1px solid var(--line);overflow:hidden}
+.exwall::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#3a3a3a,#1c1c1c);opacity:calc(.35 + var(--room))}
+.exwall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5%;background:#2a2016;opacity:.9}
+.exscreen{position:absolute;left:50%;transform:translateX(-50%);overflow:hidden;box-shadow:0 0 calc(40px*var(--room)) rgba(0,0,0,.4);transition:width .25s,height .25s}
+.exscreen img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .25s}
+.exscreen.blur img{filter:blur(3px) brightness(.6)!important}
+.exwash{position:absolute;inset:0;background:#d9d3c7;mix-blend-mode:screen;transition:opacity .25s}
+.exover{position:absolute;left:8px;top:8px;background:var(--red);color:#fff;font-size:.78rem;padding:2px 6px}
+.experson{position:absolute;bottom:4.5%;left:10%;width:auto;z-index:2;filter:drop-shadow(0 0 8px rgba(0,0,0,.55)) brightness(calc(.75 + var(--room)*.5))}
+.exscale{position:absolute;left:8px;bottom:6px;font-size:.75rem;color:#e6e6e6;z-index:2}
+.exside{width:100%;height:auto;margin-top:8px}.exside .ax,.exside .vl{font-size:12px;fill:var(--muted)}.exside .vl{fill:var(--ink)}
+.exnums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 12px}
+.exnums div{border:1px solid var(--line);border-top:4px solid var(--blue);padding:12px 14px;font-size:.86rem;color:var(--muted)}
+.exnums b{display:block;font:400 2rem/1.05 "Bebas Neue","Oswald",Impact,sans-serif;color:var(--ink);margin-bottom:4px}
+.exgauge{position:relative;height:12px;background:linear-gradient(90deg,#4d4d4d,#33BCF2 55%,#ffffff);border:1px solid var(--line);margin:10px 0 22px;display:flex;justify-content:space-between}
+.exgauge span{position:absolute;top:-5px;width:4px;height:22px;background:var(--ink);transform:translateX(-2px)}
+.exgauge i{font-style:normal;font-size:.74rem;color:var(--muted);transform:translateY(16px)}
+.exrate{font-size:1.15rem;margin:0 0 6px}.exrate.good{color:var(--ink)}.exrate.good::before{content:"■ ";color:var(--blue)}.exrate.mid::before{content:"■ ";color:#999}.exrate.bad::before{content:"■ ";color:var(--red)}
+/* v4.9.0 scorecard */
+.pjscore{display:flex;flex-direction:column;gap:10px}
+.pjrow{display:grid;grid-template-columns:minmax(180px,1.3fr) minmax(160px,1.4fr) minmax(170px,1fr);gap:8px 18px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--blue);padding:12px 14px}
+.pjrow.out{border-left-color:var(--red)}
+.pjnm b{display:block}.pjnm small,.pjv small{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;line-height:1.35}
+.pjst{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;margin-top:4px;border:1px solid var(--line)}
+.pjst.in{background:var(--ink);color:var(--surface,#fff);border-color:var(--ink)}
+.pjbar{position:relative;height:22px;background:var(--sunk)}
+.pjbar span{position:absolute;left:0;top:0;bottom:0;background:var(--blue)}
+.pjrow.out .pjbar span{background:var(--red);opacity:.6}
+.pjbar em{position:absolute;left:8px;top:2px;font-style:normal;font-size:.82rem;color:var(--ink);font-weight:700;mix-blend-mode:normal}
+.pjv .exrate{font-size:1rem;margin:0}
+@media(max-width:760px){.pjrow{grid-template-columns:1fr}}
+
+
+/* ---------- Little Lion additions ---------- */
+.chip.sx22,.chip.alien{background:var(--blue);color:var(--on-blue)}
+.chip.sx13,.chip.karts{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip.pacman{background:var(--ink);color:#fff}
+.chip.rnd{background:var(--sunk);color:var(--ink)}
+.chip.missing{background:transparent;color:var(--ink);box-shadow:inset 3px 0 0 var(--red),inset 0 0 0 1px var(--line)}
+.chip.all{background:var(--sunk)}
+.st{display:inline-block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;white-space:nowrap;border:1px solid var(--line)}
+.st-open{box-shadow:inset 3px 0 0 var(--red)}
+.st-waiting,.st-watching{background:var(--sunk)}
+.st-done,.st-resolved{background:var(--blue);color:#000;border-color:var(--blue)}
+.st-proposed{border-style:dashed}
+.st-workaround{background:var(--ok-soft)}
+.st-rma{box-shadow:inset 3px 0 0 var(--red);background:var(--warn-soft)}
+.mk{display:inline-grid;place-items:center;min-width:26px;height:22px;font-weight:700;font-size:.85rem;border:1px solid var(--line)}
+.mk4{background:var(--ok-soft)}.mk1,.mk2,.mk3{background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--red)}
+ul.chk{list-style:none;margin:0;padding:0;columns:2 300px;column-gap:28px}
+ul.chk li{padding:5px 0;break-inside:avoid}
+ul.chk li.n{color:#4D4D4D}ul.chk li.n span[aria-hidden]{color:var(--red)}
+ul.chk li.y span[aria-hidden]{color:#000}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.howf .btn{font-size:.75rem;padding:7px 12px}
+main p.flag{max-width:80ch;margin:6px 0}
+main p.note{margin:8px 0}
+ol.time .item{font-weight:700}
+
+</style>
+<!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/t3d-repo.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+</head>
+<body>
+<div class="topbar"><button class="ib" id="menu" aria-label="Open menu" aria-expanded="false" aria-controls="sidenav">☰</button><div class="tt" id="tt">Little Lion</div><button class="db" id="dtop" aria-expanded="false" aria-controls="docs">Docs</button></div>
+<div class="scrim" id="scrim"></div>
+<div class="shell">
+  <aside class="side" id="side">
+    <a class="logo" href="#overview" aria-label="Atomic Orbital — back to the overview"><img class="ao-logo-on-light" src="/brand/logos/svg/atomic-orbital-logo-for-light-backgrounds.svg" alt="Atomic Orbital"><img class="ao-logo-on-dark" src="/brand/logos/svg/atomic-orbital-logo-for-dark-backgrounds.svg" alt="Atomic Orbital"></a>
+    <a class="brand" href="#overview" title="Back to the overview">Little Lion</a>
+    <div class="tag">Internal repository</div>
+    <nav id="sidenav" aria-label="Little Lion repository"></nav>
+    <div class="ver" id="ver"></div>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+  <aside class="docs" id="docs" aria-label="OptiTrack documentation">
+    <header><div><p class="dk">OptiTrack docs</p><p class="dsub" id="dctx"></p></div><button class="ib" id="dclose" aria-label="Close docs panel">×</button></header>
+    <div class="dsearch"><input id="dq" type="search" placeholder="Search docs  ( / )" aria-label="Search OptiTrack docs" autocomplete="off"><select id="dver" aria-label="Motive version"><option value="">Motive 3.5</option><option value="/v3.4">3.4</option><option value="/v3.3">3.3</option></select></div>
+    <div class="dbody" id="dbody" aria-live="polite"></div>
+    <footer><form class="ask" id="askf"><input id="askq" placeholder="Ask the OptiTrack docs…" aria-label="Ask the OptiTrack docs"><button class="btn" type="submit">Ask</button></form><p class="muted">Answers and pages open on docs.optitrack.com in a new tab.</p></footer>
+  </aside>
+</div>
+<button class="fab" id="dfab" aria-controls="docs" aria-expanded="false">OptiTrack docs</button>
+<script>
+const VERSION="v1.0.0", BUILT="5 Nov 2026";
+
+/* ---------------- Sources ---------------- */
+const SRC={
+ WIKI:{t:"Little Lion OptiTrack wiki (Netlify, last edit 21 Sep 2026)",u:"https://littleliont3d.netlify.app/"},
+ AUD:{t:"“Cameras in Each Space” audit, 21 Sep 2026 (via wiki)",u:""},
+ LIC:{t:"LicenseData exports, 21 Sep 2026 (via wiki)",u:""},
+ MOT:{t:"Motive project files: kart_rigid_bodies_v1_0.xlsx, pacmen.motive, alienInvasion.motive (via wiki)",u:""},
+ R22:{t:"Site visit report, 22 Jul 2026",u:"https://drive.google.com/file/d/1LA2F2Xfemsdx6rlWTyfbZiBxucX_j34g/view"},
+ R07:{t:"Site visit report, 7 Sep 2026",u:"https://drive.google.com/file/d/1I6-5t_DH9Ml60GDDWZxY76wmoppiPGXD/view"},
+ R21:{t:"Monday Upgrade Day report, 21 Sep 2026",u:"https://drive.google.com/file/d/1-VQPxeVF2dr83SgnvDjuAyXpcCbC8Ekc/view"},
+ Q67:{t:"Quote 8067, Alien Invasion, 30 Apr 2026",u:"https://drive.google.com/file/d/13Xq8f4E0ZSptXH_yMKTWoTToQt3Ufsll/view"},
+ Q68:{t:"Quote 8068, Pac-Man and ChaosKarts, 30 Apr 2026",u:"https://drive.google.com/file/d/1sXj3NzzFUiAj6z771OTKtEbXx8t8zmwH/view"},
+ Q71:{t:"Quote 8171, ChaosKarts, 11 Jun 2026",u:"https://drive.google.com/file/d/1Xkh-i76CBy2CTjwJmFCbV4Jm1vhrGyqy/view"},
+ NP:{t:"NP_serials_licences_combined (NaturalPoint packing slips), 2 Nov 2026",u:"https://docs.google.com/spreadsheets/d/1XsO5ev1KNDBu_4xVzIbg8ff-rZWAJIm3Ytk_thnakao/edit"},
+ INV:{t:"Invoices 5007, 5062, 5063 (via wiki)",u:"https://drive.google.com/file/d/172mPGnp6q-4GkRczxBesGa1DuzFI0VSb/view"},
+ PD:{t:"Pipedrive (Little Lion Entertainment, org 6018)",u:""},
+ DEMO:{t:"Demo report 9446, Jan 2026",u:"https://docs.google.com/document/d/1sRWSBukDx-hAT9iYQX6M7V6nSvRs9eR17-X5NOLB9vs/edit"},
+ PH:{t:"Site photos, 27–28 Aug 2026 (via wiki)",u:""},
+ OPS:{t:"Ops queue seed list (wiki repo)",u:""}
+};
+
+/* ---------------- Arenas ---------------- */
+const ARENAS=[
+ {key:"alien",name:"Alien Invasion",short:"AI",what:"Drones + player vests",ip:"10.14.2.62",
+  motive:"3.5.0.1 (v3.5.0.2 upgrade deferred to its own day)",
+  cams:{sx22:16,sx13:3},bs:"A02682",tags:"32 × Tag-8 (A05262–A05293)",rbs:"32 (8 drones, 24 vests)",markers:80,
+  ws:"PULSARON 12× 4.4 GHz, 32 GB, RTX 5060 Ti, rackmount",switches:1,
+  leds:"Custom 3D-printed diffusers over the LEDs. Bright enough, but very directional.",
+  lede:"The drone arena. Target3D re-seated and re-aimed the whole array from a MEWP on 22 Jul after finding loose clamps. It is the one system still on 3.5.0.1: its upgrade was deliberately moved to a dedicated full day.",
+  status:[["warn","DRONE 7 and VEST 17 share all four active marker IDs, so Motive cannot tell them apart."],["warn","20 of 24 vests run on one or two markers."],["warn","Licence unconfirmed: no LicenseData export pulled yet."],["note","v3.5.0.2 upgrade, tag reprogramming and vest pivot/refine all outstanding."]],
+  settings:[["Calibration","2500 µs","Medium (4)","—","Good middle ground found at commissioning"],["Game","2500 µs","Medium (4)","—",""]],
+  rb:{boot:"—",deflection:"8 (22 Jul)",minmk:"3 (22 Jul)",intensity:"—"},
+  pipeline:[["Pattern depth","12 (capped by the 3.5 beta bug)"],["Maximum active count","3"],["Maximum fill rate","3"],["Missing marker penalty","12"],["Best residual threshold","40 mm"]],
+  calres:[],
+  docs:[["Site visit report, 22 Jul 2026","R22"],["Quote 8067 (kit as sold)","Q67"],["Monday Upgrade Day report, 21 Sep 2026","R21"]]},
+ {key:"karts",name:"ChaosKarts",short:"CK",what:"Go-karts",ip:"10.14.2.72",
+  motive:"3.5.0.2 (upgraded 21 Sep 2026)",
+  cams:{sx22:28,sx13:0},bs:"A02691",tags:"16 × Tag-8 (A05551–A05566)",rbs:"9 karts in profile (10+1 recreated 21 Sep)",markers:35,
+  ws:"PULSARON 12× 4.4 GHz, 32 GB, RTX 5060 Ti, rackmount",switches:2,
+  leds:"OptiTrack-supplied emitters on roof-mounted rigs. Recommended: use all 8 LEDs per tag.",
+  lede:"28 Slim X 22 cameras. First reliable tracking on 7 Sep; upgraded to 3.5.0.2 and recalibrated sub-mm at 180 fps on 21 Sep, with 9 karts running through paid bookings.",
+  status:[["warn","MEWP mount-rigidity pass never happened. The same loose-clamp problem was found at Alien Invasion."],["warn","One Slim X 22 has a stuck IR filter switcher. RMA open (Pipedrive 10560)."],["warn","KART_06 runs on 3 markers (broken front-right LED). KART_01 and KART_09 are missing from the profile."],["note","Camera M127761 shipped on this order but is not in the audit."]],
+  settings:[["Calibration (wiki)","1000 µs","Medium (4)","—","Mean ray error 0.868 mm, 21 Sep"],["Calibration (wand driven round the volume)","—","1","360 fps","Lower fps or higher gain gave poor results (7 Sep)"],["Game","4000 µs","High (8)","120 Hz (7 Sep) · 180 fps (21 Sep)","Type over the 120 fps cap in Camera Settings"]],
+  rb:{boot:"Min 1 / max 1",deflection:"8 (wiki) · 54 (7 Sep)",minmk:"Markers to boot / continue 1",intensity:"1000 µs"},
+  pipeline:[],
+  calres:[["27 Aug 10:18","Exceptional","0.927 mm","0.172 mm"],["27 Aug 11:16","Exceptional","0.836 mm","0.210 mm"],["21 Sep","Sub-mm","0.868 mm","—"]],
+  docs:[["Site visit report, 7 Sep 2026","R07"],["Monday Upgrade Day report, 21 Sep 2026","R21"],["Quote 8171 (kit as sold)","Q71"],["Quote 8068 (first combined quote)","Q68"]]},
+ {key:"pacman",name:"Pac-Man",short:"PM",what:"Player vests",ip:"10.14.2.52",
+  motive:"3.5.0.2 (ProcDump installed)",
+  cams:{sx22:11,sx13:6},bs:"A02689",tags:"26 × Tag-8 (A05493–A05518)",rbs:"15 vests",markers:59,
+  ws:"PULSARON 12× 4.4 GHz, 32 GB, RTX 5060 Ti, rackmount",switches:1,
+  leds:"Little Lion’s own LEDs (Vishay 5 mm). Suggested layout: 3 front, 3 back, 2 on the shoulder.",
+  lede:"Ran 6 hours with zero crashes after the 7 Sep changes. Four Slim X 13s were added for the corners (2 on 7 Sep, 2 on 21 Sep). It is the only workstation with ProcDump, so it supplies the crash dumps going to OptiTrack.",
+  status:[["warn","Every vest needs a pivot reset and Refine (2000 samples). 8 were done on 21 Sep but nobody recorded which."],["warn","VEST19 reports 3 markers instead of 4."],["note","Two crash events on 19–20 Sep captured by ProcDump and sent to OptiTrack."],["note","The far two corners still need extra coverage."]],
+  settings:[["Calibration","1000 µs","Medium (4)","120 fps, LEDs off","Mean ray error 0.669 mm, 21 Sep"],["Calibration (7 Sep)","—","1","—","Exceptional: ray 0.604 mm, wand 0.207 mm"],["Game","4000 µs","High (8)","60 fps (7 Sep)","Player movement doesn’t need more"]],
+  rb:{boot:"Min 1 / max 1",deflection:"60 (wiki) · 64 (7 Sep)",minmk:"—",intensity:"1000 µs"},
+  pipeline:[],
+  calres:[["7 Sep","Exceptional","0.604 mm","0.207 mm"],["21 Sep","Sub-mm","0.669 mm","—"]],
+  docs:[["Site visit report, 7 Sep 2026","R07"],["Monday Upgrade Day report, 21 Sep 2026","R21"],["Quote 8068 (kit as sold)","Q68"]]},
+ {key:"rnd",name:"R&D test rig",short:"R&D",what:"Bench system (deal 9446)",ip:"—",
+  motive:"Motive:Tracker 3 (licence MTRL4322 shipped with it)",
+  cams:{sx22:0,sx13:4},bs:"A02594",tags:"2 tags + 1 puck",rbs:"—",markers:0,
+  ws:"—",switches:0,
+  leds:"Active Tag, Puck and 8 in / 20 in LED harnesses from the test kit.",
+  lede:"The test system sold under deal 9446 (shipped 12 May 2026). Photographed on 28 Aug as a 4-camera bench rig at 120 Hz and 2500 µs. Its six Slim X 13s now appear in the Pac-Man audit, so the rig has probably been stripped.",
+  status:[["note","All six Slim X 13s from this order (M126856–M126861) are listed in Pac-Man’s 21 Sep audit."],["warn","Where licence MTRL4322, key 552428, eSync 2 ES003099 and the second active wand and square are now isn’t recorded."]],
+  settings:[["Bench","2500 µs","—","120 Hz","Tag A-state “Claimed”, last calibrated 21 Aug 2026"]],
+  rb:null,pipeline:[],calres:[],
+  docs:[["Demo report, Jan 2026","DEMO"],["NaturalPoint packing slip PSP020826","NP"]]}
+];
+
+/* ---------------- Cameras ---------------- */
+const CAM=[];
+(function(){
+ const add=(arena,type,list,ship,note)=>list.forEach(s=>CAM.push({s,arena,type,ship,note:note&&note[s]||""}));
+ const r=(a,b,p="M")=>{const o=[];for(let i=a;i<=b;i++)o.push(p+i);return o};
+ add("alien","Slim X 13",["M121049","M121052","M121552"],"Not on any invoice or packing slip",{});
+ add("alien","Slim X 22",["M125302","M125303","M125305","M125306","M125308","M125309",...r(127280,127289)],"Inv 5007 (Alien Invasion)",{});
+ const mv={M127752:"Moved from Pac-Man",M127754:"Moved from Pac-Man",M127756:"Moved from Pac-Man",M127294:"Moved from ChaosKarts",M127769:"Moved from ChaosKarts",M127778:"Moved from ChaosKarts",M127786:"Moved from ChaosKarts"};
+ const ck=["M127290","M127291","M127292","M127293","M127750","M127752","M127754","M127756",...r(127762,127767),...r(127770,127777),...r(127779,127784)];
+ ck.forEach(s=>CAM.push({s,arena:"karts",type:"Slim X 22",ship:["M127752","M127754","M127756"].includes(s)?"PO 6434 · SO-2012454 · 26 Jun":"PO 6436 · SO-2012455 · 30 Jun",note:mv[s]||""}));
+ add("pacman","Slim X 13",r(126856,126861),"Deal 9446 test system · SO-2011569 · 12 May",{});
+ const pm=["M127294","M127751","M127753","M127755","M127757","M127758","M127759","M127760","M127769","M127778","M127786"];
+ pm.forEach(s=>CAM.push({s,arena:"pacman",type:"Slim X 22",ship:["M127294","M127769","M127778","M127786"].includes(s)?"PO 6436 · SO-2012455 · 30 Jun":"PO 6434 · SO-2012454 · 26 Jun",note:mv[s]||""}));
+ CAM.push({s:"M127761",arena:"missing",type:"Slim X 22",ship:"PO 6436 · SO-2012455 · 30 Jun",note:"Shipped with the ChaosKarts order but not in the 21 Sep audit"});
+})();
+
+/* ---------------- Licences ---------------- */
+const LIC=[
+ {lic:"MTRL4299",key:"552447",hash:"",inv:"Inv 5007 · Alien Invasion",ship:"Not in the packing-slip sheet",live:"ChaosKarts workstation",mid:"1F7A-84BA",reg:"Tech Manager (tech@chaoskarts.com)",act:"10 Aug 2026",upd:"9 Aug 2027",flag:"Running on ChaosKarts, not Alien Invasion where it was invoiced."},
+ {lic:"MTRL4444",key:"552657",hash:"792E-D057-2E94-5F81",inv:"Inv 5062 · Pac-Man",ship:"PO 6436 · SO-2012455 · 30 Jun 2026",live:"Pac-Man workstation",mid:"0C7C-84BA",reg:"Jon Crawley (tech@chaoskarts.com)",act:"31 Jul 2026",upd:"30 Jul 2027",flag:""},
+ {lic:"MTRL4484",key:"552468",hash:"DBE5-3F2B-FFAC-66ED",inv:"Inv 5063 · ChaosKarts",ship:"PO 6434 · SO-2012454 · 26 Jun 2026",live:"Not confirmed. Likely Alien Invasion",mid:"",reg:"",act:"",upd:"≈ 26 Jun 2027 (estimate)",flag:"Not seen in any live export."},
+ {lic:"MTRL4322",key:"552428",hash:"BC51-5C77-2D3F-E94B",inv:"Deal 9446 · test system",ship:"PO 6290 · SO-2011569 · 12 May 2026",live:"Not confirmed. R&D rig or Alien Invasion",mid:"",reg:"",act:"",upd:"≈ 12 May 2027 (estimate)",flag:"Missing from the wiki’s licence page."}
+];
+
+/* ---------------- Active hardware ---------------- */
+const ACT=[
+ {s:"A02682",item:"ActiveIO BaseStation",arena:"alien",src:"PO 6434 · SO-2012454 · 26 Jun 2026",note:"Confirmed at Alien Invasion by the 21 Sep audit. Shipped on the same slip as Pac-Man’s 10 cameras."},
+ {s:"A02608",item:"ActiveIO BaseStation",arena:"missing",src:"Inv 5007 · Alien Invasion",note:"Not seen in the 21 Sep audit. Status unknown."},
+ {s:"A02691",item:"ActiveIO BaseStation",arena:"karts",src:"PO 6436 · SO-2012455 · 30 Jun 2026",note:""},
+ {s:"A02689",item:"ActiveIO BaseStation",arena:"pacman",src:"PO 6436 · SO-2012455 · 30 Jun 2026",note:"Shipped with the ChaosKarts order, now at Pac-Man."},
+ {s:"A02594",item:"ActiveIO BaseStation",arena:"rnd",src:"PO 6290 · SO-2011569 · 12 May 2026",note:"Seen on the R&D bench rig, 28 Aug."},
+ {s:"A03095",item:"ActiveIO Calibration Square",arena:"alien",src:"Inv 5007",note:""},
+ {s:"A03087",item:"ActiveIO Calibration Wand",arena:"alien",src:"Inv 5007",note:""},
+ {s:"A03093",item:"ActiveIO Calibration Square",arena:"rnd",src:"PO 6290 · SO-2011569",note:"Second active square. Not in the wiki."},
+ {s:"A03100",item:"ActiveIO Calibration Wand",arena:"rnd",src:"PO 6290 · SO-2011569",note:"Second active wand. Not in the wiki."},
+ {s:"A05248",item:"ActiveIO Puck",arena:"rnd",src:"PO 6290 · SO-2011569",note:""},
+ {s:"A05056",item:"ActiveIO Tag",arena:"rnd",src:"PO 6290 · SO-2011569",note:""},
+ {s:"A05106",item:"ActiveIO Tag",arena:"rnd",src:"PO 6290 · SO-2011569",note:""},
+ {s:"ES003099",item:"eSync 2",arena:"rnd",src:"PO 6290 · SO-2011569",note:"Plus 2 pairs of 8 in and 2 pairs of 20 in LED harnesses."},
+ {s:"A05262–A05293",item:"32 × ActiveIO Tag-8",arena:"alien",src:"Inv 5007",note:"Quote 8067 also included 16 + 16 pairs of 8 in / 20 in LED harnesses."},
+ {s:"A05551–A05566",item:"16 × ActiveIO Tag-8",arena:"karts",src:"SO-2012807 · PSP021806 · 20 Jul 2026 (A05551–A05564); A05565–66 per invoice",note:"The packing-slip sheet lists SO-2012807 as client UNKNOWN."},
+ {s:"A05493–A05518",item:"26 × ActiveIO Tag-8",arena:"pacman",src:"PO 6434 · SO-2012454 · PSP021712 · 14 Jul 2026",note:""}
+];
+const SPEC=[["Power","PoE (802.3af)","USB 5 V","Battery (USB-C charge)","Battery (USB-C charge)"],["RF","2.4 GHz, 2 radios","2.4 GHz","2.4 GHz","2.4 GHz"],["IP rating","IP67","—","IP4X","IP4X"],["Battery life","—","—","175 h idle / 17 h synced / 8 h always-on","175 h idle / 17 h synced / 8 h always-on"],["Latency","8.3 ms","—","—","—"]];
+
+/* ---------------- Trackables ---------------- */
+const TR={
+ karts:{src:"kart_rigid_bodies_v1_0.xlsx",rows:[
+  ["KART_02","513, 576, 1152, 1026",4,"35.5",""],["KART_03","68, 136, 272, 257",4,"37.54",""],
+  ["KART_04","290, 274, 289, 265",4,"32.7","Markers 002 (29.0 mm) and 004 (31.4 mm) undersized: mis-measurement or occlusion at calibration?"],
+  ["KART_05","1040, 2080, 33, 66",4,"36.67",""],["KART_06","80, 40, 160",3,"38.59","Front-right LED broken. Pivot solved from 3 markers, so its origin sits differently from the rest of the fleet."],
+  ["KART_07","2050, 546, 2560, 273",4,"38.06",""],["KART_08","580, 1060, 578, 1058",4,"38.91",""],["KART_10","516, 1032, 528, 1056",4,"36.88",""],["KART_11","2176, 18, 9, 2056",4,"37.94",""],
+  ["KART_01","—",0,"—","Not in the profile: retired or in another file?"],["KART_09","—",0,"—","Not in the profile: retired or in another file?"]]},
+ pacman:{src:"pacmen.motive",rows:[
+  ["VEST02","2128, 2308, 2114, 2084",4,"",""],["VEST03","276, 261, 138, 162",4,"",""],["VEST04","289, 265, 274, 290",4,"",""],["VEST07","40, 20, 160, 80",4,"",""],
+  ["VEST08","1042, 644, 1057, 584",4,"",""],["VEST09","146, 266, 292, 161",4,"",""],["VEST10","1058, 1060, 578, 580",4,"",""],["VEST11","2560, 273, 2050, 546",4,"",""],
+  ["VEST12","1152, 576, 513, 1026",4,"",""],["VEST13","648, 1044, 1041, 642",4,"",""],["VEST14","2176, 9, 18, 2056",4,"",""],["VEST15","136, 68, 272, 257",4,"",""],
+  ["VEST18","516, 1032, 1056, 528",4,"",""],["VEST19","2116, 2192, 2180",3,"","One marker short of the standard 4."],["VEST21","2208, 2088, 2178, 2082",4,"",""]]},
+ alien:{src:"alienInvasion.motive",rows:[
+  ["DRONE 1","1185, 1065, 1157, 1066",4,"",""],["DRONE 2","1320, 1352, 1346, 2122",4,"",""],["DRONE 3","2384, 2580, 2578, 2626",4,"",""],["DRONE 4","680, 1045, 170, 340",4,"",""],
+  ["DRONE 5","2720, 2690, 597, 2570",4,"",""],["DRONE 6","1193, 1317, 1189, 1194",4,"",""],["DRONE 7","2088, 2082, 2208, 2178",4,"","ID collision with VEST 17."],["MOTHER DRONE 1","2708, 2724, 2706, 341",4,"",""],
+  ["VEST 02","2080",1,"",""],["VEST 03","516, 1032, 528, 1056",4,"",""],["VEST 04","136, 68",2,"",""],["VEST 05","2056, 2176",2,"",""],["VEST 06","576, 513",2,"",""],
+  ["VEST 07","40, 20",2,"",""],["VEST 08","2050, 2560",2,"",""],["VEST 09","265, 274",2,"",""],["VEST 10","580",1,"",""],["VEST 11","2116, 2120",2,"",""],
+  ["VEST 12","161, 146",2,"",""],["VEST 13","644, 584",2,"",""],["VEST 14","2114, 2084",2,"",""],["VEST 15","138, 162",2,"",""],["VEST 16","648",1,"",""],
+  ["VEST 17","2088, 2208, 2178, 2082",4,"","ID collision with DRONE 7."],["VEST 18","82, 74",2,"",""],["VEST 19","656, 641, 1033, 1034",4,"",""],["VEST 20","2068",1,"",""],
+  ["VEST 21","1281",1,"",""],["VEST 22","293",1,"",""],["VEST 23","549",1,"",""],["VEST 24","1097, 1106, 658, 1098",4,"",""],["VEST 25","1188",1,"",""]]}
+};
+
+/* ---------------- Kit as sold (quotes) ---------------- */
+const KIT={
+ alien:{q:"Quote 8067 / Inv 5007",src:"Q67",rows:[["Tracking camera","OptiTrack Slim X 22",16],["Motive:Tracker 3.x perpetual licence","1 year of updates",1],["Security key (Motive 3.x)","",1],["ActiveIO Calibration Square","",1],["ActiveIO Calibration Wand","",1],["PoE+ switch, 24-port","NETGEAR GS728TPP3",1],["ActiveIO BaseStation","",1],["ActiveIO Tag, assembled","",32],["LED harness pair, 8 in","V2 850 nm wide-angle",16],["LED harness pair, 20 in","V2",16],["Mocap workstation","PULSARON rackmount (per wiki; not on quote 8067)",1]],
+  now:"19 cameras: 16 Slim X 22 + 3 Slim X 13 added from elsewhere."},
+ karts:{q:"Quote 8171 / Inv 5063 / PO-0028",src:"Q71",rows:[["Tracking camera","OptiTrack Slim X 22",30],["Motive:Tracker 3.x perpetual licence","",1],["Security key (Motive 3.x)","",1],["PoE+ switch, 24-port","NETGEAR GS728TPP3",2],["ActiveIO BaseStation","",2],["ActiveIO Tag, assembled","",16],["Mocap workstation","PULSARON 12× 4.4 GHz / 32 GB DDR5 / 1 TB NVMe + 4 TB / RTX 5060 Ti 8 GB, rackmount",1]],
+  now:"28 cameras: 30 sold, 4 moved to Pac-Man, 3 came back, 1 (M127761) unaccounted for. One of the two BaseStations is now at Pac-Man. No calibration wand or square was sold for this arena."},
+ pacman:{q:"Quote 8068 / Inv 5062 / PO-0029",src:"Q68",rows:[["Tracking camera","OptiTrack Slim X 22",10],["Motive:Tracker 3.x perpetual licence","",1],["Security key (Motive 3.x)","",1],["PoE+ switch, 24-port","NETGEAR GS728TPP3",1],["ActiveIO BaseStation","",1],["ActiveIO Tag, assembled","",26],["Mocap workstation","PULSARON rackmount (invoice subtotal includes £3,100 for it)",1]],
+  now:"17 cameras: 10 sold, plus 4 Slim X 22 swapped in from ChaosKarts (3 went the other way) and 6 Slim X 13 from the test system. No calibration wand or square was sold for this arena."},
+ rnd:{q:"Deal 9446 test system · £20,331",src:"NP",rows:[["Tracking camera","Slim X 13 (SX13-FSBP-NS-32)",6],["Motive:Tracker 3 licence","MTRL4322",1],["Hardware key","552428",1],["eSync 2","ES003099",1],["ActiveIO BaseStation","A02594",1],["ActiveIO Puck","A05248",1],["ActiveIO Tag","A05056, A05106",2],["ActiveIO Wand","A03100",1],["ActiveIO Square","A03093",1],["LED harness pairs","2 × 8 in + 2 × 20 in",4]],now:"Photographed as a 4-camera bench rig on 28 Aug. All six cameras are now listed at Pac-Man."}
+};
+
+/* ---------------- Known issues ---------------- */
+const ISSUES=[
+ {t:"Crash rate on Motive 3.5.0.2",v:"3.5.0.2",st:"Watching",d:"After the Pac-Man PC moved to 3.5.0.2 on 3 Sep, crashes went from about 0.5 a day to about 4.5 a day (41 WER reports grouped by bucket: 1ae6 and b8e2 persisted, 24df heap corruption got worse, four buckets fixed, three new). The site rolled back to 3.5.0.1, which cut crashes about 9×, but Tom still saw 1–2 a day. 3.5.0.2 was reinstalled on ChaosKarts on 21 Sep and ran sub-mm with no crashes. Dumps go to Liam for a 3.5.0.3 fix.",fix:"Watchdog script relaunches Motive on all three PCs. ProcDump on Pac-Man only."},
+ {t:"IMU not re-found after power-down",v:"3.5 beta",st:"Workaround",d:"If a rigid body is paired to an IMU, the device isn’t re-found after it’s powered down.",fix:"Don’t pair IMUs. Little Lion don’t need IMU data for now. Re-test on the stable 3.5 release."},
+ {t:"Frame-rate field capped at 120",v:"3.5.0.2",st:"Workaround",d:"Camera Settings shows max 120 fps, but ChaosKarts needs 180.",fix:"Type over 120 in Camera Settings."},
+ {t:"Pattern depth capped at 12",v:"3.5 beta",st:"Open",d:"Pattern depth can’t go above 12. Alien Invasion runs 32 rigid bodies and 80 markers at once, so 12 may not leave enough headroom.",fix:"Confirm with OptiTrack once the cap lifts. Review Maximum Active Count and Fill Rate at the same time."},
+ {t:"Camera won’t calibrate in a volume",v:"—",st:"Workaround",d:"One camera refused to calibrate in the middle volume during testing.",fix:"Turned it off and calibrated without it. If it recurs, check that camera’s cabling and power first."},
+ {t:"Motive 3.4 Final doesn’t see new camera firmware",v:"3.4",st:"Resolved",d:"Found on 22 Jul. 3.4 Final doesn’t recognise the latest Slim X firmware.",fix:"Run 3.5.x."},
+ {t:"Continuous calibration",v:"—",st:"Resolved",d:"Switched off on 7 Sep as a suspected cause of drift and load. OptiTrack later confirmed it is safe to re-enable: it uses the active LED IDs, not the rigid-body definitions, so it doesn’t fight the high-deflection rigid bodies.",fix:"Safe to re-enable on all arenas."},
+ {t:"Stuck IR filter switcher on one Slim X 22",v:"Hardware",st:"RMA",d:"ChaosKarts camera found on 7 Sep. Tracking unaffected.",fix:"Pipedrive 10560: “Test camera and pass to Lana for RMA” still open."}
+];
+
+/* ---------------- How-tos ---------------- */
+const HOWTO=[
+ {id:"cal-vs-live",t:"Switch between calibration and live settings",ap:["karts","pacman","alien"],
+  lede:"Gain, exposure and frame rate are changed by hand between calibrating and running the game. The 7 Sep report asked for this to be written down; this is the procedure as recorded so far.",
+  steps:["Charge the wand and ground plane fully first. Neither has a battery indicator, and low charge gives poor results without an obvious cause.","Mask stray reflections, including sunlight coming through the roof.","Set calibration settings for the arena (table below). Drop gain to about 1: high gain interferes with calibration.","ChaosKarts: drive the wand round the volume at 360 fps and gain 1. Lower fps or higher gain gave poor results.","Wand until every camera’s indicator turns light green, then check the result is Exceptional or Excellent.","Set the ground plane.","Put the live settings back (table below) and run a test game before bookings."],
+  table:{cols:["Arena","Calibrate","Live"],rows:[["Alien Invasion","2500 µs · gain 4","2500 µs · gain 4"],["ChaosKarts","1000 µs · gain 4, or 360 fps gain 1 for a driven wand","4000 µs · gain 8 · 180 fps (type over 120)"],["Pac-Man","1000 µs · gain 4 (or 1) · 120 fps, LEDs off","4000 µs · gain 8 · 60 fps"]]},
+  notes:[["flag","Suggested in reports: a dedicated wand and ground plane per arena, wall hooks to store them, and a charging routine."]],src:["R07","R21","WIKI"]},
+ {id:"pivot",t:"Reset a pivot and refine a rigid body",ap:["pacman","alien"],
+  lede:"Found to be needed on every vest in the building (about 30) during Upgrade Day. Record the date against each asset on the Trackables register as you go.",
+  steps:["Stand the player (or asset) at the origin facing forward: +X in-game, +Z in Motive.","Reset the rigid body’s pivot.","Run Refine with 2000 samples.","Write the date in that asset’s row. Don’t mark a whole arena done unless every asset has been through it."],
+  notes:[["flag","8 vests were done on 21 Sep but nobody recorded which, so all are treated as outstanding."]],src:["R21","WIKI"]},
+ {id:"activeio",t:"Set up ActiveIO kit",ap:["alien","karts","pacman","rnd"],
+  lede:"Summarised from OptiTrack’s documentation in the wiki.",
+  steps:["Each system needs at least one BaseStation. It links tags and pucks to Motive on an RF channel (11–26) and syncs the LEDs to camera exposure. Plan for about 100 ft of range.","Tags and pucks are identified by their LED pattern, so Motive labels them without a distinctive marker geometry.","Puck: hold the button about 1 s to power on. Holding longer than 3 s enters bootloader mode (both LEDs orange); power-cycle to exit.","Devices pair automatically out of the box. Change channels or labels only with the Active Batch Programmer, not in Motive.","Raise Pattern Depth (default 12) as asset count grows, or IDs can duplicate."],
+  notes:[["note","Each arena runs its own Motive and BaseStation, so the same active IDs can be reused across arenas. Within one arena they must be unique."]],src:["WIKI"]},
+ {id:"imu",t:"Pair an IMU (and when not to)",ap:["karts","alien"],
+  lede:"Currently not recommended because of the 3.5 beta re-pairing bug.",
+  steps:["Power the device on a level surface and wait for it to finish calculating its bias.","Pair it to the rigid body. The viewport shows “Rotate to Pair IMU” and a count such as 27/100.","Rotate until the status reads Fused (Paired means linked but not aligned)."],
+  notes:[["flag","After a power-down the paired IMU isn’t re-found. Leave IMUs unpaired until the stable 3.5 release."]],src:["WIKI","PH"]},
+ {id:"crash",t:"Capture Motive crashes",ap:["pacman","karts","alien"],
+  lede:"What’s running on each PC, and how dumps get to OptiTrack.",
+  steps:["Pac-Man: ProcDump is in C:\\Users\\Stype\\Downloads\\Procdump. Tom checks the dump folder.","ChaosKarts and Alien Invasion: Ashley’s watchdog script relaunches Motive after a crash, but doesn’t write dumps in the format Liam needs.","Copy new .dmp files and send them to Target3D for Liam at OptiTrack.","Log each crash event (not each file) on the Known issues page. Several files within a few seconds, or a “-1” suffix, are one event."],
+  notes:[["flag","To do: install ProcDump on ChaosKarts and Alien Invasion over TeamViewer, and agree a handover routine with Tom Kirkham-Wood."]],src:["R07","R21","WIKI"]},
+ {id:"mounts",t:"Check camera mounts",ap:["karts","pacman","alien"],
+  lede:"On 22 Jul several Alien Invasion clamps could be pulled off by hand.",
+  steps:["Take the MEWP round every camera.","Check each clamp and cam is fully seated and tight.","Clean the lens (the warehouse is dusty).","Re-aim against the ideal views from Target3D’s camera configurator.","Recalibrate afterwards."],
+  notes:[["flag","Done at Alien Invasion (22 Jul) and Pac-Man. ChaosKarts is still outstanding."]],src:["R22","R07","R21"]},
+ {id:"servers",t:"Before racking a workstation",ap:["karts","pacman","alien"],
+  lede:"From the 22 Jul visit.",steps:["Open the case and remove the protective packaging shipped inside.","Look under the bottom packaging for the rack rails. Both are easy to miss."],notes:[],src:["R22"]}
+];
+
+/* ---------------- Open items ---------------- */
+const TIX=[
+ {t:"Re-ID DRONE 7 or VEST 17",a:"alien",c:"Safety",p:1,st:"Open",d:"Both share active IDs 2088, 2082, 2208 and 2178. A flying drone and a player can’t be told apart.",src:"MOT"},
+ {t:"Alien Invasion dedicated upgrade day",a:"alien",c:"Upgrade",p:1,st:"Open",d:"Back up, install 3.5.0.2, calibrate, reprogram tags, recreate assets, log IDs and serials, pivot/refine every vest. All 10 tasks outstanding.",src:"R21"},
+ {t:"Pivot reset + Refine on every vest (~30)",a:"all",c:"Tracking",p:1,st:"Open",d:"Half-day session. Record a date per vest.",src:"R21"},
+ {t:"ChaosKarts MEWP mount check, lens clean, spares count",a:"karts",c:"Deep clean",p:1,st:"Open",d:"Planned for 21 Sep, not reached.",src:"R21"},
+ {t:"Pull a LicenseData export from Alien Invasion",a:"alien",c:"Licences",p:2,st:"Open",d:"It’s running MTRL4484, MTRL4322, or nothing.",src:"LIC"},
+ {t:"ProcDump on ChaosKarts and Alien Invasion",a:"karts",c:"Stability",p:2,st:"Open",d:"Plus a dump handover routine with Tom Kirkham-Wood.",src:"R21"},
+ {t:"Forward 19–20 Sep Pac-Man dumps and log OptiTrack’s answer",a:"pacman",c:"Stability",p:2,st:"Waiting",d:"Report says sent to OptiTrack. No findings logged yet.",src:"R21"},
+ {t:"RMA the Slim X 22 with the stuck IR filter",a:"karts",c:"Hardware",p:2,st:"Open",d:"Pipedrive 10560, stage RMA in progress since 19 Oct. Test task assigned 24 Sep, not done.",src:"PD"},
+ {t:"ActiveIO tag order (PD-10492)",a:"all",c:"Commercial",p:2,st:"Waiting",d:"V3 quote 13 Oct: 10 bare tag PCBs, £2,825 ex VAT. PO pending, expected close 27 Nov. 29 Oct ops meeting: Little Lion items ship first week of November.",src:"PD"},
+ {t:"IO Tags support ticket (Pipedrive 10372)",a:"all",c:"Hardware",p:3,st:"Open",d:"Open since 6 Jul. “Check in with PJ on dead stock” done 16 Sep; Ashley collected from PJ 28 Sep. Outcome not recorded.",src:"PD"},
+ {t:"Repair KART_06’s front-right LED",a:"karts",c:"Tracking",p:2,st:"Open",d:"Re-add the fourth marker so its pivot matches the fleet.",src:"MOT"},
+ {t:"Check VEST19’s fourth marker",a:"pacman",c:"Tracking",p:2,st:"Open",d:"",src:"MOT"},
+ {t:"Re-check KART_04 markers 002 and 004",a:"karts",c:"Tracking",p:3,st:"Open",d:"Undersized diameter readings.",src:"MOT"},
+ {t:"KART_01 and KART_09: retired or in another file?",a:"karts",c:"Tracking",p:3,st:"Open",d:"",src:"MOT"},
+ {t:"Decide on 1–2 marker Alien Invasion vests",a:"alien",c:"Tracking",p:2,st:"Open",d:"8 vests on one marker, 12 on two. The 22 Jul report suggested 5 markers per vest; 7 Sep suggested all 8 LEDs per tag.",src:"MOT"},
+ {t:"Confirm pattern depth 12 is enough for 32 bodies / 80 markers",a:"alien",c:"Tracking",p:2,st:"Waiting",d:"Needs the stable 3.5 release.",src:"WIKI"},
+ {t:"Re-test IMU pairing on the stable 3.5 release",a:"karts",c:"Tracking",p:3,st:"Waiting",d:"Also: did KART 04 re-pair cleanly after the 27 Aug power cycle?",src:"WIKI"},
+ {t:"Diffuser brightness vs active wand",a:"alien",c:"Hardware",p:3,st:"Open",d:"Diffused markers looked about 25% the size of the wand at full intensity. Compare with and without the diffuser.",src:"OPS"},
+ {t:"Trial OptiTrack’s new threshold guidance on Pac-Man",a:"pacman",c:"Tracking",p:3,st:"Done",d:"Ticked on 21 Sep. Results not recorded.",src:"R21"},
+ {t:"Find camera M127761",a:"karts",c:"Inventory",p:2,st:"Open",d:"Shipped on PO 6436 with ChaosKarts’ cameras; missing from the audit.",src:"NP"},
+ {t:"Find BaseStation A02608",a:"alien",c:"Inventory",p:2,st:"Open",d:"Invoiced to Alien Invasion; not in the audit.",src:"WIKI"},
+ {t:"Source of the 3 Slim X 13s at Alien Invasion",a:"alien",c:"Inventory",p:3,st:"Open",d:"M121049, M121052, M121552 aren’t on any invoice or packing slip. Possibly from earlier Slim 13 deals 7266 or 9437.",src:"NP"},
+ {t:"Where is the test-system kit now?",a:"rnd",c:"Inventory",p:3,st:"Open",d:"Licence MTRL4322, key 552428, eSync 2, wand A03100, square A03093, puck and two tags.",src:"NP"},
+ {t:"Uniform aperture and focus on every camera",a:"all",c:"Deep clean",p:3,st:"Open",d:"Ideally bench every camera, set them the same, clean and re-mount.",src:"OPS"},
+ {t:"Spares stock per arena",a:"all",c:"Deep clean",p:2,st:"Open",d:"None held site-wide.",src:"R07"},
+ {t:"Add ~70 cm of gulley round each arena",a:"all",c:"Structure",p:3,st:"Proposed",d:"Cheaper than solving corner coverage with more cameras.",src:"R07"},
+ {t:"Use all 8 LEDs per tag",a:"all",c:"Structure",p:2,st:"Proposed",d:"Pac-Man: 3 front, 3 back, 2 shoulder. ChaosKarts: all 8 on the car.",src:"R07"},
+ {t:"Get Tom’s ops spreadsheet",a:"all",c:"Docs",p:3,st:"Open",d:"Reuse it as the components database rather than build a second one.",src:"OPS"},
+ {t:"Monthly SLA: Allan and Jon to agree",a:"all",c:"Commercial",p:1,st:"Open",d:"Covers engineering visits, lens deep clean and spares. Engineering quote 10614 (£5,950) was marked lost on 29 Sep for budget.",src:"PD"},
+ {t:"Dates for the remaining dark days",a:"all",c:"Scheduling",p:2,st:"Open",d:"28–29 Sep were confirmed. Two more were rumoured.",src:"WIKI"},
+ {t:"Which entity goes on paperwork?",a:"all",c:"Commercial",p:3,st:"Open",d:"Little Lion Entertainment or The Ents Inc Limited. Pipedrive also has a duplicate org (8073).",src:"WIKI"},
+ {t:"Client PO for Alien Invasion (Inv 5007)",a:"alien",c:"Commercial",p:3,st:"Open",d:"None on file.",src:"WIKI"},
+ {t:"Rigid body vs raw marker mode in Unity",a:"all",c:"Engineering",p:3,st:"Proposed",d:"OptiTrack confirmed raw marker IDs reach Unity without rigid bodies. A game toggle would need a game-dev conversation.",src:"OPS"},
+ {t:"Operator dashboard on the NatNet SDK",a:"alien",c:"Engineering",p:3,st:"Proposed",d:"Reference-camera overlay plus start/stop calibration controls.",src:"R22"},
+ {t:"Two more cameras for Pac-Man’s far corners",a:"pacman",c:"Coverage",p:3,st:"Open",d:"Jon has discussed buying extra cameras.",src:"R07"}
+];
+
+/* ---------------- Upgrade Day checklist (21 Sep) ---------------- */
+const UPG=[
+ {n:"Prep",crew:"",t:[["USB stick with v3.5.0.2 installer on PM workstation",1],["Calibration wand & ground plane charged",1],["MEWP charged (CK + possibly PM)",1],["2× Manfrotto clamps",1],["2× radios for Sam/Josh",1],["Diffuser/shoulder-pad material for OptiTrack feedback",1],["Direct-monitor fallback in case VNC hangs",1]]},
+ {n:"ChaosKarts",crew:"Sam, Josh, Tom, Louis, Ashley",t:[["Backup 3.5.0.1 assets + calibration file",1],["Install v3.5.0.2",1],["Set calibration camera settings",1],["Calibrate (sub-mm)",1],["Set tracking camera settings",1],["Reprogram/update firmware on each kart’s tags",1],["Move karts to origin 1-by-1 for RB creation",1],["Recreate 10+1 karts",1],["Log marker IDs/locations per kart",1],["Log camera serials/locations",1],["Check mount rigidity via MEWP",0],["Re-calibrate before 12pm bookings",1]]},
+ {n:"Pac-Man",crew:"Ashley, Sam, Josh, Tom",t:[["Check ProcDump folder",1],["Calibration camera settings",1],["Calibrate (sub-mm)",1],["Tracking camera settings",1],["Trial new OptiTrack threshold guidance",1],["Mount 2 extra Slim X 13 cameras for remaining corners",1],["Re-calibrate",1],["Log marker IDs/vest + camera serials",1],["Run the game as much as possible",1]]},
+ {n:"Lunch",crew:"",t:[["Monitor ChaosKarts",1],["Grab food",1]]},
+ {n:"Alien Invasion",crew:"Ashley, Sam, Josh, Tom",t:[["Backup 3.5.0.1 assets + calibration file",0],["Install v3.5.0.2",0],["Set calibration camera settings",0],["Calibrate (sub-mm)",0],["Set tracking camera settings",0],["Reprogram tags per trackable",0],["Move to origin 1-by-1",0],["Recreate assets",0],["Log marker IDs + camera serials",0],["Reset pivot + Refine (2000 samples) per vest",0]]}
+];
+
+/* ---------------- Visits and history ---------------- */
+const VISITS=[
+ ["Jan 2026","Demo at Target3D","Jon Crawley and Marc Williams saw passive, active and Captury in Studio 2. Little Lion plan 50 sites in 5 years (London, Dubai, Abu Dhabi) and were moving from BlackTrax.","DEMO"],
+ ["9–10 Mar","Technical test, Studio 2","Two days.","PD"],
+ ["5 May","New site equipment won (deal 10061)","Split into Order 1 (Alien Invasion) and Order 2 (Pac-Man and ChaosKarts).","PD"],
+ ["12 May","Test system shipped (deal 9446)","6 Slim X 13, eSync 2, BaseStation, active wand and square, licence MTRL4322.","NP"],
+ ["26 Jun–20 Jul","Hardware shipped","PO 6434 (26 Jun, 14 Jul), PO 6436 (30 Jun), ChaosKarts tags (20 Jul).","NP"],
+ ["8 Jul","Support request","All day.","PD"],
+ ["14 Jul","Kit drop-off and site walk","","PD"],
+ ["22 Jul","Alien Invasion re-install","Ashley, Sam, Jack. All 16 Slim X 22s re-seated and re-aimed from a MEWP; 1 Slim X 13 added; Motive 3.5 beta, NatNet set up.","R22"],
+ ["19 Aug","Technical visit (Sam)","","PD"],
+ ["21 Aug","Technical visit (Liam)","","PD"],
+ ["27 Aug","Technical visit (Liam)","ChaosKarts calibrated Exceptional twice; 28 cameras confirmed.","PH"],
+ ["3 Sep","Pac-Man PC moved to 3.5.0.2","Crash rate rose about 9×.","R07"],
+ ["7 Sep","On-site day (Ashley)","Crash investigation, watchdog on all PCs, 2 Pac-Man cameras added, ChaosKarts tracking reliably for the first time, Pac-Man 6 h with no crashes.","R07"],
+ ["8 Sep","Morning check (Ashley)","","PD"],
+ ["12 Sep","Remote support (Ashley)","","PD"],
+ ["19–20 Sep","Pac-Man crash events","Two events, six dump files.","WIKI"],
+ ["21 Sep","Monday Upgrade Day","Sam, Josh, Ashley (plus Tom, Louis). ChaosKarts upgraded to 3.5.0.2; Pac-Man tuned with 2 more cameras; Alien Invasion deferred.","R21"],
+ ["22 Sep","Remote support (Ashley)","","PD"],
+ ["24 Sep","Engineering quote 10614","£5,950 ex VAT for 21 Sep and 28–29 Sep; £11,050 of earlier visits waived.","PD"],
+ ["28–29 Sep","Dark days booked (Ashley, Sam)","Whether they went ahead isn’t recorded. Quote 10614 was marked lost on 29 Sep.","PD"],
+ ["13 Oct","Tag quote PD-10492 v3","10 bare ActiveIO tag PCBs, £2,825 ex VAT.","PD"],
+ ["29 Oct","Ops meeting","Little Lion items due to ship in the first week of November.","PD"]
+];
+
+/* ---------------- Commercial ---------------- */
+const DEALS=[
+ ["7266","Slim 13’s","2024","Closed","—","Early enquiry. “Will kill this off if there is still no answer.”"],
+ ["9437","Slim13 System","Nov 2025","Superseded","—","Questionnaire: 45 × 30 × 8 m, up to 85 trackers (20 at once), 20 mph, Unity, projection mapping, replacing BlackTrax."],
+ ["9446","OptiTrack test system","Jan–May 2026","Won","£20,331","Listed under duplicate org 8073."],
+ ["10061","OptiTrack LBE New Site Equipment","May 2026","Won","£177,686","Pipedrive value. Invoiced as 5007, 5062, 5063."],
+ ["10372","IO Tags","Jul 2026","Support ticket","—","In progress."],
+ ["10492","OptiTrack ActiveIO Tags","Aug–Oct 2026","PO pending","£2,825","Expected close 27 Nov 2026."],
+ ["10560","Slim X 22","Sep 2026","RMA in progress","—","1 camera."],
+ ["10614","OptiTrack Site Engineering","Sep 2026","Lost (budget)","£5,950","Lost 29 Sep 2026."]
+];
+const INVOICES=[["5007","01 Jun 2026","Alien Invasion","£56,564.00","£11,362.80","£250.00","£68,176.80","—"],["5062","13 Jul 2026","Pac-Man","£38,844.00","£7,818.80","£250.00","£46,912.80","PO-0029 (11 Jun)"],["5063","13 Jul 2026","ChaosKarts","£88,478.00","£17,695.60","—","£106,173.60","PO-0028 (11 Jun)"]];
+const SUPPLIER=[["6434","SO-2012454","PSP021477 (26 Jun), PSP021712 (14 Jul)","10 Slim X 22 (M127751–60), BaseStation A02682, licence MTRL4484 + key 552468, 26 tags A05493–A05518","Contents match the Pac-Man quote. The wiki records 6434 as “Alien Invasion (part), $36,729.90”."],["6436","SO-2012455","PSP021558 (30 Jun), PSP021806 (20 Jul)","30 Slim X 22, BaseStations A02689 + A02691, licence MTRL4444 + key 552657","Contents match the ChaosKarts quote. $88,130. 14 tags on PSP021806 are listed under SO-2012807."],["6290","SO-2011569","PSP020826 (12 May)","Test system (deal 9446)","Delivered 14 May."]];
+const CONTACTS=[
+ ["Jon Crawley","Little Lion","Director of Product. Primary client contact."],
+ ["Marc Williams","Little Lion","Head of Technical and Production. Trained in the MEWP on 22 Jul."],
+ ["PJ Davy","Little Lion","R&D. Unity side and drone pipeline; has his own Motive experience."],
+ ["David","Little Lion","Drone development (with PJ)."],
+ ["Tom Kirkham-Wood","Little Lion","On-site technician (Pac-Man, ChaosKarts). Checks ProcDump; owns the ops spreadsheet."],
+ ["Louis","Little Lion","On-site technician (Pac-Man, ChaosKarts)."],
+ ["Liam Bergsma","OptiTrack","liam.bergsma@optitrack.com. Logs findings to Little Lion’s OptiTrack case; receives crash dumps."],
+ ["Jacques Gay","OptiTrack / Target3D","Raised the ChaosKarts drop-out diagnostic questions."],
+ ["Ashley Keeler","Target3D","Co-Founder/CTO. ashley.k@target3d.co.uk"],
+ ["Allan Rankin","Target3D","CEO. Commercials, quotes, SLA talks."],
+ ["Sam Kaighin","Target3D","Studio supervisor. MEWP and camera work."],
+ ["Josh","Target3D","Engineer on Upgrade Day."],
+ ["Jack Weston","Target3D","22 Jul re-install; shipping chases."]
+];
+
+/* ---------------- Gaps ---------------- */
+const GAPS=[
+ ["Alien Invasion licence","No LicenseData export. It is running MTRL4484 (ChaosKarts’ invoiced licence), MTRL4322 (test system) or neither.","Export LicenseData.txt from About Motive on the Alien Invasion PC."],
+ ["Licence paperwork disagrees three ways","Client invoices put MTRL4444 on Pac-Man and MTRL4484 on ChaosKarts. NaturalPoint shipped MTRL4444 with the 30-camera order and MTRL4484 with the 10-camera order. Live exports show MTRL4444 on Pac-Man and MTRL4299 (invoiced to Alien Invasion) on ChaosKarts.","Decide which record is canonical and note it on the invoice copies."],
+ ["Licence hash for MTRL4299","The only live licence without a recorded hash.","Read it from the ChaosKarts LicenseData export."],
+ ["Missing hardware","Camera M127761 and BaseStation A02608.","Search the site and workshop; check RMA records."],
+ ["Test-system kit","Six cameras are now at Pac-Man. The licence, key, eSync, second active wand and square, puck and tags aren’t placed.","Ask PJ what the R&D rig runs on now."],
+ ["Untracked Slim X 13s","M121049, M121052, M121552 at Alien Invasion.","Check deals 7266 and 9437 and stock records."],
+ ["Rigid-body settings conflict","Wiki: deflection 8 (ChaosKarts), 60 (Pac-Man). 7 Sep report: 54 and 64.","Read the current values in Motive and update the arena pages."],
+ ["Pac-Man Motive version","Wiki says 3.5.0.2; ops queue mentions a rollback to 3.5.0.1 after 7 Sep. Upgrade Day didn’t reinstall on Pac-Man.","Check Help › About on the Pac-Man PC."],
+ ["Which workstation is which","The 7 Sep report calls Pac-Man/ChaosKarts a shared workstation; licence exports show two machines (MachineIDs 1F7A-84BA, 0C7C-84BA). A fourth Schneider Digital rackmount (SD2545FD47061201622, invoice 79216) isn’t assigned.","Label each PC with arena and serial."],
+ ["Pivot/refine dates","Every trackable row reads “Not yet recorded”.","Fill in as the vest session runs."],
+ ["28–29 Sep dark days","Booked, but no report and the engineering quote was lost.","Add a visit note if they happened."],
+ ["Tag order PD-10492","Started at 22 boards, quoted at 20 (£6,750 inc VAT), now 10 (£2,825 ex VAT). PO still pending.","Confirm quantity and add the serials when they arrive."]
+];
+
+/* ---------------- Wiki changelog (history) ---------------- */
+const WIKILOG=[
+ ["21 Sep 2026","Trackables register for all three arenas; DRONE 7 / VEST 17 collision found; 42-asset question resolved (32 bodies)."],
+ ["21 Sep 2026","Camera register rebuilt from the physical audit (64 cameras); licence exports added; A02691 resolved."],
+ ["21 Sep 2026","Upgrade Day debrief: three dedicated sessions, ProcDump rollout, dark days, SLA agenda, day rate £850."],
+ ["28 Aug 2026","Inventory pages from invoices and slips; site photo log; ActiveIO guide; rebuilt as a Netlify site with CMS and tickets."],
+ ["26 Aug 2026","First draft from support chat notes."]
+];
+
+const D={"DOCS": [{"s": "Quick start", "t": "Getting started", "p": "/quick-start-guides/quick-start-guide-getting-started", "g": ["all"], "d": "Get a camera system up and running."}, {"s": "Quick start", "t": "Active marker tracking", "p": "/quick-start-guides/quick-start-guide-active-marker-tracking", "g": ["a"], "d": "Set up active tags and BaseStations for tracking."}, {"s": "Quick start", "t": "Precision capture", "p": "/quick-start-guides/quick-start-guide-precision-capture", "g": ["c"], "d": "Settings for highest-accuracy capture."}, {"s": "Quick start", "t": "Tutorial videos", "p": "/quick-start-guides/quick-start-guide-tutorial-videos", "g": ["all"], "d": "Video walkthroughs of common tasks."}, {"s": "What's new", "t": "What's new in Motive 3.5", "p": "/whats-new/whats-new-in-motive-3.5", "g": ["l"], "d": "Highlights of the current Motive release."}, {"s": "What's new", "t": "Changelogs", "p": "/whats-new/changelogs", "g": ["l"], "d": "Motive release history."}, {"s": "Cameras", "t": "Flex 13", "p": "/hardware/cameras/usb-cameras/flex-13", "g": ["f"], "d": "USB camera (Flex series)."}, {"s": "Cameras", "t": "Slim X 13 (SlimX 13)", "p": "/hardware/cameras/ethernet-cameras/slimx-13", "g": ["a"], "d": "PoE camera. Slim X 13s are at Alien Invasion and Pac-Man."}, {"s": "Cameras", "t": "Trio 3 (V120:Trio)", "p": "/hardware/cameras/usb-cameras/trio-3", "g": ["t"], "d": "All-in-one tracking bar."}, {"s": "Cameras", "t": "Duo 3", "p": "/hardware/cameras/usb-cameras/duo-3", "g": ["t"], "d": "Two-camera tracking bar."}, {"s": "Cameras", "t": "Slim 3U", "p": "/hardware/cameras/usb-cameras/slim-3u", "g": ["f"], "d": "USB camera."}, {"s": "Cameras", "t": "Flex 3", "p": "/hardware/cameras/usb-cameras/flex-3", "g": ["f"], "d": "Older USB camera."}, {"s": "Cameras", "t": "PrimeX 13", "p": "/hardware/cameras/ethernet-cameras/primex-13", "g": ["a"], "d": "Ethernet camera."}, {"s": "Cameras", "t": "PrimeX 22", "p": "/hardware/cameras/ethernet-cameras/primex-22", "g": ["a"], "d": "Ethernet camera."}, {"s": "Cameras", "t": "SlimX 22", "p": "/hardware/cameras/ethernet-cameras/slimx-22", "g": ["a"], "d": "Higher-resolution Slim camera."}, {"s": "Cameras", "t": "VersaX 22", "p": "/hardware/cameras/ethernet-cameras/versax-22", "g": ["a"], "d": "Ethernet camera."}, {"s": "Cameras", "t": "Adjusting global origin for tracking bars", "p": "/hardware/cameras/usb-cameras/adjusting-global-origin-for-tracking-bars", "g": ["t"], "d": "Move the origin on a Trio or Duo."}, {"s": "Setup", "t": "Prepare setup area", "p": "/hardware/prepare-setup-area", "g": ["all"], "d": "Clear reflections, lighting and IR interference."}, {"s": "Setup", "t": "Camera mount structures", "p": "/hardware/camera-mount-structures", "g": ["p"], "d": "Truss, clamps and frames for mounting cameras."}, {"s": "Setup", "t": "Camera placement", "p": "/hardware/camera-placement", "g": ["p"], "d": "How to position cameras for coverage."}, {"s": "Setup", "t": "Aiming and focusing", "p": "/hardware/aiming-and-focusing", "g": ["c"], "d": "Aim cameras and set focus."}, {"s": "Setup", "t": "Camera status indicators", "p": "/hardware/camera-status-indicators", "g": ["a"], "d": "What the LEDs on Ethernet cameras mean."}, {"s": "USB system", "t": "USB camera network overview and specs", "p": "/hardware/usb-camera-system-setup/usb-camera-network-overview-and-specs", "g": ["f"], "d": "OptiHub, cable lengths and USB limits."}, {"s": "USB system", "t": "Duo 3 and Trio 3 setup", "p": "/hardware/usb-camera-system-setup/duo-3-and-trio-3-setup", "g": ["t"], "d": "Connect and configure a tracking bar."}, {"s": "USB system", "t": "Tracking bar coordinate system", "p": "/hardware/usb-camera-system-setup/tracking-bar-coordinate-system", "g": ["t"], "d": "Axes and origin for tracking bars."}, {"s": "Network", "t": "Ethernet camera network setup", "p": "/hardware/cabling-and-wiring", "g": ["n"], "d": "Overview of PoE camera networks."}, {"s": "Network", "t": "General overview and specs", "p": "/hardware/cabling-and-wiring/general-overview-and-specs", "g": ["n"], "d": "Switch, cable and NIC requirements."}, {"s": "Network", "t": "Cabling and load balancing", "p": "/hardware/cabling-and-wiring/cabling-and-load-balancing", "g": ["n"], "d": "How to cable and balance cameras across switches."}, {"s": "Network", "t": "Windows network settings", "p": "/hardware/cabling-and-wiring/windows-10-network-settings", "g": ["n"], "d": "NIC settings for the camera network."}, {"s": "Network", "t": "White/blacklisting cameras", "p": "/hardware/cabling-and-wiring/white-blacklisting-cameras", "g": ["n"], "d": "Limit which cameras Motive connects to."}, {"s": "Network", "t": "Netgear: disabling broadcast storm control", "p": "/hardware/cabling-and-wiring/netgear-prosafe-gsm7228s-disabling-the-broadcast-storm-control", "g": ["n"], "d": "Switch setting that drops camera traffic."}, {"s": "Motive", "t": "Installation and licence activation", "p": "/motive/installation-and-activation", "g": ["l"], "d": "Install Motive, activate licences, key types and the licence folder."}, {"s": "Motive", "t": "Motive basics", "p": "/motive/motive-basics", "g": ["all"], "d": "Find your way round the Motive interface."}, {"s": "Calibration", "t": "Calibration", "p": "/motive/calibration", "g": ["c"], "d": "Wanding, ground plane and calibration quality."}, {"s": "Calibration", "t": "Continuous calibration", "p": "/motive/calibration/continuous-calibration", "g": ["c"], "d": "Automatic calibration upkeep and anchor markers."}, {"s": "Calibration", "t": "Continuous calibration pane", "p": "/motive/calibration/continuous-calibration-pane", "g": ["c"], "d": "Monitor and control continuous calibration."}, {"s": "Calibration", "t": "Calibration squares", "p": "/motive/calibration/calibration-squares", "g": ["c"], "d": "Set the ground plane and global origin."}, {"s": "Calibration", "t": ".mcal calibration files", "p": "/motive/calibration/.mcal-xml-calibration-files", "g": ["c"], "d": "What is stored in a calibration file."}, {"s": "Calibration", "t": "Calibration pane", "p": "/motive-ui-panes/calibration-pane", "g": ["c"], "d": "Calibration controls in Motive."}, {"s": "Assets", "t": "Rigid body tracking", "p": "/motive/rigid-body-tracking", "g": ["r"], "d": "Create and refine rigid bodies (guns)."}, {"s": "Assets", "t": "Aligning a rigid body pivot point", "p": "/motive/rigid-body-tracking/aligning-rigid-body-pivot-point-with-a-replicated-3d-model", "g": ["r"], "d": "Match the pivot to the gun model."}, {"s": "Assets", "t": "Assets overview", "p": "/motive/assets", "g": ["r"], "d": "Trackable asset types in Motive."}, {"s": "Assets", "t": "Gizmo tool", "p": "/motive/assets/gizmo-tool-translate-rotate-and-scale", "g": ["r"], "d": "Move, rotate and scale assets and cameras."}, {"s": "Assets", "t": "Markers", "p": "/motive/markers", "g": ["r"], "d": "Marker types and settings."}, {"s": "Assets", "t": "IMU sensor fusion", "p": "/motive/imu-sensor-fusion", "g": ["a"], "d": "Combine IMU and optical data."}, {"s": "Motive", "t": "Reconstruction and 2D mode", "p": "/motive/reconstruction-and-2d-mode", "g": ["c"], "d": "Settings that affect 3D reconstruction."}, {"s": "Motive", "t": "Data streaming", "p": "/motive/data-streaming", "g": ["s"], "d": "Broadcast tracking data to the game."}, {"s": "Motive", "t": "Data recording", "p": "/motive/data-recording", "g": ["all"], "d": "Record takes for diagnosis."}, {"s": "Motive", "t": "Labeling", "p": "/motive/labeling", "g": ["r"], "d": "How markers are labelled."}, {"s": "Motive", "t": "Camera video types", "p": "/motive/camera-video-types", "g": ["all"], "d": "Video modes on OptiTrack cameras."}, {"s": "Motive", "t": "Motive hotkeys", "p": "/motive/motive-hotkeys", "g": ["all"], "d": "Keyboard shortcuts."}, {"s": "Motive", "t": "Motive batch processor", "p": "/motive/motive-batch-processor", "g": ["d"], "d": "Script processing of takes."}, {"s": "Panes", "t": "Settings", "p": "/motive-ui-panes/settings", "g": ["all"], "d": "Application settings panel."}, {"s": "Panes", "t": "Settings: general", "p": "/motive-ui-panes/settings/settings-general", "g": ["all"], "d": "General settings defined."}, {"s": "Panes", "t": "Settings: live pipeline", "p": "/motive-ui-panes/settings/settings-live-pipeline", "g": ["c"], "d": "Live reconstruction settings."}, {"s": "Panes", "t": "Settings: streaming", "p": "/motive-ui-panes/settings/settings-streaming", "g": ["s"], "d": "Streaming settings defined."}, {"s": "Panes", "t": "Devices pane", "p": "/motive-ui-panes/devices-pane", "g": ["all"], "d": "Cameras, hubs and active devices."}, {"s": "Panes", "t": "Properties: camera", "p": "/motive-ui-panes/properties-pane/properties-pane-camera", "g": ["all"], "d": "Per-camera properties, including partition ID."}, {"s": "Panes", "t": "Properties: OptiHub2", "p": "/motive-ui-panes/properties-pane/properties-pane-optihub2", "g": ["f"], "d": "OptiHub 2 properties."}, {"s": "Panes", "t": "Properties: rigid body", "p": "/motive-ui-panes/properties-pane/properties-pane-rigid-body", "g": ["r"], "d": "Rigid body properties."}, {"s": "Panes", "t": "Properties: ActiveIO devices", "p": "/motive-ui-panes/properties-pane/properties-pane-activeio-devices", "g": ["a"], "d": "ActiveIO device properties."}, {"s": "Panes", "t": "Status panel", "p": "/motive-ui-panes/status-panel", "g": ["c"], "d": "Live status, including mean error."}, {"s": "Panes", "t": "Log pane", "p": "/motive-ui-panes/log-pane", "g": ["c"], "d": "Motive log messages."}, {"s": "Panes", "t": "Info pane", "p": "/motive-ui-panes/info-pane", "g": ["c"], "d": "Measurement and info tools."}, {"s": "Panes", "t": "Builder pane", "p": "/motive-ui-panes/builder-pane", "g": ["r"], "d": "Build rigid bodies and skeletons."}, {"s": "Panes", "t": "Assets pane", "p": "/motive-ui-panes/assets-pane", "g": ["r"], "d": "Manage assets."}, {"s": "Panes", "t": "Viewport", "p": "/motive-ui-panes/viewport", "g": ["all"], "d": "The 3D and camera views."}, {"s": "Panes", "t": "Toolbar and command bar", "p": "/motive-ui-panes/toolbar-command-bar", "g": ["all"], "d": "Toolbar items explained."}, {"s": "Panes", "t": "Control deck", "p": "/motive-ui-panes/control-deck", "g": ["all"], "d": "Playback and recording controls."}, {"s": "Active (Classic)", "t": "Active Classic hardware", "p": "/active-classic/active-classic-hardware", "g": ["a"], "d": "Tags, pucks and BaseStations."}, {"s": "Active (Classic)", "t": "BaseStation", "p": "/active-classic/active-classic-hardware/basestation", "g": ["a"], "d": "Specs and use of the Active BaseStation."}, {"s": "Active (Classic)", "t": "Active Puck", "p": "/active-classic/active-classic-hardware/active-puck", "g": ["a"], "d": "The Active Puck."}, {"s": "Active (Classic)", "t": "Wired AnchorPuck", "p": "/active-classic/active-classic-hardware/wired-anchorpuck", "g": ["a"], "d": "Fixed active marker for anchoring calibration."}, {"s": "Active (Classic)", "t": "Assembling the Active Tags", "p": "/active-classic/active-classic-hardware/information-for-assembling-the-active-tags", "g": ["a"], "d": "Power, pin-out and IR LED details for gun builds."}, {"s": "Active (Classic)", "t": "Active Batch Programmer", "p": "/active-classic/configuration/active-batch-programmer", "g": ["a"], "d": "Configure tags and BaseStations."}, {"s": "Active (Classic)", "t": "Active hardware configuration: PuTTY", "p": "/active-classic/configuration/active-hardware-configuration-putty", "g": ["a"], "d": "Configure active devices from a terminal."}, {"s": "Active (Classic)", "t": "Active firmware compatibility", "p": "/active-classic/configuration/active-component-firmware-compatibility", "g": ["a"], "d": "Which tag and BaseStation firmware work together."}, {"s": "Active (Classic)", "t": "Active marker tracking", "p": "/active-classic/active-marker-tracking", "g": ["a"], "d": "Set up and use active markers."}, {"s": "ActiveIO", "t": "ActiveIO BaseStation", "p": "/activeio/activeio-hardware/activeio-basestation", "g": ["a"], "d": "Newer ActiveIO BaseStation."}, {"s": "ActiveIO", "t": "ActiveIO Puck", "p": "/activeio/activeio-hardware/activeio-puck", "g": ["a"], "d": "Newer ActiveIO Puck."}, {"s": "ActiveIO", "t": "ActiveIO Tag8", "p": "/activeio/activeio-hardware/activeio-tag8", "g": ["a"], "d": "Eight-LED ActiveIO tag."}, {"s": "ActiveIO", "t": "ActiveIO Wand", "p": "/activeio/activeio-hardware/activeio-wand", "g": ["c"], "d": "Active calibration wand."}, {"s": "ActiveIO", "t": "ActiveIO Square", "p": "/activeio/activeio-hardware/activeio-square", "g": ["c"], "d": "Active calibration square."}, {"s": "ActiveIO", "t": "ActiveIO configuration", "p": "/activeio/activeio-configuration", "g": ["a"], "d": "Set up ActiveIO devices in Motive."}, {"s": "Sync", "t": "Synchronization hardware", "p": "/synchronization/synchronization-hardware", "g": ["f"], "d": "Sync devices overview."}, {"s": "Sync", "t": "OptiHub2 sync guide", "p": "/synchronization/synchronization-hardware/external-device-sync-guide-optihub2", "g": ["f"], "d": "Sync with OptiHub 2."}, {"s": "Sync", "t": "eSync 2 sync guide", "p": "/synchronization/synchronization-hardware/external-device-sync-guide-esync-2", "g": ["a"], "d": "Sync with eSync 2."}, {"s": "Sync", "t": "Synchronization setup", "p": "/synchronization/synchronization-setup", "g": ["all"], "d": "Configure sync in Motive."}, {"s": "Plugins", "t": "Unreal Engine plugin", "p": "/plugins/optitrack-unreal-engine-plugin", "g": ["s"], "d": "Stream into Unreal Engine."}, {"s": "Plugins", "t": "Unreal Engine: Live Link plugin", "p": "/plugins/optitrack-unreal-engine-plugin/unreal-engine-optitrack-live-link-plugin", "g": ["s"], "d": "Live Link setup."}, {"s": "Plugins", "t": "Unity plugin", "p": "/plugins/optitrack-unity-plugin", "g": ["s"], "d": "Stream into Unity."}, {"s": "Developer", "t": "Developer tools overview", "p": "/developer-tools/developer-tools-overview", "g": ["d"], "d": "SDKs and APIs."}, {"s": "Developer", "t": "Motive API quick start", "p": "/developer-tools/motive-api/motive-api-quick-start-guide", "g": ["d"], "d": "Control Motive from code."}, {"s": "Developer", "t": "Motive API overview", "p": "/developer-tools/motive-api/motive-api-overview", "g": ["d"], "d": "What the Motive API can do."}, {"s": "Developer", "t": "Motive API function reference", "p": "/developer-tools/motive-api/motive-api-function-reference", "g": ["d"], "d": "All Motive API functions."}, {"s": "Developer", "t": "Motive API camera calibration", "p": "/developer-tools/motive-api/motive-api-camera-calibration", "g": ["c"], "d": "Calibrate from code — basis for a one-click tool."}, {"s": "Developer", "t": "NatNet SDK", "p": "/developer-tools/natnet-sdk", "g": ["s"], "d": "Receive streamed tracking data."}, {"s": "Developer", "t": "NatNet data types", "p": "/developer-tools/natnet-sdk/natnet-data-types", "g": ["s"], "d": "Structure of streamed data."}, {"s": "Developer", "t": "NatNet remote requests and commands", "p": "/developer-tools/natnet-sdk/natnet-remote-requests-commands", "g": ["d"], "d": "Control Motive remotely over NatNet."}, {"s": "Developer", "t": "Latency measurements", "p": "/developer-tools/natnet-sdk/latency-measurements", "g": ["s"], "d": "Measure end-to-end latency."}, {"s": "Developer", "t": "Camera SDK", "p": "/developer-tools/camera-sdk", "g": ["d"], "d": "Low-level camera access."}, {"s": "Maintenance", "t": "System maintenance guide", "p": "/system-maintenance/system-maintenance-guide", "g": ["all"], "d": "Daily, monthly and annual checklists."}, {"s": "Troubleshooting", "t": "Licensing troubleshooting", "p": "/general-troubleshooting/licensing-troubleshooting", "g": ["l"], "d": "Common licence problems."}, {"s": "Troubleshooting", "t": "Network troubleshooting", "p": "/general-troubleshooting/network-troubleshooting", "g": ["n"], "d": "Cameras dropping or not appearing."}, {"s": "Troubleshooting", "t": "Troubleshooting Q&A", "p": "/general-troubleshooting/troubleshooting", "g": ["all"], "d": "Common problems and fixes."}, {"s": "Troubleshooting", "t": "Windows 11 optimisation for real-time use", "p": "/general-troubleshooting/windows-11-optimization-for-realtime-applications", "g": ["all"], "d": "Recommended Windows settings for a Motive PC."}, {"s": "Troubleshooting", "t": "Firewall settings", "p": "/general-troubleshooting/firewall-settings", "g": ["n"], "d": "Firewall rules for Motive."}, {"s": "Troubleshooting", "t": "High DPI displays", "p": "/general-troubleshooting/running-motive-on-high-dpi-displays", "g": ["all"], "d": "Fix Motive scaling."}], "TIPS": [{"t": "Licence key straight into the PC", "d": "Not into a USB hub or a busy USB bus. Only one key at a time.", "p": "/motive/installation-and-activation", "g": ["l", "f", "all"]}, {"t": "Licence files live in C:\\ProgramData\\OptiTrack\\License", "d": "Export LicenseData.txt from About Motive to record licence, hash and key.", "p": "/motive/installation-and-activation", "g": ["l"]}, {"t": "Hardware Keys don’t run Motive 3.0.x", "d": "Security Key M works with every version except 3.0.x.", "p": "/motive/installation-and-activation", "g": ["l"]}, {"t": "Continuous calibration needs visible markers", "d": "Live mode only; most cameras must see markers, ideally 4+ each. Fixed active anchor markers help most.", "p": "/motive/calibration/continuous-calibration", "g": ["c", "a"]}, {"t": "Recalibrate when residual rises", "d": "Or after cameras, truss or mounts move, or the environment changes.", "p": "/system-maintenance/system-maintenance-guide", "g": ["c", "all"]}, {"t": "Tags 1.3.2 + BaseStations 1.1.0", "d": "OptiTrack’s recommended 1.x pairing. Check what each arena runs, and only update firmware with OptiTrack support.", "p": "/active-classic/configuration/active-component-firmware-compatibility", "g": ["a"]}, {"t": "Back up .mcal files per arena", "d": "Keep calibration, asset definitions and the Motive profile with the site record.", "p": "/system-maintenance/system-maintenance-guide", "g": ["c", "all"]}]};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const AR=k=>ARENAS.find(a=>a.key===k);
+const ANAME=k=>k==="all"?"All arenas":k==="missing"?"Unaccounted for":(AR(k)||{}).name||k;
+const src1=id=>{const x=SRC[id];if(!x)return esc(id);return x.u?`<a href="${x.u}" target="_blank" rel="noopener">${esc(x.t)}</a>`:esc(x.t)};
+const srcShort=id=>{const x=SRC[id];if(!x)return esc(id);return x.u?`<a href="${x.u}" target="_blank" rel="noopener" title="${esc(x.t)}">${esc(id)}</a>`:`<span title="${esc(x.t)}">${esc(id)}</span>`};
+const tbl=(cols,rows,cls="")=>`<div class="tbl ${cls}"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+const tr=cells=>`<tr>${cells.map(c=>`<td>${c}</td>`).join("")}</tr>`;
+const chipA=k=>`<span class="chip ${k}">${esc(k==="all"?"All":k==="missing"?"Missing":(AR(k)||{}).short||k)}</span>`;
+const PST={1:"High",2:"Medium",3:"Low"};
+const stChip=s=>`<span class="st st-${s.toLowerCase().replace(/[^a-z]/g,"")}">${esc(s)}</span>`;
+const OPEN=TIX.filter(t=>!["Done"].includes(t.st));
+
+/* ---------------- Pages ---------------- */
+const PAGES=[
+ {id:"overview",label:"Overview",grp:"Little Lion"},
+ ...ARENAS.map(a=>({id:a.key,label:a.name,sub:a.key==="rnd"?"9446":(a.cams.sx22+a.cams.sx13)+" cams",grp:"Arenas"})),
+ {id:"cameras",label:"Cameras",sub:String(CAM.length),grp:"Registers"},
+ {id:"licences",label:"Licences and keys",grp:"Registers"},
+ {id:"active",label:"Active hardware",grp:"Registers"},
+ {id:"trackables",label:"Trackables and IDs",grp:"Registers"},
+ {id:"serials",label:"Serial finder",grp:"Registers"},
+ {id:"howto",label:"How-tos",grp:"Operations"},
+ {id:"issues",label:"Known issues",grp:"Operations"},
+ {id:"visits",label:"Visit log",grp:"Operations"},
+ {id:"upgrade",label:"Upgrade Day checklist",grp:"Operations"},
+ {id:"tickets",label:"Open items",sub:String(OPEN.length),grp:"Plan"},
+ {id:"commercial",label:"Commercial",grp:"Plan"},
+ {id:"contacts",label:"Contacts",grp:"Plan"},
+ {id:"gaps",label:"Gaps to close",grp:"Tools"},
+ {id:"help",label:"Help",grp:"Tools"}
+];
+function renderNav(cur){
+ let g="",h="";
+ PAGES.forEach(p=>{if(p.grp!==g){g=p.grp;h+=`<div class="grp">${esc(g)}</div>`}h+=`<a href="#${p.id}" ${p.id===cur?'aria-current="page"':""}>${esc(p.label)}${p.sub?`<small>${esc(p.sub)}</small>`:""}</a>`});
+ $("#sidenav").innerHTML=h;
+ const pg=PAGES.find(p=>p.id===cur);$("#tt").innerHTML=`${esc(pg?pg.label:"Little Lion")}<small>Little Lion repository</small>`;
+}
+
+/* ---------------- Overview ---------------- */
+function pageOverview(){
+ const live=ARENAS.filter(a=>a.key!=="rnd");
+ const cams=CAM.filter(c=>["alien","karts","pacman"].includes(c.arena));
+ const sx22=cams.filter(c=>c.type==="Slim X 22").length, sx13=cams.length-sx22;
+ const rbs=TR.alien.rows.length+TR.karts.rows.filter(r=>r[2]).length+TR.pacman.rows.length;
+ const mk=live.reduce((a,x)=>a+x.markers,0);
+ const hi=OPEN.filter(t=>t.p===1);
+ const byst=[...new Set(OPEN.map(t=>t.st))].map(s=>`<li><b>${OPEN.filter(t=>t.st===s).length}</b> ${esc(s)}</li>`).join("");
+ return `<div class="ovhead"><div><h1 class="page">Little Lion</h1><p class="kicker">Little Lion Entertainment · Arcade Arena, Lambeth · Target3D 2026</p>
+ <p class="lede">The three OptiTrack arenas Target3D supplied for Little Lion’s Arcade Arena, plus the R&D test system: cameras by serial, licences, active hardware, marker IDs, settings, procedures and everything still open. Built from the Little Lion wiki, site reports, quotes, NaturalPoint packing slips and Pipedrive.</p></div>
+ <a class="card tixcard" href="#tickets"><span class="num">Plan · ${OPEN.length} open</span><span class="nm">Open items</span><ul class="tixst">${byst}</ul><span class="sm">${hi.length} high priority, led by the DRONE 7 / VEST 17 ID collision</span><span class="go">View open items →</span></a></div>
+ <div class="big"><div><b>3</b>arenas live</div><div><b>${cams.length}</b>cameras in the audit</div><div><b>${sx22}</b>Slim X 22</div><div><b>${sx13}</b>Slim X 13</div><div><b>${rbs}</b>rigid bodies</div><div><b>${mk}</b>active markers</div><div><b>4</b>Motive licences</div></div>
+ <section><h2>Arenas</h2><div class="cards">${ARENAS.map(a=>`<a class="card" href="#${a.key}"><span class="num">${esc(a.what)}</span><span class="nm">${esc(a.name)}</span><span class="sm">${esc(a.motive)}</span><span class="mix rows">${a.cams.sx22?`<span class="chip sx22">${a.cams.sx22} × Slim X 22</span>`:""}${a.cams.sx13?`<span class="chip sx13">${a.cams.sx13} × Slim X 13</span>`:""}<span class="chip">BaseStation ${esc(a.bs)}</span></span></a>`).join("")}</div></section>
+ <section><h2>Needs attention</h2>${tbl(["Item","Arena","Status"],hi.map(t=>tr([`<b>${esc(t.t)}</b><div class="inote">${esc(t.d)}</div>`,chipA(t.a),stChip(t.st)])))}<p><a href="#tickets">All ${OPEN.length} open items</a></p></section>
+ <section><h2>Recent</h2><ol class="time">${VISITS.slice(-6).reverse().map(v=>`<li><b>${esc(v[0])}</b> ${esc(v[1])}${v[2]?` <span class="muted">· ${esc(v[2])}</span>`:""}</li>`).join("")}</ol><p><a href="#visits">Full visit log</a></p></section>
+ <section><h2>Registers</h2><div class="cards">
+  <a class="card" href="#cameras"><span class="num">${CAM.length} rows</span><span class="nm">Cameras</span><span class="sm">Every serial with arena, order and moves</span></a>
+  <a class="card" href="#licences"><span class="num">${LIC.length} licences</span><span class="nm">Licences and keys</span><span class="sm">Invoiced, shipped and live, side by side</span></a>
+  <a class="card" href="#active"><span class="num">${ACT.length} rows</span><span class="nm">Active hardware</span><span class="sm">BaseStations, tags, wands, squares</span></a>
+  <a class="card" href="#trackables"><span class="num">${TR.alien.rows.length+TR.karts.rows.length+TR.pacman.rows.length} assets</span><span class="nm">Trackables</span><span class="sm">Drones, karts and vests with marker IDs</span></a>
+ </div></section>
+ <section><h2>Not covered here</h2><p class="note">Passwords and remote-access details stay out of this page. Licence hashes are hidden until you choose Show. The live ticket tracker and shared checklist stay on the existing Netlify wiki.</p></section>`;
+}
+
+/* ---------------- Arena ---------------- */
+function pageArena(a){
+ const cams=CAM.filter(c=>c.arena===a.key), act=ACT.filter(x=>x.arena===a.key), tix=OPEN.filter(t=>t.a===a.key||t.a==="all");
+ const lic=LIC.filter(l=>(a.key==="karts"&&l.live.startsWith("ChaosKarts"))||(a.key==="pacman"&&l.live.startsWith("Pac-Man"))||(a.key==="alien"&&/Alien/.test(l.live))||(a.key==="rnd"&&/R&D/.test(l.live)));
+ const kit=KIT[a.key], trk=TR[a.key];
+ const how=HOWTO.filter(h=>h.ap.includes(a.key));
+ return `<p class="kicker">Arena · ${esc(a.what)}</p><h1 class="page">${esc(a.name)}</h1>
+ <div class="meta"><span>Motive <b>${esc(a.motive)}</b></span>${a.ip!=="—"?`<span>Motive PC <b class="mono">${esc(a.ip)}</b></span>`:""}<span>BaseStation <b class="mono">${esc(a.bs)}</b></span>${a.switches?`<span>PoE switches <b>${a.switches}</b></span>`:""}</div>
+ <p class="lede">${esc(a.lede)}</p>
+ <div class="big"><div><b>${cams.length}</b>cameras${a.key==="rnd"?" from this order":""}</div>${a.cams.sx22?`<div><b>${a.cams.sx22}</b>Slim X 22</div>`:""}${a.cams.sx13?`<div><b>${a.key==="rnd"?6:a.cams.sx13}</b>Slim X 13</div>`:""}${trk?`<div><b>${trk.rows.filter(r=>r[2]).length}</b>rigid bodies</div><div><b>${a.markers}</b>active markers</div>`:""}<div><b>${tix.filter(t=>t.a===a.key).length}</b>open items</div></div>
+ <section><h2>Status</h2>${a.status.map(s=>`<p class="${s[0]==="warn"?"flag":"note"}">${esc(s[1])}</p>`).join("")}</section>
+ <section><h2>Camera settings</h2>${tbl(["Mode","Exposure","Gain","Frame rate","Notes"],a.settings.map(r=>tr(r.map(esc))))}
+ ${a.rb?`<dl class="kv" style="margin-top:14px"><dt>Markers to boot</dt><dd>${esc(a.rb.boot)}</dd><dt>Deflection ratio</dt><dd>${esc(a.rb.deflection)}</dd><dt>Minimum markers</dt><dd>${esc(a.rb.minmk)}</dd><dt>Marker intensity</dt><dd>${esc(a.rb.intensity)}</dd>${a.pipeline.map(p=>`<dt>${esc(p[0])}</dt><dd>${esc(p[1])}</dd>`).join("")}</dl>`:""}
+ <p class="note">LEDs: ${esc(a.leds)}${a.key!=="rnd"?" All rigid bodies run high deflection, so identification relies almost entirely on the active LED IDs.":""}</p>
+ ${a.calres.length?`<h3 class="cond" style="font-size:1.3rem;margin:24px 0 8px">Calibration results</h3>${tbl(["When","Result","Mean ray error","Mean wand error"],a.calres.map(r=>tr(r.map(esc))))}`:""}</section>
+ <section><h2>Kit</h2><p class="muted">As sold: ${esc(kit.q)} (${srcShort(kit.src)})</p>${tbl(["Qty","Item","Detail"],kit.rows.map(r=>`<tr><td class="q">${r[2]}</td><td class="item">${esc(r[0])}</td><td class="model">${esc(r[1])}</td></tr>`))}<p class="note">Now: ${esc(kit.now)}</p></section>
+ <section><h2>Cameras</h2>${cams.length?tbl(["Serial","Model","Shipped on","Note"],cams.map(c=>tr([`<span class="mono">${esc(c.s)}</span>`,esc(c.type),esc(c.ship),c.note?`<span class="flag">${esc(c.note)}</span>`:""]))):`<p class="empty">No camera serials recorded.</p>`}<p class="src">Source: ${src1("AUD")}; shipping from ${src1("NP")}</p></section>
+ <section><h2>Active hardware</h2>${tbl(["Serial","Item","Shipped on","Note"],act.map(x=>tr([`<span class="mono">${esc(x.s)}</span>`,esc(x.item),esc(x.src),esc(x.note)])))}</section>
+ <section><h2>Licence</h2>${lic.length?lic.map(l=>`<dl class="kv"><dt>Licence</dt><dd class="mono">${esc(l.lic)}</dd><dt>Hardware key</dt><dd class="mono">${esc(l.key)}</dd><dt>Running on</dt><dd>${esc(l.live)}</dd><dt>Updates until</dt><dd>${esc(l.upd)}</dd><dt>Invoiced as</dt><dd>${esc(l.inv)}</dd></dl>${l.flag?`<p class="flag">${esc(l.flag)}</p>`:""}`).join("<br>"):`<p class="empty">Not confirmed. See <a href="#licences">Licences and keys</a>.</p>`}</section>
+ ${trk?`<section><h2>Trackables</h2><p>${trk.rows.filter(r=>r[2]).length} rigid bodies from <span class="mono">${esc(trk.src)}</span>. ${trk.rows.filter(r=>r[2]&&r[2]<4).length} run on fewer than 4 markers. <a href="#trackables:${a.key}">Open the register</a>.</p></section>`:""}
+ <section><h2>Open items</h2>${tbl(["Item","Priority","Status"],tix.map(t=>tr([`<b>${esc(t.t)}</b>${t.a==="all"?` <span class="chip">All arenas</span>`:""}${t.d?`<div class="inote">${esc(t.d)}</div>`:""}`,PST[t.p],stChip(t.st)])))}</section>
+ <section><h2>How-tos</h2><ul class="doclist">${how.map(h=>`<li><a href="#howto:${h.id}">${esc(h.t)}</a></li>`).join("")}</ul></section>
+ <section><h2>Documents</h2><ul class="doclist">${a.docs.map(d=>`<li>${SRC[d[1]]&&SRC[d[1]].u?`<a href="${SRC[d[1]].u}" target="_blank" rel="noopener">${esc(d[0])}</a>`:esc(d[0])}</li>`).join("")}</ul></section>`;
+}
+
+/* ---------------- Cameras ---------------- */
+let camF="";
+function pageCameras(){
+ const order=["alien","karts","pacman","missing"];
+ const list=CAM.filter(c=>!camF||c.arena===camF);
+ const moved=CAM.filter(c=>/Moved/.test(c.note)).length;
+ return `<p class="kicker">Registers</p><h1 class="page">Cameras</h1>
+ <p class="lede">From the physical audit of 21 Sep 2026, matched to NaturalPoint packing slips. 64 cameras are deployed; one more shipped but isn’t accounted for.</p>
+ <div class="big"><div><b>64</b>deployed</div><div><b>${moved}</b>moved between arenas</div><div><b>3</b>with no order on file</div><div><b>1</b>missing</div></div>
+ <div class="howf" role="group" aria-label="Filter by arena"><button class="btn ${camF?"ghost":""}" data-cf="">All</button>${order.map(k=>`<button class="btn ${camF===k?"":"ghost"}" data-cf="${k}">${esc(ANAME(k))} (${CAM.filter(c=>c.arena===k).length})</button>`).join("")}</div>
+ ${tbl(["Serial","Model","Arena","Shipped on","Note"],list.map(c=>tr([`<span class="mono">${esc(c.s)}</span>`,esc(c.type),chipA(c.arena),esc(c.ship),c.note?(/Shipped|Not/.test(c.note)?`<span class="flag">${esc(c.note)}</span>`:esc(c.note)):(c.ship.startsWith("Not")?`<span class="flag">Source unknown</span>`:"")])))}
+ <section><h2>Keeping this current</h2><p class="note">When a camera moves, is swapped or develops a fault, record the new arena and condition here and in Tom’s ops spreadsheet. Status values used on the wiki: Deployed, Spare, RMA – sent to OptiTrack, Faulty – awaiting repair.</p></section>`;
+}
+function wireCameras(){document.querySelectorAll("[data-cf]").forEach(b=>b.onclick=()=>{camF=b.dataset.cf;route()})}
+
+/* ---------------- Licences ---------------- */
+let showHash=false;
+function pageLicences(){
+ return `<p class="kicker">Registers</p><h1 class="page">Licences and keys</h1>
+ <p class="lede">Each arena has a perpetual Motive:Tracker 3 licence and a USB hardware key. The licence doesn’t expire, but free updates end a year after purchase. Three records disagree about which licence belongs where, so all three are shown.</p>
+ <div class="actions"><button class="btn ghost" id="hh">${showHash?"Hide":"Show"} licence hashes</button></div>
+ ${tbl(["Licence","Key","Hash","Invoiced as","Shipped on","Running on","Updates until"],LIC.map(l=>tr([`<b class="mono">${esc(l.lic)}</b>${l.flag?`<div class="flag">${esc(l.flag)}</div>`:""}`,`<span class="mono">${esc(l.key)}</span>`,`<span class="mono">${l.hash?(showHash?esc(l.hash):"••••-••••-••••-••••"):"—"}</span>`,esc(l.inv),esc(l.ship),`${esc(l.live)}${l.mid?`<div class="model">MachineID ${esc(l.mid)} · activated ${esc(l.act)}</div><div class="model">${esc(l.reg)}</div>`:""}`,esc(l.upd)])))}
+ <section><h2>What this means</h2><p class="note">MTRL4444 is settled: invoiced to Pac-Man and running there. MTRL4299 was invoiced to Alien Invasion but was re-activated on the ChaosKarts PC on 10 Aug. That leaves Alien Invasion on MTRL4484 (invoiced to ChaosKarts), MTRL4322 (the test system’s licence), or unlicensed. A LicenseData export from that PC will settle it.</p>
+ <p class="note">Set a reminder about a month before each “updates until” date to decide on renewal. Both confirmed licences cover a move to the stable 3.5 release.</p>
+ <p class="note">A hardware key has to move with its workstation. If a PC is swapped, move the key or ask OptiTrack for a replacement.</p></section>
+ <p class="src">Sources: ${src1("LIC")} · ${src1("NP")} · ${src1("INV")}</p>`;
+}
+function wireLicences(){$("#hh").onclick=()=>{showHash=!showHash;route()}}
+
+/* ---------------- Active ---------------- */
+function pageActive(){
+ return `<p class="kicker">Registers</p><h1 class="page">Active hardware</h1>
+ <p class="lede">BaseStations, tags, calibration kit and sync. BaseStation locations are from the 21 Sep audit and take priority over the paperwork.</p>
+ ${tbl(["Serial","Item","Arena","Shipped on","Note"],ACT.map(x=>tr([`<span class="mono">${esc(x.s)}</span>`,esc(x.item),chipA(x.arena),esc(x.src),esc(x.note)])))}
+ <section><h2>Calibration kit</h2><p class="note">There are two active wand-and-square sets: A03087/A03095 (bought for Alien Invasion) and A03100/A03093 (from the test system). ChaosKarts and Pac-Man weren’t sold their own. The 7 Sep report recommends one set per arena, stored on wall hooks with a charging routine.</p></section>
+ <section><h2>Networking and PCs</h2>${tbl(["Arena","PoE+ switch (GS728TPP3)","Workstation"],[tr(["Alien Invasion","1","PULSARON rackmount"]),tr(["ChaosKarts","2","PULSARON rackmount"]),tr(["Pac-Man","1","PULSARON rackmount"]),tr(["Not assigned","—","Schneider Digital 4U conversion, SD2545FD47061201622 (invoice 79216, offer 92494)"])])}</section>
+ <section><h2>Quick spec</h2>${tbl(["","BaseStation","Tag","Square","Wand"],SPEC.map(r=>tr(r.map(esc))))}</section>`;
+}
+
+/* ---------------- Trackables ---------------- */
+function pageTrackables(anchor){
+ const sec=k=>{const T=TR[k],a=AR(k),ids={};T.rows.forEach(r=>r[1].split(",").map(s=>s.trim()).filter(s=>s&&s!=="—").forEach(i=>(ids[i]=ids[i]||[]).push(r[0])));
+  const dup=Object.entries(ids).filter(([i,v])=>v.length>1);
+  return `<section id="tr-${k}"><h2>${esc(a.name)}</h2><p class="muted">${T.rows.filter(r=>r[2]).length} rigid bodies · ${T.rows.reduce((s,r)=>s+r[2],0)} markers · from <span class="mono">${esc(T.src)}</span>${dup.length?` · <b style="color:var(--red)">${dup.length} shared IDs within the arena</b>`:" · no shared IDs within the arena"}</p>
+  ${tbl(["Asset","Active IDs","Markers",...(k==="karts"?["Mean dia (mm)"]:[]),"Last pivot/refine","Flag"],T.rows.map(r=>{const fl=r[4]||(r[2]===1?"One marker: position only, lost on any occlusion.":r[2]===2?"Two markers: rotation about their axis is unconstrained.":"");
+   return tr([`<b>${esc(r[0])}</b>`,`<span class="mono">${esc(r[1])}</span>`,r[2]?`<span class="mk mk${Math.min(r[2],4)}">${r[2]}</span>`:"—",...(k==="karts"?[esc(r[3])]:[]),r[2]?'<span class="muted">Not yet recorded</span>':"—",fl?`<span class="flag">${esc(fl)}</span>`:""])}))}</section>`};
+ return `<p class="kicker">Registers</p><h1 class="page">Trackables and marker IDs</h1>
+ <p class="lede">Every rigid body and the active marker IDs that make it up, from each arena’s Motive profile (21 Sep 2026). Check here before blaming an ID swap or occlusion on something mysterious.</p>
+ <div class="howjump">${["alien","karts","pacman"].map(k=>`<a href="#trackables:${k}">${esc(AR(k).name)}</a>`).join("")}</div>
+ <p class="flag"><b>DRONE 7 and VEST 17 share IDs 2088, 2082, 2208 and 2178.</b> Motive can’t tell a flying drone from a player. Re-ID one before they’re used in the same session.</p>
+ <p class="note">The same IDs appear in more than one arena (for example 513 is on KART_02 and VEST12). That’s expected: each arena has its own Motive and BaseStation. It would only matter if the volumes were ever merged.</p>
+ ${sec("alien")}${sec("karts")}${sec("pacman")}`;
+}
+
+/* ---------------- Serial finder ---------------- */
+const INDEX=[];
+(function(){
+ CAM.forEach(c=>INDEX.push({s:c.s,k:"Camera",d:`${c.type} · ${ANAME(c.arena)}`,x:`${c.ship}${c.note?" · "+c.note:""}`,h:c.arena==="missing"?"cameras":c.arena}));
+ LIC.forEach(l=>{INDEX.push({s:l.lic,k:"Licence",d:`Motive:Tracker 3 · ${l.live}`,x:`Key ${l.key} · ${l.inv}`,h:"licences"});INDEX.push({s:l.key,k:"Hardware key",d:`For ${l.lic} · ${l.live}`,x:l.ship,h:"licences"})});
+ ACT.forEach(a=>{const m=a.s.match(/^A(\d+)–A(\d+)$/);if(m){for(let i=+m[1];i<=+m[2];i++)INDEX.push({s:"A0"+i,k:"ActiveIO Tag-8",d:ANAME(a.arena),x:a.src,h:"active"})}else INDEX.push({s:a.s,k:a.item,d:ANAME(a.arena),x:a.src+(a.note?" · "+a.note:""),h:a.arena==="missing"?"active":"active"})});
+ INDEX.push({s:"SD2545FD47061201622",k:"Workstation",d:"Schneider Digital 4U conversion · arena not assigned",x:"Invoice 79216 · offer 92494",h:"active"});
+ Object.entries(TR).forEach(([k,T])=>T.rows.forEach(r=>{if(r[2])INDEX.push({s:r[0],k:"Rigid body",d:`${ANAME(k)} · IDs ${r[1]}`,x:r[4]||"",h:"trackables:"+k,ids:r[1]})}));
+})();
+let sq="";
+function pageSerials(){return `<p class="kicker">Registers</p><h1 class="page">Serial finder</h1>
+ <p class="lede">Search cameras, licences, keys, BaseStations, tags and rigid bodies. You can also type an active marker ID (such as 2088) to see which assets use it.</p>
+ <input class="search" id="sq" type="search" placeholder="Serial, licence, key or marker ID" value="${esc(sq)}" autocomplete="off" aria-label="Search serials"><div id="sres" aria-live="polite" style="margin-top:18px"></div>`}
+function wireSerials(){const i=$("#sq"),r=$("#sres");const go=()=>{sq=i.value.trim();const q=sq.toLowerCase();if(q.length<2){r.innerHTML=`<p class="muted">${INDEX.length} entries indexed. Type at least two characters.</p>`;return}
+ const isId=/^\d{1,4}$/.test(q);
+ const res=INDEX.filter(e=>e.s.toLowerCase().includes(q)||e.k.toLowerCase().includes(q)&&q.length>3||(isId&&e.ids&&e.ids.split(",").map(s=>s.trim()).includes(q)));
+ r.innerHTML=res.length?tbl(["Serial","Type","Where","Detail"],res.slice(0,200).map(e=>tr([`<a href="#${e.h}" class="mono">${esc(e.s)}</a>`,esc(e.k),esc(e.d),esc(e.x)]))):`<p class="empty">Nothing matches “${esc(sq)}”.</p>`;labelTables(r)};
+ i.oninput=go;go();i.focus()}
+
+/* ---------------- How-tos ---------------- */
+function pageHowto(){
+ return `<p class="kicker">Operations</p><h1 class="page">How-tos</h1><p class="lede">Procedures recorded on site so far. Each one says which arenas it applies to and where it came from.</p>
+ <div class="howjump">${HOWTO.map(h=>`<a href="#howto:${h.id}">${esc(h.t)}</a>`).join("")}</div>
+ ${HOWTO.map(h=>`<section class="how" id="how-${h.id}"><h2>${esc(h.t)}</h2><div class="howap">${h.ap.map(chipA).join(" ")}</div><p>${esc(h.lede)}</p>
+ <ol class="steps">${h.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
+ ${h.table?tbl(h.table.cols,h.table.rows.map(r=>tr(r.map(esc)))):""}
+ ${h.notes.map(n=>`<p class="${n[0]==="flag"?"flag":"note"}">${esc(n[1])}</p>`).join("")}
+ <p class="howsrc">Sources: ${h.src.map(src1).join(" · ")}</p></section>`).join("")}`;
+}
+
+/* ---------------- Known issues ---------------- */
+const DUMPS=[["Motive_exe_260919_103834.dmp","19 Sep 2026, 09:38:34","74.7 MB"],["Motive_exe_260919_103835.dmp","19 Sep 2026, 09:38:35","74.7 MB"],["Motive_exe_260919_103837.dmp","19 Sep 2026, 09:38:37","74.7 MB"],["Motive_exe_260919_103837-1.dmp","19 Sep 2026, 09:38:38","74.7 MB"],["Motive_exe_260920_144907.dmp","20 Sep 2026, 13:49:07","90.3 MB"],["Motive_exe_260920_144907-1.dmp","20 Sep 2026, 13:49:07","90.3 MB"]];
+const BUCKETS=[["1ae6","Motive.exe","5×","3×","Long-standing, persisted"],["b8e2","Motive.exe","5×","3×","Long-standing, persisted"],["24df","StackHash (ntdll, heap corruption)","1×","4×","Worse after the update"],["0588 / 53df / 5dcb / 148b","Motive.exe","4–5× each","—","Fixed by the update"],["358d / 4b39 / 5190","Motive.exe / StackHash","—","1× each","New, low frequency"]];
+function pageIssues(){
+ return `<p class="kicker">Operations</p><h1 class="page">Known issues</h1><p class="lede">Motive 3.5.x bugs, hardware faults and their workarounds across the site.</p>
+ ${tbl(["Issue","Version","Status","Workaround or fix"],ISSUES.map(i=>tr([`<b>${esc(i.t)}</b><div class="inote">${esc(i.d)}</div>`,esc(i.v),stChip(i.st),esc(i.fix)])))}
+ <section><h2>Crash buckets, 3 Aug – 5 Sep</h2><p>41 Windows Error Reporting files from the Pac-Man PC, grouped by crash signature. About 0.5 crashes a day on 3.5.0.1 (31 days) against about 4.5 a day on 3.5.0.2 (2 days).</p>${tbl(["Bucket","Fault module","On 3.5.0.1","On 3.5.0.2","Note"],BUCKETS.map(r=>tr(r.map(esc))))}<p class="src">Source: ${src1("R07")}</p></section>
+ <section><h2>ProcDump captures, Pac-Man</h2>${tbl(["File","Crash time","Size"],DUMPS.map(r=>tr([`<span class="mono">${esc(r[0])}</span>`,esc(r[1]),esc(r[2])])))}<p class="note">Two crash events, not six. The four 19 Sep files landed within four seconds (a crash loop), and the “-1” files are ProcDump’s second trigger on the same crash. Finding the fault module needs WinDbg, which Liam’s team does at OptiTrack.</p></section>
+ <section><h2>ChaosKarts rigid-body drop-out</h2><p>Markers stay visible but the rigid body “gets left behind” as the kart moves. Jacques Gay’s diagnostic questions, still unanswered on the wiki: Tag or Puck? Boot setting? Continue-tracking setting? When were the LEDs bought? ChaosKarts tracked reliably from 7 Sep (boot/continue set to 1), so this may be resolved. Confirm before closing.</p></section>
+ <section><h2>Environment</h2><p class="note">Sunlight comes through cracks in the roof: mask the affected camera views. The warehouse is dusty, and dust was already on lenses in July.</p></section>`;
+}
+
+/* ---------------- Visits ---------------- */
+function pageVisits(){return `<p class="kicker">Operations</p><h1 class="page">Visit log</h1><p class="lede">Visits, support days and key events, 2026. Diary entries come from Allan’s time-spent note in Pipedrive.</p>
+ <ol class="time">${VISITS.map(v=>`<li><b>${esc(v[0])}</b> <span class="item">${esc(v[1])}</span>${v[2]?`<div class="inote">${esc(v[2])}</div>`:""}<div class="src">${srcShort(v[3])}</div></li>`).join("")}</ol>
+ <section><h2>Wiki history</h2><ol class="time">${WIKILOG.map(w=>`<li><b>${esc(w[0])}</b> ${esc(w[1])}</li>`).join("")}</ol></section>`}
+
+/* ---------------- Upgrade Day ---------------- */
+function pageUpgrade(){
+ const all=UPG.flatMap(s=>s.t), done=all.filter(t=>t[1]).length;
+ return `<p class="kicker">Operations · 21 Sep 2026</p><h1 class="page">Upgrade Day checklist</h1>
+ <p class="lede">The 39-task Monday Upgrade Day plan with each task’s outcome from the report. Alien Invasion was deferred by design to a dedicated day.</p>
+ <div class="big"><div><b>${done}</b>done</div><div><b>${all.length-done}</b>not done</div><div><b>0 / 10</b>Alien Invasion</div></div>
+ ${UPG.map(s=>`<section><h2>${esc(s.n)}</h2>${s.crew?`<p class="muted">Crew: ${esc(s.crew)}</p>`:""}<ul class="chk">${s.t.map(t=>`<li class="${t[1]?"y":"n"}"><span aria-hidden="true">${t[1]?"☑":"☐"}</span> ${esc(t[0])}<span class="sr">${t[1]?" (done)":" (not done)"}</span></li>`).join("")}</ul></section>`).join("")}
+ <section><h2>Found on the day</h2><p class="flag">Every vest needs a pivot reset and Refine (2000 samples). 8 done, which 8 unknown.</p><p class="note">2 VIP visits worked round with no tracking drops; 9 karts running; minor drops at the extremes near the door to Pac-Man with no effect on the game.</p></section>
+ <p class="src">Source: ${src1("R21")}. The live, tickable copy of this checklist is on the Netlify wiki.</p>`;
+}
+
+/* ---------------- Tickets ---------------- */
+let tF="open";
+function pageTickets(){
+ const cats=[...new Set(TIX.map(t=>t.c))];
+ const list=TIX.filter(t=>tF==="all"||tF==="open"&&t.st!=="Done"||t.a===tF||t.c===tF).sort((a,b)=>a.p-b.p);
+ return `<p class="kicker">Plan</p><h1 class="page">Open items</h1><p class="lede">Everything still to do, gathered from the wiki’s task lines, the ops queue, site reports and Pipedrive. Sorted by priority.</p>
+ <div class="howf"><button class="btn ${tF==="open"?"":"ghost"}" data-tf="open">Open (${OPEN.length})</button>${["alien","karts","pacman","all"].map(k=>`<button class="btn ${tF===k?"":"ghost"}" data-tf="${k}">${esc(k==="all"?"Site-wide":AR(k).name)}</button>`).join("")}</div>
+ <div class="howf">${cats.map(c=>`<button class="btn ${tF===c?"":"ghost"}" data-tf="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+ ${tbl(["Item","Arena","Area","Priority","Status","Source"],list.map(t=>tr([`<b>${esc(t.t)}</b>${t.d?`<div class="inote">${esc(t.d)}</div>`:""}`,chipA(t.a),esc(t.c),PST[t.p],stChip(t.st),srcShort(t.src)])))}
+ <p class="src">Ticking items off happens on the Netlify ticket tracker. Update this page when the next version is built.</p>`;
+}
+function wireTickets(){document.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>{tF=b.dataset.tf;route()})}
+
+/* ---------------- Commercial ---------------- */
+function pageCommercial(){
+ return `<p class="kicker">Plan · internal</p><h1 class="page">Commercial</h1>
+ <p class="flag">Internal only. This page includes Target3D’s supplier orders next to client values.</p>
+ <p class="lede">Little Lion Entertainment (trading name) and The Ents Inc Limited (which issued the POs) share First Floor, 53 Greek Street, London W1D 3DR. The arena equipment invoices went to HSBC Equipment Finance UK Ltd, due on receipt.</p>
+ <section><h2>Deals</h2>${tbl(["Deal","Title","When","Status","Value","Note"],DEALS.map(d=>tr([`<span class="mono">${esc(d[0])}</span>`,esc(d[1]),esc(d[2]),esc(d[3]),esc(d[4]),esc(d[5])])))}<p class="src">Source: ${src1("PD")}</p></section>
+ <section><h2>Client invoices</h2>${tbl(["Invoice","Date","Arena","Subtotal","VAT","Shipping","Total","Client PO"],INVOICES.map(r=>tr(r.map((c,i)=>i===6?`<b>${esc(c)}</b>`:esc(c)))))}<p><b>£221,263.20</b> invoiced across the three arenas.</p><p class="note">The Little Lion copies of invoices 5062 and 5063 had serial numbers swapped (found 28 Aug).</p></section>
+ <section><h2>Supplier orders (Target3D → NaturalPoint)</h2>${tbl(["PO","Sales order","Packing slips","Contents","Note"],SUPPLIER.map(r=>tr([`<span class="mono">${esc(r[0])}</span>`,esc(r[1]),esc(r[2]),esc(r[3]),esc(r[4])])))}<p class="src">Source: ${src1("NP")}</p></section>
+ <section><h2>Engineering time</h2><p>Day rate from 21 Sep 2026: <b>£850 ex VAT</b> per engineer per day. Quote 10614 (24 Sep) billed only 21 Sep (3 engineers, £2,550) and 28–29 Sep (2 engineers, £3,400): £5,950 ex VAT, with £11,050 of earlier visits waived. Pipedrive marks it <b>lost on 29 Sep, no budget</b>.</p>
+ <p class="note">Allan’s note: margin on this account sits in professional services that were stripped out of the hardware sale. Suggested a £10k retainer for work to date plus a fund for future visits, or a formal monthly SLA.</p></section>
+ <section><h2>SLA agenda (Allan and Jon)</h2><ul><li>Move from ad hoc visits and spares to a monthly SLA.</li><li>Lens deep clean.</li><li>A spares stock so a failed camera, tag or BaseStation can be hot-swapped.</li><li>Three dedicated sessions: Alien Invasion upgrade day, vest pivot/refine half-day, ChaosKarts deep clean.</li></ul></section>
+ <section><h2>Other quotes</h2>${tbl(["Ref","Date","For","Status","Amount"],[tr(["PD-10492 v1","19 Aug 2026","20 bare Active IO Tag PCBs (ACTBCN0001)","Superseded","£6,750 inc VAT"]),tr(["PD-10492 v3","13 Oct 2026","10 bare Active IO Tag PCBs + shipping","PO pending","£2,825 ex VAT"]),tr(["Offer 92494","19 Jun 2026","Schneider Digital: 4U rackmount conversion, fan, case buyback (SD2545FD47061201622)","Non-binding","€495"])])}</section>
+ <section><h2>Where Little Lion is heading</h2><p class="note">At the January demo Little Lion said they plan 50 new locations in 5 years, including London, Dubai and Abu Dhabi, moving from BlackTrax. They asked about dual-game sites sharing BaseStations and eSync, and the active LED limit (BlackTrax: 255 LEDs). The 7 Sep report flags a possible further install at another site once OptiTrack is proven here.</p></section>`;
+}
+
+/* ---------------- Contacts ---------------- */
+function pageContacts(){return `<p class="kicker">Plan</p><h1 class="page">Contacts</h1><p class="lede">Who to ask. Use the support ticket tracker rather than direct messages, so there’s a record.</p>
+ ${tbl(["Name","Organisation","Role and notes"],CONTACTS.map(c=>tr([`<b>${esc(c[0])}</b>`,esc(c[1]),esc(c[2])])))}
+ <p class="note">Site: The Workshop / Arcade Arena, 26 Lambeth High Street, London SE1 7AG. Office: First Floor, 53 Greek Street, London W1D 3DR.</p>`}
+
+/* ---------------- Gaps ---------------- */
+function pageGaps(){return `<p class="kicker">Tools</p><h1 class="page">Gaps to close</h1><p class="lede">Where the records are missing or disagree, and what would settle each one.</p>
+ ${GAPS.map(g=>`<div class="gap"><h3>${esc(g[0])}</h3><p>${esc(g[1])}</p><p class="ask">To close: ${esc(g[2])}</p></div>`).join("")}`}
+
+/* ---------------- Help ---------------- */
+function pageHelp(){return `<div class="prose"><p class="kicker">Tools</p><h1 class="page">Help</h1>
+ <p>This is Target3D’s internal repository for the Little Lion Entertainment installs, built in the same format as the Clays repository. It brings the Little Lion OptiTrack wiki together with the site reports, quotes, NaturalPoint packing slips and Pipedrive.</p>
+ <h3>Finding things</h3><p>Use the left menu, or the <b>Serial finder</b> for any camera, licence, key, BaseStation, tag or rigid body. Type an active marker ID (such as 2088) to see every asset using it. Arena pages pull together settings, kit, serials, licence, open items and documents for that arena.</p>
+ <h3>OptiTrack docs panel</h3><p>The panel on the right (or the OptiTrack docs button) suggests docs.optitrack.com pages for the page you’re on. Press <b>/</b> to search, star pages to pin them, and choose a Motive version. It remembers your pins in this browser only.</p>
+ <h3>Labels</h3><p>A red square marks a flag that needs action. Blue-edged notes are context. Priorities on Open items are High, Medium and Low.</p>
+ <h3>What isn’t here</h3><p>Passwords and remote-access details. Licence hashes are hidden until you choose Show. The live ticket tracker and tickable checklist remain on the Netlify wiki (littleliont3d.netlify.app).</p>
+ <h3>Keeping it current</h3><p>This page is a snapshot. Send updates (moved cameras, licence exports, pivot/refine dates, closed items) and the next version will include them.</p>
+ <h3>Version history</h3><ul><li><b>${VERSION}</b> — ${BUILT}. First release. Arenas, camera, licence, active-hardware and trackable registers, serial finder, how-tos, known issues, visit log, Upgrade Day checklist, open items, commercial, contacts, gaps and OptiTrack docs panel. New since the wiki: packing-slip shipping for each camera and BaseStation, the test-system licence MTRL4322 and second active wand and square, and the source of Pac-Man’s six Slim X 13s.</li></ul></div>`}
+
+
+/* ---------------- OptiTrack docs panel ---------------- */
+const OTB="https://docs.optitrack.com";
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let pins=store.get("ll-pins",[]), dver=store.get("ll-ver","");
+const wide=()=>matchMedia("(min-width:1280px)").matches;
+function ctx(id){
+ const a=AR(id);
+ if(a)return{label:a.name+" — Slim X, ActiveIO",tags:["a","c","n"]};
+ return({overview:{label:"Overview",tags:["all","a","c"]},cameras:{label:"Cameras",tags:["n","c","all"]},licences:{label:"Licences and keys",tags:["l"]},active:{label:"Active hardware",tags:["a"]},trackables:{label:"Trackables and marker IDs",tags:["a","c"]},serials:{label:"Serial finder",tags:["a","l"]},
+  howto:{label:"How-tos",tags:["c","a"]},issues:{label:"Known issues",tags:["all","a","l"]},visits:{label:"Visit log",tags:["all"]},upgrade:{label:"Upgrade Day",tags:["c","a","l"]},tickets:{label:"Open items",tags:["a","c","all"]},commercial:{label:"Commercial",tags:["l","p"]},contacts:{label:"Contacts",tags:["all"]},gaps:{label:"Gaps",tags:["l","all"]},help:{label:"Help",tags:["all"]}})[id]||{label:"",tags:["all"]};
+}
+const durl=p=>OTB+dver+p;
+const docItem=(d,q)=>{const hl=s=>q?esc(s).replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>"):esc(s);const on=pins.includes(d.p);
+ return `<li><a href="${durl(d.p)}" target="_blank" rel="noopener"><i>${esc(d.s)}</i><b>${hl(d.t)}</b><span>${hl(d.d)}</span></a><button class="pin" data-p="${esc(d.p)}" aria-pressed="${on}" aria-label="${on?"Unpin":"Pin"} ${esc(d.t)}" title="${on?"Unpin":"Pin"}">${on?"★":"☆"}</button></li>`};
+let curId="overview";
+function renderDocs(){
+ const q=$("#dq").value.trim(), c=ctx(curId), b=$("#dbody");
+ $("#dctx").textContent=c.label?("For: "+c.label):"";
+ if(q){
+  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  const res=D.DOCS.map(d=>{const T=d.t.toLowerCase(),S=(d.d+" "+d.s).toLowerCase();let sc=0;for(const w of words){if(T.includes(w))sc+=3;else if(S.includes(w))sc+=1;else return null}return{d,sc}}).filter(Boolean).sort((a,b)=>b.sc-a.sc);
+  b.innerHTML=res.length?`<h3>${res.length} result${res.length>1?"s":""}</h3><ul class="dl">${res.map(r=>docItem(r.d,words.length===1?words[0]:"")).join("")}</ul>`
+   :`<p class="muted" style="margin-top:14px">Nothing in the bundled index. Try the Ask box below, or <a href="${OTB}${dver}/readme" target="_blank" rel="noopener">search on docs.optitrack.com</a>.</p>`;
+ } else {
+  const pools=c.tags.map(tg=>D.DOCS.filter(d=>d.g.includes(tg))), rec=[];
+  for(let i=0;rec.length<8&&i<20;i++)pools.forEach(pl=>{const d=pl.find(x=>!rec.includes(x));if(d&&rec.length<8)rec.push(d)});
+  const tips=D.TIPS.filter(tp=>tp.g.some(g=>c.tags.includes(g))).slice(0,3);
+  const pinned=D.DOCS.filter(d=>pins.includes(d.p));
+  const secs=[...new Set(D.DOCS.map(d=>d.s))];
+  b.innerHTML=(pinned.length?`<h3>Pinned</h3><ul class="dl">${pinned.map(d=>docItem(d)).join("")}</ul>`:"")
+   +(tips.length?`<h3>Key facts</h3>${tips.map(tp=>`<div class="tip"><b>${esc(tp.t)}</b>${esc(tp.d)} <a href="${durl(tp.p)}" target="_blank" rel="noopener">Source</a></div>`).join("")}`:"")
+   +`<h3>For this page</h3><ul class="dl">${rec.map(d=>docItem(d)).join("")}</ul>`
+   +`<h3>Browse</h3>${secs.map(s=>{const L=D.DOCS.filter(d=>d.s===s);return `<details class="dsec"><summary>${esc(s)} <small>${L.length}</small></summary><ul class="dl">${L.map(d=>docItem(d)).join("")}</ul></details>`}).join("")}`;
+ }
+ b.querySelectorAll(".pin").forEach(x=>x.onclick=()=>{const p=x.dataset.p;pins=pins.includes(p)?pins.filter(y=>y!==p):[...pins,p];store.set("ll-pins",pins);renderDocs()});
+}
+let lastTrigger=null;
+function setDocs(open,focus){
+ document.body.classList.toggle("docs-open",open);
+ ["#dfab","#dtop"].forEach(s=>$(s).setAttribute("aria-expanded",open));
+ if(wide())store.set("ll-open",open);
+ syncDrawer();
+ if(open&&focus)setTimeout(()=>$("#dq").focus(),wide()?0:260);
+ if(!open&&lastTrigger&&!wide())lastTrigger.focus();
+}
+function setNav(open){document.body.classList.toggle("nav-open",open);$("#menu").setAttribute("aria-expanded",open);syncDrawer();if(open)setTimeout(()=>{const a=$("#sidenav a[aria-current]");a&&a.focus()},260)}
+function syncDrawer(){const d=(!wide()&&document.body.classList.contains("docs-open"))||document.body.classList.contains("nav-open");document.body.classList.toggle("drawer",d);document.body.style.overflow=d?"hidden":""}
+$("#dfab").onclick=e=>{lastTrigger=e.currentTarget;setDocs(true,true)};
+$("#dtop").onclick=e=>{lastTrigger=e.currentTarget;setNav(false);setDocs(!document.body.classList.contains("docs-open"),true)};
+$("#dclose").onclick=()=>setDocs(false);
+$("#menu").onclick=()=>{setDocs(false);setNav(!document.body.classList.contains("nav-open"))};
+$("#scrim").onclick=()=>{setNav(false);if(!wide())setDocs(false)};
+$("#sidenav").addEventListener("click",e=>{if(e.target.closest("a"))setNav(false)});
+$("#dq").addEventListener("input",renderDocs);
+$("#dver").value=dver;$("#dver").onchange=e=>{dver=e.target.value;store.set("ll-ver",dver);renderDocs()};
+$("#askf").onsubmit=e=>{e.preventDefault();const q=$("#askq").value.trim();if(!q)return;window.open(`${OTB}/readme.md?ask=${encodeURIComponent(q)}&goal=${encodeURIComponent("Support and maintain OptiTrack Slim X and ActiveIO systems at a location-based entertainment venue")}`,"_blank","noopener")};
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){if(document.body.classList.contains("nav-open"))setNav(false);else if(!wide()&&document.body.classList.contains("docs-open"))setDocs(false)}
+ if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();lastTrigger=document.activeElement;setDocs(true,true)}
+});
+matchMedia("(min-width:1280px)").addEventListener("change",()=>{setNav(false);document.body.classList.toggle("docs-open",wide()?store.get("ll-open",true):false);syncDrawer()});
+matchMedia("(min-width:861px)").addEventListener("change",()=>setNav(false));
+if(wide()&&store.get("ll-open",true))document.body.classList.add("docs-open");
+
+function labelTables(root){root.querySelectorAll(".tbl table").forEach(tb=>{const h=[...tb.querySelectorAll("thead th")].map(th=>th.textContent.trim());
+ tb.querySelectorAll("tbody tr").forEach(tr=>{const tds=[...tr.children];let col=0;tds.forEach(td=>{if(td.colSpan>1||!h[col]){td.classList.add("nolab")}else td.dataset.label=h[col];col+=td.colSpan||1})})})}
+
+/* ---------------- Router ---------------- */
+function route(){
+ let [id,anchor]=(location.hash||"#overview").slice(1).split(":"); if(!PAGES.some(p=>p.id===id)) id="overview";
+ renderNav(id); const m=$("#main"); const a=AR(id);
+ m.innerHTML= id==="overview"?pageOverview(): a?pageArena(a): id==="cameras"?pageCameras(): id==="licences"?pageLicences(): id==="active"?pageActive(): id==="trackables"?pageTrackables(anchor): id==="serials"?pageSerials(): id==="howto"?pageHowto(): id==="issues"?pageIssues(): id==="visits"?pageVisits(): id==="upgrade"?pageUpgrade(): id==="tickets"?pageTickets(): id==="commercial"?pageCommercial(): id==="contacts"?pageContacts(): id==="gaps"?pageGaps(): pageHelp();
+ if(id==="cameras")wireCameras(); if(id==="licences")wireLicences(); if(id==="serials")wireSerials(); if(id==="tickets")wireTickets();
+ labelTables(m); curId=id; renderDocs();
+ const tgt=anchor&&(document.getElementById((id==="howto"?"how-":"tr-")+anchor));
+ if(tgt)tgt.scrollIntoView(); else if(id!==curScroll)window.scrollTo(0,0);
+ curScroll=id;
+}
+let curScroll="";
+window.addEventListener("hashchange",route);
+$("#ver").textContent=VERSION+" · "+BUILT;
+route();
+
+</script>
+</body>
+</html>

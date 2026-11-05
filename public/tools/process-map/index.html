@@ -1,0 +1,789 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style><!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/process-map.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+</head><body><title>Deal-to-Project Process Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one flowchart band (deal spine → three project tracks → close), then a detail panel that lays the selected project across the same five phases. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E8ECF2; --line:#C9D1DD; --ink:#132033; --muted:#566377;
+  --accent:#1D4FD7; --accent-soft:#E3EAFD;
+  --prove:#A2620A; --prove-soft:#FBF0DC;
+  --deliver:#0B7A6E; --deliver-soft:#DDF3EF;
+  --support:#6A45C9; --support-soft:#ECE6FB;
+  --gate:#C23A12; --gate-soft:#FCE6DE;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1520; --surface:#162131; --sunk:#1D2A3D; --line:#2E3E55; --ink:#E6ECF5; --muted:#9AA8BC;
+  --accent:#7FA2FF; --accent-soft:#1E2E57;
+  --prove:#F0B04E; --prove-soft:#3A2A10; --deliver:#4CCDBB; --deliver-soft:#0F332F;
+  --support:#B49BFF; --support-soft:#2A2150; --gate:#FF8A63; --gate-soft:#3D1D12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1520; --surface:#162131; --sunk:#1D2A3D; --line:#2E3E55; --ink:#E6ECF5; --muted:#9AA8BC;
+  --accent:#7FA2FF; --accent-soft:#1E2E57;
+  --prove:#F0B04E; --prove-soft:#3A2A10; --deliver:#4CCDBB; --deliver-soft:#0F332F;
+  --support:#B49BFF; --support-soft:#2A2150; --gate:#FF8A63; --gate-soft:#3D1D12; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;font-stretch:88%}
+h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-block:28px 18px;border-bottom:1px solid var(--line)}
+header.top .lede{max-width:62ch;color:var(--muted);margin-top:8px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;cursor:pointer;font-size:13.5px;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--accent)}
+.ver{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+section{padding-block:28px 4px}
+.sec-head{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin-bottom:14px}
+.sec-head p{color:var(--muted);max-width:70ch}
+
+/* flowchart */
+.flow-scroll{overflow-x:auto}
+.flow{position:relative;display:grid;grid-template-columns:120px 150px 130px minmax(420px,1fr) 150px;gap:0 44px;align-items:center;padding:18px 6px 70px;min-width:980px}
+.flow svg.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.wires path{fill:none;stroke:var(--muted);stroke-width:1.5}
+.wires path.loop{stroke-dasharray:5 5}
+.wires text{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.node{position:relative;z-index:1;background:var(--surface);border:1.5px solid var(--ink);border-radius:8px;padding:12px;text-align:left}
+.node .k{font-family:var(--f-mono);font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
+.node b{font-family:var(--f-display);font-size:17px;font-stretch:88%;display:block;line-height:1.15}
+.node small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.35}
+.node.deal{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.decision{position:relative;z-index:1;width:130px;height:130px;display:grid;place-items:center;text-align:center}
+.decision::before{content:"";position:absolute;inset:16px;background:var(--surface);border:1.5px solid var(--ink);transform:rotate(45deg);border-radius:6px}
+.decision span{position:relative;font-family:var(--f-display);font-weight:700;font-size:14px;font-stretch:88%;line-height:1.15;padding:0 8px}
+.tracks{display:grid;gap:24px;position:relative;z-index:1}
+.subhead{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--c);margin:0 0 6px}
+.subhead.price{margin-top:10px;padding-top:8px;border-top:1px dashed var(--c)}
+.lane{border-radius:10px;padding:12px 12px 12px;border:1.5px solid var(--c);background:var(--cs)}
+.lane[data-t="prove"]{--c:var(--prove);--cs:var(--prove-soft)}
+.lane[data-t="deliver"]{--c:var(--deliver);--cs:var(--deliver-soft)}
+.lane[data-t="support"]{--c:var(--support);--cs:var(--support-soft)}
+.lane-head{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:9px}
+.lane-head h3{color:var(--c);font-size:15px;letter-spacing:.02em;text-transform:uppercase}
+.lane-head span{font-size:12.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--c);background:var(--surface);border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-size:13.5px;text-align:left}
+.chip .code{font-family:var(--f-mono);font-size:11px;color:var(--c);font-weight:500}
+.chip:hover{box-shadow:0 0 0 3px var(--cs),0 0 0 4px var(--c)}
+.chip[aria-pressed="true"]{background:var(--c);color:var(--surface)}
+.chip[aria-pressed="true"] .code{color:var(--surface)}
+.chip .unpaid{font-family:var(--f-mono);font-size:10px;border:1px dashed currentColor;border-radius:4px;padding:0 4px;opacity:.85}
+.gate-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;color:var(--gate);background:var(--gate-soft);border:1px solid var(--gate);border-radius:4px;padding:2px 7px;margin:2px 0 0}
+.gate-tag::before{content:"";width:7px;height:7px;border:1.5px solid currentColor;transform:rotate(45deg)}
+.lane-gap{display:flex;justify-content:center;margin:-6px 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:18px;vertical-align:middle;margin-right:6px}
+.legend .l1{border-top:1.5px solid var(--muted)}
+.legend .l2{border-top:1.5px dashed var(--muted)}
+
+/* phases */
+.phases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.phase{padding:14px;border-left:1px solid var(--line);min-width:0;position:relative}
+.phase:first-child{border-left:0}
+.phase .n{font-family:var(--f-mono);font-size:11px;color:var(--accent)}
+.phase h3{margin:2px 0 6px}
+.phase p{font-size:13.5px;color:var(--muted)}
+.phase .q{font-size:13px;margin-top:8px;color:var(--ink)}
+
+/* detail */
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.d-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;padding:20px;border-bottom:1px solid var(--line);border-top:5px solid var(--c)}
+.d-head[data-t="prove"]{--c:var(--prove);--cs:var(--prove-soft)}
+.d-head[data-t="deliver"]{--c:var(--deliver);--cs:var(--deliver-soft)}
+.d-head[data-t="support"]{--c:var(--support);--cs:var(--support-soft)}
+.d-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.d-title h2{font-size:26px}
+.d-code{font-family:var(--f-mono);font-size:13px;color:var(--c);border:1px solid var(--c);border-radius:4px;padding:1px 7px}
+.d-purpose{margin-top:8px;max-width:64ch}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;align-content:start;margin:0}
+.facts dt{color:var(--muted);font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.facts dd{margin:0;min-width:0}
+.pill{display:inline-block;font-size:12px;border-radius:999px;padding:1px 9px;border:1px solid var(--c);color:var(--c);background:var(--cs)}
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.steps .col{padding:14px;border-left:1px solid var(--line);min-width:0}
+.steps .col:first-child{border-left:0}
+.steps .col h4{margin:0 0 8px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.steps ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.steps li{font-size:13.5px;line-height:1.4;padding-left:12px;border-left:2px solid var(--line)}
+.steps li .who{display:block;font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:2px}
+.steps li.gate{border-left-color:var(--gate);background:var(--gate-soft);padding:6px 8px 6px 10px;border-radius:0 6px 6px 0}
+.steps li.gate::before{content:"GATE · ";font-family:var(--f-mono);font-size:10.5px;color:var(--gate);font-weight:500}
+.steps li.new::after{content:" NEW";font-family:var(--f-mono);font-size:10px;color:var(--accent);vertical-align:1px}
+.d-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;padding:16px 20px;border-top:1px solid var(--line);background:var(--sunk)}
+.d-foot h4{margin:0 0 4px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.d-foot p{font-size:14px}
+.linkchip{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:14px}
+
+/* nav, finder, detail bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;padding-block:6px;scrollbar-width:thin}
+nav.jump button{border:0;background:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap;color:var(--muted)}
+nav.jump button:hover{background:var(--sunk);color:var(--ink)}
+section{scroll-margin-top:56px}
+.finder{display:grid;gap:6px;margin:0 0 10px;max-width:680px}
+.finder input{font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.finder input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.results{display:grid;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;max-height:220px;overflow:auto}
+.res{display:grid;grid-template-columns:72px 62px minmax(0,1fr);gap:8px;align-items:baseline;text-align:left;border:0;background:none;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13.5px}
+.res:hover,.res:focus-visible{background:var(--sunk)}
+.res .code{font-family:var(--f-mono);font-size:11px;color:var(--accent)}
+.res-ph{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.res-t{min-width:0}
+.res-count{font-size:12.5px;color:var(--muted);padding:4px 8px}
+mark{background:var(--prove-soft);color:inherit;border-radius:2px;box-shadow:0 0 0 1px var(--prove)}
+.chip.dim{opacity:.3}
+.steps li.hit{background:var(--accent-soft);border-left-color:var(--accent)}
+.d-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.d-pos{font-size:12.5px;color:var(--muted);display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.d-pos code{font-family:var(--f-mono);color:var(--ink)}
+.btn-sm{padding:2px 8px;font-size:12px}
+
+/* example deal */
+.deal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.deal-card .dc-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.example{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gate);border:1px dashed var(--gate);border-radius:4px;padding:1px 6px}
+.dc-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+.dc-table th{text-align:left;font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:9px 16px;border-bottom:1px solid var(--line)}
+.dc-table td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.dc-table tr:last-child td{border-bottom:0}
+.track-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;width:180px}
+.track-bar i{height:8px;border-radius:2px;background:var(--sunk);border:1px solid var(--line)}
+.track-bar i.done{background:var(--muted);border-color:var(--muted)}
+.track-bar i.now{background:var(--accent);border-color:var(--accent)}
+.status{font-family:var(--f-mono);font-size:12px}
+
+/* rules + chooser */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.rules{list-style:none;margin:0;padding:0;counter-reset:r;display:grid;gap:10px}
+.rules li{counter-increment:r;display:grid;grid-template-columns:30px 1fr;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
+.rules li::before{content:counter(r);font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--accent);line-height:1}
+.rules b{display:block;margin-bottom:2px}
+.rules span{color:var(--muted);font-size:13.5px}
+.choose{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.choose .grp{padding:10px 14px;font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;background:var(--sunk);color:var(--muted);border-bottom:1px solid var(--line)}
+.choose .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);font-size:14px}
+.choose .row:last-child{border-bottom:0}
+.choose .row .chip{white-space:nowrap}
+.choose .row[data-t="prove"],.lane-like-prove{--c:var(--prove);--cs:var(--prove-soft)}
+.choose .row[data-t="deliver"]{--c:var(--deliver);--cs:var(--deliver-soft)}
+.choose .row[data-t="support"]{--c:var(--support);--cs:var(--support-soft)}
+
+.ids{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.idbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;min-width:0}
+.idbox code{display:block;font-family:var(--f-mono);font-size:13.5px;margin-top:6px;overflow-wrap:anywhere;color:var(--accent)}
+.idbox p{font-size:13px;color:var(--muted);margin-top:6px}
+.idbox a{color:var(--accent);font-weight:500}
+.idbox .linkchip{font-size:13px}
+
+.confirm{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.confirm li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.confirm li::before{content:"?";font-family:var(--f-display);font-weight:800;color:var(--gate);font-size:18px;line-height:1.1}
+
+/* help */
+#help{scroll-margin-top:12px}
+.help{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px}
+.help h3{margin:0 0 6px}
+.help ul{margin:0 0 14px;padding-left:18px;font-size:14px}
+.help li{margin-bottom:4px}
+.changelog{border-left:2px solid var(--line);padding-left:12px;font-size:13.5px}
+.changelog .v{font-family:var(--f-mono);font-weight:500;color:var(--accent)}
+footer{margin-top:28px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between;border-top:1px solid var(--line);padding-top:14px}
+
+/* responsive */
+@media (max-width:960px){
+  .flow-scroll{overflow:visible}
+  .flow{grid-template-columns:1fr;min-width:0;gap:34px;padding:6px 0 10px;justify-items:stretch}
+  .flow .node,.flow .decision{justify-self:center;width:min(100%,340px)}
+  .flow .decision{width:130px}
+  .wires .loop,.wires .looplbl{display:none}
+  .phases,.steps{grid-template-columns:1fr}
+  .phase,.steps .col{border-left:0;border-top:1px solid var(--line)}
+  .phase:first-child,.steps .col:first-child{border-top:0}
+  .d-head,.d-foot,.two,.help{grid-template-columns:1fr}
+  .ids{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .chip,.btn{transition:box-shadow .15s,border-color .15s,background .15s}
+  .detail{animation:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Target3D Operations · Process methodology</div>
+      <h1>Deal-to-Project Process Map</h1>
+      <p class="lede">Every piece of work starts from one Pipedrive deal. Projects attach to that deal, each one a type with its own template, owner and five phases. Click any box to see how that project runs.</p>
+    </div>
+    <div class="top-actions">
+      <span class="ver" id="ver-top"></span>
+      <a class="btn" href="#help">Help</a>
+    </div>
+  </header>
+  <nav class="jump" aria-label="Sections">
+    <button type="button" data-go="#flow-h">Map</button>
+    <button type="button" data-go="#detail-h">Project detail</button>
+    <button type="button" data-go="#ph-h">Phases</button>
+    <button type="button" data-go="#ex-h">Example deal</button>
+    <button type="button" data-go="#rules-h">Rules &amp; chooser</button>
+    <button type="button" data-go="#id-h">Naming &amp; codes</button>
+    <button type="button" data-go="#tools-h">Tools</button>
+    <button type="button" data-go="#q-h">To confirm</button>
+    <button type="button" data-go="#help-h">Help</button>
+  </nav>
+
+  <!-- FLOWCHART -->
+  <section aria-labelledby="flow-h">
+    <div class="sec-head">
+      <h2 id="flow-h">The map</h2>
+      <p>One deal, many projects. Prove projects build the case and end in a Quote or Tender while the deal is open. Deliver projects start when it is won. Support projects come later, from existing customers.</p>
+    </div>
+    <div class="finder">
+      <label for="q" class="eyebrow">Find a step, tool or role</label>
+      <input id="q" type="search" placeholder="Try calibrate, SOW, invoice, Accounts…" autocomplete="off">
+      <div id="results" class="results" hidden></div>
+    </div>
+    <div class="flow-scroll">
+      <div class="flow" id="flow">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="node" id="n-lead"><span class="k">START</span><b>Lead</b><small>Webform, Jotform, email, event, referral, licence renewal due</small></div>
+        <div class="node deal" id="n-deal"><span class="k">PIPEDRIVE</span><b>Deal</b><small>Client org, contacts, value, pipe stage. Everything hangs off the Deal ID.</small></div>
+        <div class="decision" id="n-dec"><span>What does this deal need next?</span></div>
+        <div class="tracks" id="tracks"></div>
+        <div class="node" id="n-close"><span class="k">EVERY PROJECT</span><b>Close &amp; report</b><small>Report on the deal, next action set, effort logged</small></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="l1"></i>Work flow</span>
+      <span><i class="l2"></i>Outcome feeds back to the deal</span>
+      <span><span class="gate-tag">Gate</span> Decision point that needs sign-off</span>
+      <span><span class="mono" style="font-size:10px;border:1px dashed currentColor;border-radius:4px;padding:0 4px">INVEST</span> Usually unpaid, so effort is tracked at £450/day as cost of sale</span>
+    </div>
+  </section>
+
+  <!-- DETAIL -->
+  <section aria-labelledby="detail-h" id="detail-sec">
+    <div class="sec-head">
+      <h2 id="detail-h">Project detail</h2>
+      <p>The selected project laid out across the five phases. Owners are roles, not names.</p>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </section>
+
+  <!-- PHASES -->
+  <section aria-labelledby="ph-h">
+    <div class="sec-head">
+      <h2 id="ph-h">The five phases every project uses</h2>
+      <p>Different project types do different work, but they all move through the same five phases. That gives everyone one way to answer "where are we?": <b class="mono">type · phase</b>, for example <span class="mono">DEMO-ON · Prepare</span>.</p>
+    </div>
+    <div class="phases" id="phases"></div>
+  </section>
+
+  <!-- EXAMPLE DEAL -->
+  <section aria-labelledby="ex-h">
+    <div class="sec-head">
+      <h2 id="ex-h">What a deal looks like with projects attached</h2>
+      <p>Read across a deal to see every project and its phase at a glance. This one is made up to show the pattern.</p>
+    </div>
+    <div class="deal-card">
+      <div class="dc-head">
+        <div><span class="example">Example only</span>
+          <h3 style="margin-top:6px">Deal 4127 · Automotive R&amp;D motion lab</h3>
+          <div class="eyebrow" style="margin-top:2px">Pipe: Systems · Stage: Proposal made · Deal open</div></div>
+        <div style="font-size:13.5px;color:var(--muted);max-width:42ch">The deal stays open while Prove projects build the case. A QUOTE prices it, and the Install project is only created once the quote is accepted and the deal is marked won.</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dc-table" id="dc-table">
+          <thead><tr><th>Project ID</th><th>Type</th><th>Phase</th><th>Progress</th><th>Basis</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULES + CHOOSER -->
+  <section aria-labelledby="rules-h">
+    <div class="two">
+      <div>
+        <div class="sec-head"><h2 id="rules-h">The rules</h2></div>
+        <ol class="rules">
+          <li><div><b>No deal, no project.</b><span>Every project links to a Pipedrive deal. Support and RMA Jotforms already create the deal automatically; everything else needs the deal first.</span></div></li>
+          <li><div><b>One project per piece of work.</b><span>A health check, a demo and a proof of concept on the same deal are three linked projects, not one long one. Each has its own template, owner and close-out.</span></div></li>
+          <li><div><b>Same five phases for everything.</b><span>Request, Plan, Prepare, Deliver, Close. Status is always reported as type · phase.</span></div></li>
+          <li><div><b>One named owner.</b><span>Each project has one person accountable for moving it to the next phase, even when several teams do the work.</span></div></li>
+          <li><div><b>Unpaid work is an approved investment.</b><span>Proof-of-concept and technical engineering work needs written success criteria and MD sign-off before it starts, and is capped at one day (£450 at the internal run rate). Anything beyond that is quoted as paid work or re-approved. Effort is logged even when nothing is billed.</span></div></li>
+          <li><div><b>Every project reports back to the deal.</b><span>The close-out report goes on the deal and sets the next action: another project, a quote or tender, won, or lost.</span></div></li>
+          <li><div><b>Price before you win.</b><span>Paid work is priced in a QUOTE or TENDER first. A deal is only marked won once one is accepted, and that is what starts the Deliver projects. In-SLA support and warranty RMAs are the exception.</span></div></li>
+        </ol>
+      </div>
+      <div>
+        <div class="sec-head"><h2>Which project do I attach?</h2></div>
+        <div class="choose" id="choose"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IDS -->
+  <section aria-labelledby="id-h">
+    <div class="sec-head">
+      <h2 id="id-h">Naming and IDs</h2>
+      <p>Uses the existing ID-ClientName-Type pattern. The Type part always comes from the code table below, so names stay consistent and any folder, chat space or invoice traces back to its deal.</p>
+    </div>
+    <div class="ids">
+      <div class="idbox"><div class="eyebrow">Project ID</div><code>{ID}-{ClientName}-{Type}</code><p>e.g. <span class="mono">4127-AutoLab-DEMO-ON</span>. A second demo on the same deal adds a number: <span class="mono">4127-AutoLab-DEMO-ON-2</span>.</p></div>
+      <div class="idbox"><div class="eyebrow">Drive folder</div><code>/PROJECTS/{ID}-{ClientName}-{Type}/</code><p>Uses the existing folder template from the Studio delivery process (00_DOCUMENTS, 01_DATA …).</p></div>
+      <div class="idbox"><div class="eyebrow">Pipedrive project</div><code>{ID}-{ClientName}-{Type}</code><p>Same name as the folder. Created from the type's template and linked to the deal, so it shows on the deal's timeline.</p></div>
+    </div>
+    <div class="deal-card" style="margin-top:14px">
+      <div class="dc-head"><div><div class="eyebrow">Type code table · proposed v1</div><h3 style="margin-top:4px">Project types</h3></div><div style="font-size:13.5px;color:var(--muted);max-width:44ch">The first agreed list. New project types get a code here before anyone uses them.</div></div>
+      <div style="overflow-x:auto"><table class="dc-table" id="codes"><thead><tr><th>Type</th><th>Project</th><th>Track</th><th>Basis</th><th>Example ID</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section aria-labelledby="tools-h">
+    <div class="sec-head"><h2 id="tools-h">Tools in the process</h2><p>Our own tools and where each one plugs into the map.</p></div>
+    <p style="margin:0 0 16px;padding:10px 14px;border-left:3px solid var(--accent,#04959B);background:var(--accent-soft,rgba(4,149,155,.1));border-radius:0 8px 8px 0;max-width:80ch">
+      <b>Checklists &amp; templates.</b> The checklist, report or template for each step (qualification, demos, site surveys, proposal to order, supply and integration projects, install planning, sign-off, health checks and support) is in the Nucleus:
+      <a href="/launch.html?t=checklists" target="_top">open Checklists &amp; templates</a>.</p>
+    <div class="ids">
+      <div class="idbox"><div class="eyebrow">System Designer</div><p style="color:var(--ink);font-size:14px">Site visit and health check forms.</p><p>Used in <button class="linkchip" data-id="site-survey">Site Survey</button>, <button class="linkchip" data-id="health-check">Health Check</button>, <button class="linkchip" data-id="quote">Quote</button> and <button class="linkchip" data-id="tender">Tender</button>.</p><p><a href="https://keeler.netlify.app/" target="_blank" rel="noopener">Open System Designer</a></p></div>
+      <div class="idbox"><div class="eyebrow">Motive licence tracker</div><p style="color:var(--ink);font-size:14px">Tracks licence renewal status. It's also how we get back in front of existing clients for upgrades, refresher training and MOTs.</p><p>Starts <button class="linkchip" data-id="health-check">Health Check</button> and <button class="linkchip" data-id="training">Training</button>; updated at <button class="linkchip" data-id="install">Install</button> close.</p><p><a href="https://motive-upgrade.netlify.app/#clients" target="_blank" rel="noopener">Open licence tracker</a></p></div>
+      <div class="idbox"><div class="eyebrow">SOW Builder</div><p style="color:var(--ink);font-size:14px">Makes sure every service project has the information it needs before work starts.</p><p>Used in <button class="linkchip" data-id="quote">Quote</button> and <button class="linkchip" data-id="tender">Tender</button>, then in Plan for <button class="linkchip" data-id="install">Install</button>, <button class="linkchip" data-id="studio-project">Studio Shoot</button> and <button class="linkchip" data-id="training">Training</button>, and at the <button class="linkchip" data-id="tech-engineering">Tech Engineering</button> go decision.</p><p><a href="https://sowb.netlify.app/" target="_blank" rel="noopener">Open SOW Builder</a></p></div>
+    </div>
+  </section>
+
+  <!-- OPEN QUESTIONS -->
+  <section aria-labelledby="q-h">
+    <div class="sec-head">
+      <h2 id="q-h">To confirm before roll-out</h2>
+      <p>Assumptions in this version that need a decision.</p>
+    </div>
+    <ul class="confirm">
+      <li><div><b>Type codes.</b> Approve the first code table (HEALTH, DEMO-ON, DEMO-OFF, SURVEY, TECH, INSTALL, SHOOT, TRAIN, SUPPORT, RMA) or rename any before templates and folders use them.</div></li>
+      <li><div><b>Does the 1-day cap apply to demos?</b> Technical Engineering is capped at one day (£450). Should demos on prem and on location have the same cap, or stay uncapped cost of sale?</div></li>
+      <li><div><b>One form, not two.</b> Site visit and health check can be logged in the System Designer or on Jotform. Pick one so the data isn't entered twice.</div></li>
+      <li><div><b>Tools to Pipedrive.</b> Should System Designer, licence tracker and SOW Builder outputs land on the deal automatically (BCC email or Drive folder), the same way the Jotforms do?</div></li>
+      <li><div><b>Price and bid sign-off.</b> Quote price sign-off and the tender bid / no-bid decision are shown as Sales with the MD. Confirm who signs, and whether small quotes need sign-off at all.</div></li>
+      <li><div><b>Tender library.</b> Where reusable tender answers, case studies, CVs and certificates live, and who keeps them current.</div></li>
+      <li><div><b>Quote and Tender templates.</b> Both need a Pipedrive project template; tenders also need a compliance matrix template.</div></li>
+      <li><div><b>New templates needed.</b> Pipedrive project templates and a request Jotform for Demo Offsite and Technical Engineering; a template for Health Check if one doesn't exist yet.</div></li>
+    </ul>
+  </section>
+
+  <!-- HELP -->
+  <section aria-labelledby="help-h" id="help">
+    <div class="sec-head"><h2 id="help-h">Help</h2><span class="ver" id="ver-help"></span></div>
+    <div class="help">
+      <div>
+        <h3>Reading the map</h3>
+        <ul>
+          <li>Start at <b>Lead</b> and <b>Deal</b>. Nothing happens without a deal in Pipedrive.</li>
+          <li>The diamond is the question asked at every review: what does this deal need next? The answer is one of the project types in the coloured tracks.</li>
+          <li><b>Prove</b> (amber) runs while the deal is open. <b>Deliver</b> (teal) starts when the deal is marked won. <b>Support</b> (violet) is for existing customers.</li>
+          <li>Click a project box to open its detail. Steps marked <span class="gate-tag">Gate</span> need a decision before the project continues. Steps marked <span class="mono" style="font-size:11px;color:var(--accent)">NEW</span> don't exist in the current process yet.</li>
+          <li>The dashed line shows each project's close-out feeding back to the deal, where the next action is set.</li>
+        </ul>
+        <h3>Finding a step</h3>
+        <ul>
+          <li>Type in the Find box above the map, e.g. <span class="mono">calibrate</span>, <span class="mono">SOW</span>, <span class="mono">invoice</span>, or a role such as <span class="mono">Accounts</span>. Matching projects stay bright on the map and every matching step is listed with its phase.</li>
+          <li>Click a result to open that project with the matching steps highlighted. Press <span class="mono">Esc</span> to clear the box, or <span class="mono">/</span> anywhere to jump to it.</li>
+        </ul>
+        <h3>Moving around</h3>
+        <ul>
+          <li>The bar under the title jumps to each section and stays at the top as you scroll.</li>
+          <li>In Project detail, use the ← and → buttons or the arrow keys to step through every project type in order.</li>
+          <li>"Often leads to" at the bottom of each project links to the projects that usually come next.</li>
+        </ul>
+        <h3>Quote or Tender?</h3>
+        <ul>
+          <li><b>Quote</b>: the client asked us directly for a price. We design, cost and send a quote with an SOW.</li>
+          <li><b>Tender</b>: a formal competitive bid with fixed deadlines, compliance questions and scoring, often on a portal. It starts with a bid / no-bid decision.</li>
+          <li>Both sit at the end of Prove. A deal is marked won only once one is accepted, and that starts the Deliver projects.</li>
+        </ul>
+        <h3>Linking to one project</h3>
+        <ul>
+          <li>Every project type has its own link. Add <span class="mono">#demo-onsite</span>, <span class="mono">#tech-engineering</span>, <span class="mono">#install</span>, <span class="mono">#quote</span>, <span class="mono">#tender</span> and so on to the page address to open straight at that project.</li>
+          <li>Use these links from the Operations Google Site, so each process page points at its part of the map.</li>
+        </ul>
+        <h3>Putting it on the Operations site</h3>
+        <ul>
+          <li>Option 1: share this page and add the link as a button on the Operations site.</li>
+          <li>Option 2: in Google Sites choose Insert → Embed → Embed code and paste the standalone HTML version of this page.</li>
+        </ul>
+        <h3>Changing the process</h3>
+        <ul>
+          <li>Ask for changes and the version number below goes up: patch for wording fixes, minor for new steps or project types, major when the structure of the method changes.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Version history</h3>
+        <div class="changelog" id="changelog"></div>
+        <h3 style="margin-top:18px">Built from</h3>
+        <ul style="font-size:13.5px">
+          <li>Process flow chart v4 (Operations site)</li>
+          <li>Demo Request Process flow chart</li>
+          <li>DEMO Simple Template 1.0</li>
+          <li>CLIENT Installation Template 2.0</li>
+          <li>SHOOT Simple Template checklist</li>
+          <li>Studio Project Delivery Process (Post-Sale)</li>
+          <li>Demo Confirmation Email Template</li>
+          <li>Project Helen plan of action</li>
+          <li>System Designer, Motive licence tracker, SOW Builder</li>
+          <li>Ops answers, 4 Nov 2026: onsite/offsite, 1-day cap, health check charging, ID format</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Target3D · Operations · Deal-to-Project Process Map</span>
+    <span class="ver" id="ver-foot"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+const VERSION = "v1.2.0";
+const CHANGELOG = [
+  {v:"v1.2.0", d:"4 Nov 2026", t:"Quote and Tender added as separate project types at the end of Prove, with a 'won' arrow into Deliver. New Find box searches every step, tool and role. Section bar stays at the top; previous/next buttons and arrow keys step through projects; copyable project links. New rule: price before you win."},
+  {v:"v1.1.0", d:"4 Nov 2026", t:"Onsite = on prem, Offsite = on location. Technical Engineering capped at 1 day (£450 internal day rate). Health check charged case by case. IDs follow ID-ClientName-Type with a first type code table. System Designer, Motive licence tracker and SOW Builder linked into the steps they support."},
+  {v:"v1.0.0", d:"4 Nov 2026", t:"First version. Deal spine with Prove, Deliver and Support tracks; ten project types mapped to five phases; rules, naming, chooser and open questions."}
+];
+const PHASES = [
+  {k:"Request", d:"The work is asked for and the project is created on the deal.", q:"Is there a deal, a request form and a project from the right template?"},
+  {k:"Plan", d:"Scope, people, dates and money are agreed.", q:"Do we know what, who, when, and who pays?"},
+  {k:"Prepare", d:"Kit, rooms, documents and people are made ready.", q:"Could we start tomorrow?"},
+  {k:"Deliver", d:"The work itself: the demo, the build, the shoot, the fix.", q:"Is the work happening or done?"},
+  {k:"Close", d:"Report, sign-off, invoice and the next action on the deal.", q:"Is the deal updated with what happens next?"}
+];
+const TRACKS = {
+  prove:{name:"Prove", sub:"Pre-sale · deal stays open · build the case, then price it"},
+  deliver:{name:"Deliver", sub:"Post-sale · deal won · paid work"},
+  support:{name:"Support", sub:"After-care · existing customers"}
+};
+// s(text, who, flags) helper
+const s=(t,w,f)=>({t,w,f:f||""});
+const P = [
+ {id:"health-check", code:"HEALTH", name:"System Health Check · MOT", track:"prove", basis:"Case by case: client history, engagement, opportunity", invest:false,
+  purpose:"Check the condition of a customer's existing system and find what it needs: upgrades, repairs, training or a new licence. Often the start of the next sale, and the natural visit when a licence renewal is due.",
+  owner:"Support Engineer", intake:"Health check form in the System Designer (or Health Check Jotform) → Drive folder → BCC into deal → project template. Prompts come from the Motive licence tracker.",
+  steps:[
+   [s("Prompted by a renewal in the Motive licence tracker, or a client request","Sales"),s("Health check request logged (System Designer form or Jotform)","Sales / Client"),s("Link to the client's open deal, or create a new deal on their organisation","Sales"),s("Create HEALTH project from template","Sales")],
+   [s("Confirm scope: remote or onsite, system serials, licences","Support Engineer"),s("Decide the charge case by case: client history, engagement and opportunity","Sales","gate"),s("Book engineer and date in the calendar","Ops")],
+   [s("Pull the install handover pack and licence record","Support Engineer"),s("Send confirmation to the client","Ops")],
+   [s("Run the check with the System Designer health check form: hardware, calibration, software versions, licences","Support Engineer"),s("Record findings on the project","Support Engineer")],
+   [s("Health check report sent to client","Support Engineer"),s("Each recommendation added to the deal as a next action","Sales"),s("Invoice if chargeable","Accounts"),s("Update the client's record in the Motive licence tracker","Sales")]
+  ], done:"Report is with the client and every recommendation has an owner on the deal.", feeds:["quote","rma","training"]},
+ {id:"demo-onsite", code:"DEMO-ON", name:"Demo · Onsite", track:"prove", basis:"Unpaid · cost of sale", invest:true,
+  purpose:"Show a client the kit working on prem, at Dock Street or PROTO, to move the deal towards a decision.",
+  owner:"Sales (request) · Studio Manager (resource)", intake:"Demo Request Jotform → Drive folder → BCC into deal → Pipedrive Demo template",
+  steps:[
+   [s("Sales completes the Demo Request form and adds the brief to the deal","Sales"),s("Studio Manager acknowledges the form","Studio Manager"),s("Create DEMO-ON project from Demo template","Studio Manager")],
+   [s("Check resource availability and hold the date in the calendar","Studio Manager"),s("Brief unclear? Book a meeting to discuss it","Sales / Studio"),s("Assign roles: sales rep, operator, host","Studio Manager"),s("Book studio and mocap performer; notify front of house","Studio Manager")],
+   [s("Needs testing? Book resource and test. If it fails, back to Plan","Studio / R&D","gate"),s("Demonstrator research: what's in the box, workflow, integrations, pricing, support","Sales"),s("Send the demo confirmation email (date, studio, contact, products, parking)","Studio Manager"),s("Clean studio and demo unit, set up hardware, calibrate","Studio Team")],
+   [s("Run the demo: overview, operation, data workflow, key features, use cases","Sales / Studio")],
+   [s("Demo report on the project","Studio Team"),s("Client feedback form sent","Sales"),s("Discuss next actions and update the deal stage","Sales"),s("Demo wash-up","Studio Team")]
+  ], done:"Demo report is on the deal and the deal has a next action and date.", feeds:["tech-engineering","site-survey","quote"]},
+ {id:"demo-offsite", code:"DEMO-OFF", name:"Demo · Offsite", track:"prove", basis:"Unpaid unless agreed", invest:true,
+  purpose:"Take the kit on location: the client's site or an event. Same as an onsite demo, plus travel, packing and working in someone else's space.",
+  owner:"Sales (request) · Studio Manager (resource)", intake:"Demo Request Jotform with a location field → Drive → BCC into deal → Demo Offsite template",
+  steps:[
+   [s("Demo Request form completed with the client location","Sales","new"),s("Create DEMO-OFF project linked to the deal","Studio Manager")],
+   [s("Check people and kit availability; hold dates","Studio Manager"),s("Confirm site access, power, space and parking with the client","Sales"),s("Travel and accommodation booked","Ops"),s("Risk assessment for the venue","Studio Manager")],
+   [s("Test the demo kit before it leaves","Studio / R&D","gate"),s("Equipment list, pack and label","Studio Team"),s("Confirmation email with arrival times and contacts","Studio Manager")],
+   [s("Set up and calibrate on site","Studio Team"),s("Run the demo","Sales / Studio"),s("Pack down; check nothing is left","Studio Team")],
+   [s("Kit returned, checked, and faults sent to RMA","Studio Team"),s("Demo report and client feedback","Sales"),s("Next action on the deal","Sales"),s("Travel and kit costs logged against the deal","Ops","new")]
+  ], done:"Kit is back and checked, the report is on the deal, and costs are logged.", feeds:["tech-engineering","site-survey","quote"]},
+ {id:"site-survey", code:"SURVEY", name:"Site Survey", track:"prove", basis:"Free or chargeable", invest:false,
+  purpose:"Measure and record the client's space so an installation can be designed and costed accurately.",
+  owner:"Install Lead", intake:"Site visit form in the System Designer (or Site Survey Jotform) → Drive folder → BCC into deal → project template",
+  steps:[
+   [s("Site Survey Jotform submitted","Sales"),s("Create SURVEY project linked to the deal","Install Lead")],
+   [s("Book engineer and date","Ops"),s("Confirm access, site contact and room details","Sales")],
+   [s("Risk assessment; pack scanner and measuring kit","Install Lead"),s("Confirmation to client","Ops")],
+   [s("Complete the site visit form in the System Designer","Install Lead"),s("Complete room scan and photos","Install Lead")],
+   [s("Complete CAD (Vectorworks file)","Install Lead"),s("Upload all files to the project folder","Install Lead"),s("Hand to Sales to start a QUOTE or TENDER","Install Lead")]
+  ], done:"CAD and site report are in the folder and Sales has what it needs to quote.", feeds:["quote","tender"]},
+ {id:"tech-engineering", code:"TECH", name:"Technical Engineering · PoC", track:"prove", basis:"Investment · max 1 day (£450)", invest:true,
+  purpose:"Engineering work done before a client commits, to prove something can be done for them. Usually unpaid at the start, for example the LEGO, Tata and Geely projects. Treated as an investment: clear criteria, no more than one day of unpaid effort at the £450 internal day rate, then a go/no-go decision.",
+  owner:"R&D / Engineering Lead · sponsor: MD", intake:"PoC request on the deal → TECH project template (both new); paid phase scoped in the SOW Builder",
+  steps:[
+   [s("Sales raises a PoC request on the deal with the client's problem statement","Sales","new"),s("Create TECH project linked to the deal","R&D Lead","new")],
+   [s("One-page PoC brief: problem, success criteria, what the client provides, what we invest (no more than 1 day, £450 internal cost)","R&D Lead","new"),s("MD approves the investment","MD","gate"),s("Success criteria agreed with the client in writing; NDA if needed","Sales")],
+   [s("Allocate engineers and kit; set checkpoint dates","R&D Lead"),s("Effort logged from the first hour at the £450/day internal rate, even though nothing is billed","R&D Team","new")],
+   [s("Build and test in short rounds","R&D Team"),s("Checkpoint review against the success criteria","R&D Lead / Sales"),s("1-day cap reached before criteria are met? Stop: quote a paid phase or get MD re-approval","MD","gate")],
+   [s("Go / no-go review with the client","Sales / R&D / MD","gate"),s("Go: start a QUOTE to price the paid phase, with the SOW from the SOW Builder","Sales"),s("No-go: close with learnings; investment cost recorded on the deal","R&D Lead"),s("Reusable work and learnings logged for future deals","R&D Lead")]
+  ], done:"A go or no-go is recorded on the deal, with the investment cost and what we learned.", feeds:["quote","tender"]},
+ {id:"quote", code:"QUOTE", name:"Quote & Design", track:"prove", stage:"price", basis:"Cost of sale", invest:false,
+  purpose:"Design and price a system for a client who has asked us directly. This turns an open deal into a proposal the client can say yes to.",
+  owner:"Sales · design help from Install Lead / R&D", intake:"Quote request on the deal, or raised from a Demo, Site Survey, Health Check or Tech Engineering close-out",
+  steps:[
+   [s("Quote request logged on the deal with the requirement and target date","Sales"),s("Create QUOTE project linked to the deal","Sales")],
+   [s("Confirm scope: what's in, what's out, delivery date, budget","Sales"),s("Pull inputs: site survey files, health check report, demo feedback, PoC results","Sales"),s("Assign design and costing help","Sales")],
+   [s("System design in the System Designer","Install Lead / R&D"),s("Costing sheet: kit, labour, delivery, accommodation","Install Lead"),s("Schematic or CAD if needed","Install Lead"),s("SOW drafted in the SOW Builder","Sales")],
+   [s("Margin check and price sign-off","Sales / MD","gate"),s("Quote and SOW sent; deal stage moved to Proposal made","Sales")],
+   [s("Follow up, clarify and revise; each revision saved as a new version","Sales"),s("Outcome on the deal: accepted goes through the Won gate, lost records the reason","Sales","gate")]
+  ], done:"Client has a priced quote and SOW, and the deal shows won or lost with a reason.", feeds:["install","studio-project","training"]},
+ {id:"tender", code:"TENDER", name:"Tender", track:"prove", stage:"price", basis:"Cost of sale · bid / no-bid first", invest:false,
+  purpose:"A formal competitive bid, often through a procurement portal, with fixed deadlines, compliance questions and scoring. More work and more risk than a quote, so it starts with a bid / no-bid decision.",
+  owner:"Bid owner (Sales) · section owners across Install, R&D, Accounts", intake:"Tender notice or invitation to tender, logged on the deal with the portal link and deadlines",
+  steps:[
+   [s("Tender documents downloaded; submission and clarification deadlines logged on the deal","Bid owner"),s("Bid / no-bid: fit, chance of winning, effort, margin","Bid owner / MD","gate"),s("Create TENDER project linked to the deal","Bid owner")],
+   [s("Compliance matrix: every requirement and question listed with an owner","Bid owner","new"),s("Section owners given internal deadlines ahead of the submission date","Bid owner"),s("Clarification questions sent before the clarification deadline","Bid owner")],
+   [s("System design in the System Designer","Install Lead / R&D"),s("Costing sheet and pricing schedule in the tender's format","Install Lead / Accounts"),s("Written answers, case studies, CVs, policies, insurance certificates","Section owners"),s("SOW / method statement from the SOW Builder","Bid owner")],
+   [s("Internal review against the compliance matrix and scoring criteria","Bid owner / MD","gate"),s("Submitted on the portal before the deadline; receipt saved to the folder","Bid owner")],
+   [s("Answer post-submission clarifications; present if shortlisted","Bid owner"),s("Outcome, scores and feedback recorded on the deal","Bid owner"),s("Reusable answers saved to the tender library","Bid owner","new")]
+  ], done:"Bid submitted on time, outcome and feedback recorded, reusable answers saved.", feeds:["install","studio-project","training"]},
+ {id:"install", code:"INSTALL", name:"Installation", track:"deliver", basis:"Paid", invest:false,
+  purpose:"Design, buy, build, calibrate and hand over a system at the client's site.",
+  owner:"Install Lead", intake:"Deal marked 'Won & Create Project' → CLIENT Installation template; Pre-install checklist, Install Report and Install Sign Off Jotforms",
+  steps:[
+   [s("Deal marked won; INSTALL project created from the Installation template","Sales"),s("Job number and QuickBooks project created","Accounts"),s("Drive folder and Google Chat space set up","Install Lead")],
+   [s("Site visit, or link the Site Survey project","Install Lead"),s("Costing sheet carried over from the QUOTE or TENDER and updated: kit, cabling, rigging, delivery, labour, accommodation","Install Lead"),s("Check projected margin and report to the Master Installs Tracker","Install Lead","gate"),s("Schematic; client completes the Pre-Install Checklist","Install Lead"),s("SOW built in the SOW Builder and agreed with the client","Install Lead")],
+   [s("Update costs and lead times","Install Lead"),s("Raise and record purchase orders","Install Lead"),s("All items received and bench tested; faults sent to RMA","Install Team"),s("Pack for delivery; installation plan with dates","Install Lead")],
+   [s("Install, connect, boot and calibrate","Install Team"),s("Snagging list worked through","Install Team","new"),s("Handover documentation, including patch numbers","Install Team"),s("Install Report Jotform","Install Lead")],
+   [s("Training delivered, or a TRAIN project created","Install Lead"),s("Install Sign Off Jotform signed by the client","Install Lead","gate"),s("Accounts told to invoice","Install Lead"),s("Licences added to the Motive licence tracker; warranty recorded for support","Ops")]
+  ], done:"Client has signed off, the invoice is raised, and licence and warranty details are on record.", feeds:["training","tech-support","health-check"]},
+ {id:"studio-project", code:"SHOOT", name:"Studio Project · Shoot", track:"deliver", basis:"Paid · 50% / 50%", invest:false,
+  purpose:"A paid shoot or production at our studio: capture, data handling and any post-production.",
+  owner:"Producer / Project Manager", intake:"Deal marked 'Won & Create Project' → SHOOT template",
+  steps:[
+   [s("Deal marked won; SHOOT project created; unique project ID and QuickBooks project","Producer"),s("Drive folder from the template: /PROJECTS/ID-ClientName-Type/","Producer"),s("Google Chat space with Production, Ops and Creative","Producer")],
+   [s("SOW from the SOW Builder; risk assessment; shoot plan / creative brief / GANTT","Producer"),s("Cost calculator, quote and payment terms","Producer"),s("SOW, photo/video release and RA signed","Client","gate"),s("Issue 50% invoice","Accounts")],
+   [s("Allocate crew, studio and gear in the shared calendar","Ops"),s("Internal kick-off meeting","Producer"),s("Book freelancers; casting; performer measurements","Producer"),s("Call sheet sent at least 24 hours before call time","Producer")],
+   [s("Shoot-day pre-flight checklist","Studio Team"),s("Deliver the shoot to brief; capture BTS if required","Studio Team")],
+   [s("Back up all captured data to cloud and physical storage","Studio Team"),s("Post-production per SOW, tracked on the project board","Post Team"),s("Final 50% invoice with any scope changes","Accounts"),s("Team wash-up","Producer")]
+  ], done:"Deliverables approved, final invoice issued, data backed up, wash-up held.", feeds:["studio-project"]},
+ {id:"training", code:"TRAIN", name:"Training", track:"deliver", basis:"Paid or included in install", invest:false,
+  purpose:"Teach the client's team to use their system: as part of an install, booked on its own, or as a refresher for an existing client.",
+  owner:"Trainer", intake:"Training Enquiry Jotform → auto-creates deal → project template; Training Attendee Jotform",
+  steps:[
+   [s("Training Enquiry Jotform (creates the deal automatically), created from an Install, or a refresher prompted by the Motive licence tracker","Sales"),s("Create TRAIN project","Ops")],
+   [s("Check availability of client stakeholders and trainer","Trainer"),s("Scope and price in the SOW Builder if it is paid service work","Sales"),s("Confirm training date with the client","Trainer")],
+   [s("Attendees complete the Training Attendee Jotform","Client"),s("Course material, kit and room ready","Trainer")],
+   [s("Training delivered; attendance recorded","Trainer")],
+   [s("Feedback collected","Trainer"),s("Invoice, or mark as included in the install","Accounts")]
+  ], done:"Training delivered and attendance and feedback are on the project.", feeds:["health-check"]},
+ {id:"tech-support", code:"SUPPORT", name:"Tech Support", track:"support", basis:"In SLA or chargeable", invest:false,
+  purpose:"Fix a problem for an existing customer.",
+  owner:"Support Engineer", intake:"Tech Support Jotform → Drive → auto-creates deal → BCC → auto-linked Pipedrive project",
+  steps:[
+   [s("Tech Support Jotform; deal and linked project created automatically","Client")],
+   [s("Triage: check SLA, warranty and licence status","Support Engineer"),s("Decide whether it is chargeable","Support Engineer","gate"),s("Assign engineer","Ops")],
+   [s("Gather logs, versions and remote access","Support Engineer")],
+   [s("Resolve remotely or on site","Support Engineer"),s("Hardware fault? Open an RMA project","Support Engineer")],
+   [s("Client confirms it is fixed","Support Engineer"),s("Time logged; invoice if outside SLA","Accounts"),s("Repeat issues flagged for a health check","Support Engineer")]
+  ], done:"Client confirms it is resolved and the time is logged.", feeds:["rma","health-check"]},
+ {id:"rma", code:"RMA", name:"RMA", track:"support", basis:"Warranty or chargeable", invest:false,
+  purpose:"Return, repair or replace faulty hardware.",
+  owner:"Support Engineer", intake:"RMA Jotform → Drive → auto-creates deal → BCC → auto-linked Pipedrive project",
+  steps:[
+   [s("RMA Jotform; deal and linked project created automatically","Client")],
+   [s("Check warranty, serial number and fault description","Support Engineer"),s("Get the vendor RMA number","Support Engineer")],
+   [s("Loan unit if available; ship the faulty item","Ops")],
+   [s("Replacement or repair received and tested","Support Engineer"),s("Returned, reinstalled and recalibrated","Support Engineer")],
+   [s("Client confirms working","Support Engineer"),s("Vendor case closed; cost recorded","Ops")]
+  ], done:"Client has a working unit and the vendor case is closed.", feeds:["health-check"]}
+];
+const byId = Object.fromEntries(P.map(p=>[p.id,p]));
+const CHOOSER = [
+  {g:"Deal is open", rows:[
+    ["They want to see the kit on prem (Dock Street or PROTO)","demo-onsite"],
+    ["They want to see it on location (their site or an event)","demo-offsite"],
+    ["They already own a system and we need to know its state","health-check"],
+    ["We need room measurements to quote an install","site-survey"],
+    ["We need to build or prove something before they commit","tech-engineering"],
+    ["They've asked us for a price","quote"],
+    ["It's a formal tender or procurement portal bid","tender"]]},
+  {g:"Deal is won", rows:[
+    ["We are installing a system at their site","install"],
+    ["We are shooting or producing for them in our studio","studio-project"],
+    ["We are teaching their team","training"]]},
+  {g:"Existing customer", rows:[
+    ["Something isn't working","tech-support"],
+    ["A piece of hardware needs returning or replacing","rma"],
+    ["A licence renewal is due, or it's time for an MOT, upgrade or refresher","health-check"]]}
+];
+const EXAMPLE = [
+  ["4127-AutoLab-HEALTH","health-check",4,"Closed"],
+  ["4127-AutoLab-DEMO-ON","demo-onsite",4,"Closed"],
+  ["4127-AutoLab-TECH","tech-engineering",3,"Deliver · 0.5 of 1 day used"],
+  ["4127-AutoLab-SURVEY","site-survey",1,"Plan · date being booked"],
+  ["4127-AutoLab-QUOTE","quote",-1,"Next, once the survey closes"],
+  ["4127-AutoLab-INSTALL","install",-1,"Created when the quote is accepted"]
+];
+
+const $=q=>document.querySelector(q);
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+["#ver-top","#ver-help","#ver-foot"].forEach(q=>{$(q).textContent=VERSION});
+$("#changelog").innerHTML=CHANGELOG.map(c=>`<p><span class="v">${c.v}</span> · ${esc(c.d)}<br>${esc(c.t)}</p>`).join("");
+
+// tracks
+const chip=p=>`<button class="chip" data-id="${p.id}" aria-pressed="false"><span class="code">${p.code}</span>${esc(p.name)}${p.invest?'<span class="unpaid">INVEST</span>':''}</button>`;
+const tracksEl=$("#tracks");
+tracksEl.innerHTML=Object.entries(TRACKS).map(([k,t])=>{
+  const items=P.filter(p=>p.track===k);
+  const gate = k==="deliver" ? `<div class="gate-tag" style="margin-bottom:8px">Deal marked "Won &amp; Create Project"</div>` : "";
+  return `<div class="lane" data-t="${k}" id="lane-${k}">
+    <div class="lane-head"><h3>${t.name}</h3><span>${t.sub}</span></div>${gate}
+    ${k==="prove" ? `<div class="subhead">Build the case</div><div class="chips">${items.filter(p=>!p.stage).map(chip).join("")}</div><div class="subhead price">↓ Price it · then the deal is won or lost</div><div class="chips" id="price-chips">${items.filter(p=>p.stage).map(chip).join("")}</div>` : `<div class="chips">${items.map(chip).join("")}</div>`}
+  </div>`}).join("");
+
+$("#phases").innerHTML=PHASES.map((p,i)=>`<div class="phase"><span class="n">PHASE ${i+1}</span><h3>${p.k}</h3><p>${esc(p.d)}</p><p class="q">Ready to move on when: ${esc(p.q)}</p></div>`).join("");
+
+const trackColor={prove:"var(--prove)",deliver:"var(--deliver)",support:"var(--support)"};
+$("#dc-table tbody").innerHTML=EXAMPLE.map(([pid,id,ph,st])=>{
+  const p=byId[id];
+  const bar=PHASES.map((_,i)=>`<i class="${ph<0?'':i<ph||st==='Closed'?'done':i===ph?'now':''}" title="${PHASES[i].k}"></i>`).join("");
+  return `<tr><td class="mono">${pid}</td><td><button class="linkchip" data-id="${id}">${esc(p.name)}</button></td><td class="status">${esc(st)}</td><td><div class="track-bar">${bar}</div></td><td><span class="pill" style="--c:${trackColor[p.track]};--cs:transparent">${esc(p.basis)}</span></td></tr>`}).join("");
+
+$("#codes tbody").innerHTML=P.map(p=>`<tr><td class="mono">${p.code}</td><td><button class="linkchip" data-id="${p.id}">${esc(p.name)}</button></td><td><span class="pill" style="--c:${trackColor[p.track]};--cs:transparent">${TRACKS[p.track].name}</span></td><td>${esc(p.basis)}</td><td class="mono" style="font-size:12px">4127-ClientName-${p.code}</td></tr>`).join("");
+$("#choose").innerHTML=CHOOSER.map(g=>`<div class="grp">${esc(g.g)}</div>`+g.rows.map(([q,id])=>{const p=byId[id];return `<div class="row" data-t="${p.track}"><span>${esc(q)}</span><button class="chip" data-id="${id}"><span class="code">${p.code}</span>${esc(p.name)}</button></div>`}).join("")).join("");
+
+let term="", currentId="demo-onsite";
+const hit=t=>term.length>1&&String(t).toLowerCase().includes(term);
+function mark(t){const s=esc(t);const e=esc(term).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return s.replace(new RegExp(e,"ig"),m=>`<mark>${m}</mark>`)}
+function renderDetail(id){
+  const p=byId[id]; if(!p) return; currentId=id;
+  document.querySelectorAll(".lane .chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.id===id?"true":"false"));
+  const cols=p.steps.map((list,i)=>`<div class="col"><h4>${i+1} · ${PHASES[i].k}</h4><ol>${list.map(x=>`<li class="${x.f}${hit(x.t+' '+x.w)?' hit':''}">${hit(x.t)?mark(x.t):esc(x.t)}<span class="who">${esc(x.w)}</span></li>`).join("")}</ol></div>`).join("");
+  const feeds=p.feeds.map(f=>`<button class="linkchip" data-id="${f}">${esc(byId[f].name)}</button>`).join(", ");
+  const idx=P.indexOf(p),prev=P[(idx-1+P.length)%P.length],next=P[(idx+1)%P.length];
+  $("#detail").innerHTML=`<div class="d-bar"><button class="btn" type="button" data-id="${prev.id}" title="Previous project (left arrow key)">← ${esc(prev.code)}</button><span class="d-pos">${idx+1} of ${P.length} · link to this project: <code>#${p.id}</code><button class="btn btn-sm" id="copy-anchor" type="button">Copy</button></span><button class="btn" type="button" data-id="${next.id}" title="Next project (right arrow key)">${esc(next.code)} →</button></div>
+   <div class="d-head" data-t="${p.track}">
+     <div><div class="d-title"><span class="d-code">${p.code}</span><h2>${esc(p.name)}</h2></div>
+       <p class="d-purpose">${esc(p.purpose)}</p></div>
+     <dl class="facts">
+       <dt>Track</dt><dd><span class="pill">${TRACKS[p.track].name}</span> ${esc(TRACKS[p.track].sub)}</dd>
+       <dt>Basis</dt><dd>${esc(p.basis)}</dd>
+       <dt>Owner</dt><dd>${esc(p.owner)}</dd>
+       <dt>Intake</dt><dd>${esc(p.intake)}</dd>
+     </dl>
+   </div>
+   <div class="steps">${cols}</div>
+   <div class="d-foot">
+     <div><h4>Done when</h4><p>${esc(p.done)}</p></div>
+     <div><h4>Often leads to</h4><p>${feeds}</p></div>
+   </div>`;
+}
+function select(id,scroll){
+  if(!byId[id]) return;
+  renderDetail(id);
+  try{ if(location.hash!=="#"+id) history.replaceState(null,"","#"+id);}catch(e){}
+  if(scroll) $("#detail-sec").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-id]"); if(!b) return;
+  select(b.dataset.id,true);
+});
+function fromHash(){
+  const h=(location.hash||"").slice(1);
+  if(byId[h]) select(h,true);
+  else if(h==="help") $("#help").scrollIntoView();
+}
+window.addEventListener("hashchange",fromHash);
+const initial=(location.hash||"").slice(1);
+renderDetail(byId[initial]?initial:"demo-onsite");
+if(byId[initial]) setTimeout(()=>$("#detail-sec").scrollIntoView(),50);
+if(initial==="help") setTimeout(()=>$("#help").scrollIntoView(),50);
+
+// find
+const qEl=$("#q"), resEl=$("#results");
+const haystack=p=>[p.code,p.name,p.purpose,p.intake,p.owner,p.basis,p.done].join(" ");
+function runSearch(){
+  term=qEl.value.trim().toLowerCase();
+  const chips=document.querySelectorAll(".lane .chip");
+  if(term.length<2){resEl.hidden=true;resEl.innerHTML="";chips.forEach(c=>c.classList.remove("dim"));renderDetail(currentId);return;}
+  const out=[],matched=new Set();
+  P.forEach(p=>{
+    if(hit(haystack(p))){matched.add(p.id);out.push({p,ph:-1,t:hit(p.purpose)?p.purpose:p.name+" · "+p.intake});}
+    p.steps.forEach((list,i)=>list.forEach(x=>{if(hit(x.t+" "+x.w)){matched.add(p.id);out.push({p,ph:i,t:x.t+" — "+x.w});}}));
+  });
+  chips.forEach(c=>c.classList.toggle("dim",!matched.has(c.dataset.id)));
+  resEl.hidden=false;
+  resEl.innerHTML = out.length
+    ? `<div class="res-count">${out.length} match${out.length===1?"":"es"} in ${matched.size} project${matched.size===1?"":"s"}</div>`+out.slice(0,14).map(r=>`<button class="res" type="button" data-id="${r.p.id}"><span class="code">${r.p.code}</span><span class="res-ph">${r.ph<0?"About":PHASES[r.ph].k}</span><span class="res-t">${mark(r.t)}</span></button>`).join("")+(out.length>14?`<div class="res-count">Showing the first 14. Add another word to narrow it down.</div>`:"")
+    : `<div class="res-count">Nothing matches "${esc(term)}". Try a shorter word, a tool name or a role such as Accounts.</div>`;
+  if(matched.size&&!matched.has(currentId)) renderDetail([...matched][0]); else renderDetail(currentId);
+}
+qEl.addEventListener("input",runSearch);
+qEl.addEventListener("keydown",e=>{if(e.key==="Escape"){qEl.value="";runSearch();}});
+function selectCode(btn){const code=btn.parentElement.querySelector("code");try{const r=document.createRange();r.selectNodeContents(code);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}catch(e){}btn.textContent="Selected: press Ctrl+C";}
+document.addEventListener("click",e=>{
+  const c=e.target.closest("#copy-anchor");
+  if(c){const done=()=>{c.textContent="Copied";setTimeout(()=>{c.textContent="Copy"},1500)};try{navigator.clipboard.writeText("#"+currentId).then(done,()=>selectCode(c));}catch(err){selectCode(c);}return;}
+  const g=e.target.closest("[data-go]");
+  if(g){const t=document.querySelector(g.dataset.go);if(t)(t.closest("section")||t).scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});}
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea,select"))return;
+  if(e.key==="/"){e.preventDefault();qEl.focus();return;}
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){const i=P.findIndex(p=>p.id===currentId);const n=P[(i+(e.key==="ArrowRight"?1:-1)+P.length)%P.length];select(n.id,false);}
+});
+
+// wires
+const NS="http://www.w3.org/2000/svg";
+function drawWires(){
+  const flow=$("#flow"), svg=$("#wires");
+  const fr=flow.getBoundingClientRect();
+  const R=el=>{const r=el.getBoundingClientRect();return {l:r.left-fr.left,t:r.top-fr.top,r:r.right-fr.left,b:r.bottom-fr.top,cx:(r.left+r.right)/2-fr.left,cy:(r.top+r.bottom)/2-fr.top}};
+  svg.setAttribute("viewBox",`0 0 ${fr.width} ${fr.height}`);
+  svg.innerHTML=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)" stroke="none"/></marker></defs>`;
+  const add=(d,cls,lbl,lx,ly)=>{const p=document.createElementNS(NS,"path");p.setAttribute("d",d);p.setAttribute("marker-end","url(#ah)");if(cls)p.setAttribute("class",cls);svg.appendChild(p);
+    if(lbl){const t=document.createElementNS(NS,"text");t.setAttribute("x",lx);t.setAttribute("y",ly);t.setAttribute("text-anchor","middle");if(cls)t.setAttribute("class",cls+"lbl");t.textContent=lbl;svg.appendChild(t);}};
+  const link=(a,b,lbl)=>{
+    const A=R(a),B=R(b);
+    if(B.l>=A.r-2){ // horizontal
+      const x1=A.r,y1=A.cy,x2=B.l-2,y2=B.cy,mx=(x1+x2)/2;
+      add(`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`,"",lbl,mx,Math.min(y1,y2)-6);
+    } else { // vertical
+      const x1=A.cx,y1=A.b,x2=B.cx,y2=B.t-2,my=(y1+y2)/2;
+      add(`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`,"");
+    }
+  };
+  const lead=$("#n-lead"),deal=$("#n-deal"),dec=$("#n-dec"),close=$("#n-close");
+  const lanes=["prove","deliver","support"].map(k=>$("#lane-"+k));
+  link(lead,deal); link(deal,dec);
+  const wide=R(lanes[0]).l>R(dec).r;
+  if(wide){
+    const labels=["deal open","deal won","existing customer"];
+    lanes.forEach((ln,i)=>{const A=R(dec),B=R(ln);const x1=A.r-14,y1=A.cy,x2=B.l-2,y2=B.cy,mx=(x1+x2)/2;
+      add(`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`,"");
+});
+    lanes.forEach(ln=>{const A=R(ln),B=R(close);const x1=A.r,y1=A.cy,x2=B.l-2,y2=B.cy,mx=(x1+x2)/2;add(`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`,"")});
+    const fc=document.querySelector("#price-chips .chip");
+    if(fc){const A=R(fc),Lp=R(lanes[0]),Ld=R(lanes[1]);add(`M${A.cx},${Lp.b} L${A.cx},${Ld.t-2}`,"","won",A.cx+22,(Lp.b+Ld.t)/2+4);}
+    // loop back to deal
+    const C=R(close),D=R(deal),yb=fr.height-26;
+    add(`M${C.cx},${C.b} L${C.cx},${yb} L${D.cx},${yb} L${D.cx},${D.b+2}`,"loop","next action set on the deal",(C.cx+D.cx)/2,yb-6);
+  } else {
+    link(dec,$("#tracks")); link($("#tracks"),close);
+  }
+}
+const ro=new ResizeObserver(()=>requestAnimationFrame(drawWires));
+ro.observe($("#flow"));
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(drawWires);
+drawWires();
+})();
+</script>
+</body></html>

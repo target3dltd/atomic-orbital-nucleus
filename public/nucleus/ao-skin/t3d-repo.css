@@ -1,0 +1,103 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the project repositories (Clays, Little Lion) v1.0.0.
+   Every selector starts html:not(#ao-skin) so it outranks the page's own rules without !important. */
+html:not(#ao-skin){
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --sunk:var(--ao-sunk); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line);
+  --blue:var(--ao-teal); --on-blue:var(--ao-on-teal); --red:var(--ao-orange); --yellow:var(--ao-green);
+  --green:var(--ao-text); --green-ink:var(--ao-surface); --brass:var(--ao-text); --brass-soft:var(--ao-teal-soft); --oak:var(--ao-teal);
+  --warn:var(--ao-orange); --warn-soft:var(--ao-orange-soft); --ok-soft:var(--ao-teal-soft);
+  --chrome:var(--ao-surface); --chrome-ink:var(--ao-text); --chrome-line:var(--ao-line);
+  color-scheme:light;
+}
+html:not(#ao-skin)[data-theme="dark"]{color-scheme:dark}
+html:not(#ao-skin) body, html:not(#ao-skin) .shell{background:var(--ao-bg);color:var(--ao-text);font-family:var(--ao-font-body);font-size:16px}
+html:not(#ao-skin) main{
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --sunk:var(--ao-sunk); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line);
+  --green:var(--ao-text); --green-ink:var(--ao-surface); --brass:var(--ao-text); --brass-soft:var(--ao-teal-soft); --warn-soft:var(--ao-orange-soft); --ok-soft:var(--ao-teal-soft);
+  background:var(--ao-bg); color:var(--ao-text); color-scheme:inherit;
+}
+html:not(#ao-skin) main .muted, html:not(#ao-skin) main .kicker, html:not(#ao-skin) main .meta, html:not(#ao-skin) main .src,
+html:not(#ao-skin) main .inote, html:not(#ao-skin) main .model, html:not(#ao-skin) main figcaption, html:not(#ao-skin) ul.chk li.n{color:var(--ao-muted)}
+html:not(#ao-skin) th{color:var(--ao-muted);background:var(--ao-sunk)}
+html:not(#ao-skin) ul.chk li.y span[aria-hidden]{color:var(--ao-teal-text)}
+
+/* type: Space Grotesk headings in sentence case */
+html:not(#ao-skin) h1, html:not(#ao-skin) h2, html:not(#ao-skin) h3, html:not(#ao-skin) .cond,
+html:not(#ao-skin) .side .brand, html:not(#ao-skin) .docs .dk, html:not(#ao-skin) .card .nm, html:not(#ao-skin) .topbar .tt,
+html:not(#ao-skin) .fab, html:not(#ao-skin) .pegpick .n, html:not(#ao-skin) .calc .lbl, html:not(#ao-skin) .big b, html:not(#ao-skin) td.q{
+  font-family:var(--ao-font-display); font-weight:600; text-transform:none; letter-spacing:0}
+html:not(#ao-skin) h1.page{font-size:clamp(2rem,4.6vw,3.1rem);line-height:1.05;color:var(--ao-text)}
+html:not(#ao-skin) main section > h2{font-size:clamp(1.35rem,2.4vw,1.7rem);border-bottom-color:var(--ao-line)}
+html:not(#ao-skin) .side .brand, html:not(#ao-skin) .side a.brand{font-size:1.6rem;line-height:1.1;margin-top:4px}
+html:not(#ao-skin) .side .tag, html:not(#ao-skin) .side .grp{font-family:var(--ao-font-body);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ao-muted);opacity:1}
+html:not(#ao-skin) .card .nm{font-size:1.3rem;line-height:1.15}
+html:not(#ao-skin) .big b, html:not(#ao-skin) main .big b{font-size:clamp(1.35rem,2.3vw,1.9rem);line-height:1.1;white-space:nowrap}
+html:not(#ao-skin) main .big b.m{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.3}
+html:not(#ao-skin) main .big div{overflow:hidden}
+html:not(#ao-skin) .exnums b{font-family:var(--ao-font-display);font-size:1.6rem}
+html:not(#ao-skin) td.q{font-size:1.1rem}
+html:not(#ao-skin) .docs .dk{font-size:1.3rem;line-height:1.15}
+html:not(#ao-skin) .topbar .tt{font-size:1.15rem}
+html:not(#ao-skin) .fab{font-size:1rem}
+html:not(#ao-skin) ol.time b{font-family:var(--ao-font-display);font-weight:600}
+
+/* links and focus */
+html:not(#ao-skin) a{color:var(--ao-teal-text);text-decoration-color:currentColor;text-decoration-thickness:1px}
+html:not(#ao-skin) a:hover{text-decoration-color:var(--ao-teal-text);text-decoration-thickness:2px}
+html:not(#ao-skin) :focus-visible{outline-color:var(--ao-teal-text)!important}
+html:not(#ao-skin) mark{background:var(--ao-teal-soft);color:inherit;border-radius:3px}
+
+/* chrome: side navigation, top bar, docs panel */
+html:not(#ao-skin) .side{background:var(--ao-surface);color:var(--ao-text);border-right:1px solid var(--ao-line)}
+html:not(#ao-skin) .side a{color:var(--ao-text);border-radius:var(--ao-radius)}
+html:not(#ao-skin) .side a:hover{background:var(--ao-sunk)}
+html:not(#ao-skin) .side a[aria-current="page"]{background:var(--ao-teal-soft);color:var(--ao-teal-text);font-weight:600;box-shadow:inset 3px 0 0 var(--ao-teal)}
+html:not(#ao-skin) .side a small, html:not(#ao-skin) .side .ver{color:var(--ao-muted)}
+html:not(#ao-skin) .side .brand, html:not(#ao-skin) .side a.brand{color:var(--ao-text)}
+html:not(#ao-skin) .side .logo{width:200px;margin:2px 0 22px}
+html:not(#ao-skin) .topbar{background:var(--ao-surface);color:var(--ao-text);border-bottom:1px solid var(--ao-line)}
+html:not(#ao-skin) .topbar .ib{background:var(--ao-sunk);color:var(--ao-text);border-radius:var(--ao-radius)}
+html:not(#ao-skin) .topbar .db{background:var(--ao-teal);color:var(--ao-on-teal);border-radius:var(--ao-radius)}
+html:not(#ao-skin) .topbar .tt small{color:var(--ao-muted)}
+html:not(#ao-skin) body::before{background:var(--ao-surface)!important}
+html:not(#ao-skin) .docs{
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --sunk:var(--ao-sunk); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line); --brass-soft:var(--ao-teal-soft);
+  background:var(--ao-surface); color:var(--ao-text); color-scheme:inherit; border-left:1px solid var(--ao-line)}
+html:not(#ao-skin) .docs header{border-top:3px solid var(--ao-teal)}
+html:not(#ao-skin) .docs .dk, html:not(#ao-skin) .dl li a b{color:var(--ao-text)}
+html:not(#ao-skin) .docs .dsub, html:not(#ao-skin) .dl li a span, html:not(#ao-skin) .dl li a i, html:not(#ao-skin) .dbody h3,
+html:not(#ao-skin) .docs footer .muted, html:not(#ao-skin) details.dsec summary small{color:var(--ao-muted)}
+html:not(#ao-skin) .dl li{background:var(--ao-bg);border-color:var(--ao-line);border-radius:var(--ao-radius)}
+html:not(#ao-skin) .dl li:hover{box-shadow:inset 3px 0 0 var(--ao-teal)}
+html:not(#ao-skin) .dsearch input, html:not(#ao-skin) .dsearch select, html:not(#ao-skin) .ask input{background:var(--ao-surface);color:var(--ao-text);border:1px solid var(--ao-muted);border-radius:6px}
+html:not(#ao-skin) .docs ::placeholder{color:var(--ao-muted)}
+html:not(#ao-skin) .tip{color:var(--ao-text);background:var(--ao-teal-soft);border-left-color:var(--ao-teal);border-radius:0 var(--ao-radius) var(--ao-radius) 0}
+html:not(#ao-skin) .fab{background:var(--ao-teal);color:var(--ao-on-teal);border-radius:999px}
+html:not(#ao-skin) .ib{border-radius:var(--ao-radius)}
+
+/* surfaces: rounded, hairline borders, teal accents */
+html:not(#ao-skin) .card, html:not(#ao-skin) .tbl, html:not(#ao-skin) dl.kv, html:not(#ao-skin) figure, html:not(#ao-skin) .pegpick a,
+html:not(#ao-skin) .calc label, html:not(#ao-skin) main .big div, html:not(#ao-skin) .empty, html:not(#ao-skin) .pjc, html:not(#ao-skin) .exnums div,
+html:not(#ao-skin) .pjrow, html:not(#ao-skin) .gap{border-radius:var(--ao-radius);border-color:var(--ao-line)}
+html:not(#ao-skin) main .big div, html:not(#ao-skin) .exnums div, html:not(#ao-skin) .pjc{border-top-color:var(--ao-teal)}
+html:not(#ao-skin) .tixcard{border-top-color:var(--ao-teal)!important}
+html:not(#ao-skin) a.card:hover{border-color:var(--ao-teal);box-shadow:inset 0 3px 0 var(--ao-teal)}
+html:not(#ao-skin) .note{border-radius:0 var(--ao-radius) var(--ao-radius) 0;border-left-color:var(--ao-teal);background:var(--ao-sunk)}
+html:not(#ao-skin) figure .zoom{background:#fff}
+html:not(#ao-skin) .search, html:not(#ao-skin) .pjin input, html:not(#ao-skin) .pjin select, html:not(#ao-skin) .exctl select,
+html:not(#ao-skin) .opts input[type=number], html:not(#ao-skin) .stepper input{border:1px solid var(--ao-muted);border-radius:6px;background:var(--ao-surface);color:var(--ao-text)}
+html:not(#ao-skin) textarea.csv{border-radius:var(--ao-radius)}
+
+/* buttons and chips */
+html:not(#ao-skin) .btn{background:var(--ao-teal);color:var(--ao-on-teal);border-radius:var(--ao-radius);letter-spacing:.02em;text-transform:none;font-size:.9rem}
+html:not(#ao-skin) .btn.ghost{background:transparent;color:var(--ao-teal-text);box-shadow:inset 0 0 0 1.5px var(--ao-teal-text)}
+html:not(#ao-skin) .stepper button{border-radius:6px}
+html:not(#ao-skin) .chip, html:not(#ao-skin) .st{border-radius:999px;letter-spacing:.03em}
+html:not(#ao-skin) .chip.arcade, html:not(#ao-skin) .chip.arcade5, html:not(#ao-skin) .chip.pacman, html:not(#ao-skin) .pjst.in{background:var(--ao-text);color:var(--ao-surface)}
+html:not(#ao-skin) .st-done, html:not(#ao-skin) .st-resolved{background:var(--ao-teal);color:var(--ao-on-teal);border-color:var(--ao-teal)}
+html:not(#ao-skin) .ev{border-radius:999px}
+html:not(#ao-skin) .exgauge{background:linear-gradient(90deg,#4d4d4d,var(--ao-teal) 55%,#ffffff)}
+html:not(#ao-skin) #exCv{border-radius:var(--ao-radius)}
+
+/* logo: Atomic Orbital lockup, light or dark */
+html:not(#ao-skin) .side .logo img{width:100%;height:auto}

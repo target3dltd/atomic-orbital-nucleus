@@ -1,0 +1,40 @@
+# Atomic Orbital Nucleus
+[build]
+  # The scramble build (build/protect.mjs) minifies pages and stamps the copyright, writing to dist/.
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Edge function netlify/edge-functions/gate.js protects /tools/*, /projects/* and /launch.html (see its config)
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "frame-ancestors 'self'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/tools/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/projects/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[redirects]]
+  from = "/help"
+  to = "/#help"
+  status = 302

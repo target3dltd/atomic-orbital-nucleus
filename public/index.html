@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Nucleus · Atomic Orbital</title>
+<meta name="description" content="The Atomic Orbital Nucleus: one home for operations processes, sales tools and project sites, unlocked with your Pipedrive API token.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/brand/logos/favicon/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/brand/logos/favicon/apple-touch-icon-180.png">
+<link rel="preload" href="/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<link rel="stylesheet" href="/nucleus/nucleus.css">
+<script>try{var s=localStorage.getItem('theme');document.documentElement.dataset.theme=s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
+<script src="/nucleus/nucleus.js"></script>
+<script src="/nucleus/registry.js"></script>
+</head>
+<body>
+
+<header class="ao-header n-header">
+  <div class="ao-container">
+    <a class="ao-brand" href="/" aria-label="Nucleus home">
+      <span id="brandMark"></span>
+      <span class="n-brand-text">Nucleus<small>Atomic Orbital</small></span>
+    </a>
+    <div class="n-actions">
+      <span class="n-user" id="userChip" hidden></span>
+      <button class="n-iconbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span id="helpIcon"></span>Help</button>
+      <button class="n-iconbtn" id="themeBtn" type="button"></button>
+      <button class="n-iconbtn" id="signOutBtn" type="button" hidden><span id="outIcon"></span>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<!-- Sign in -->
+<main class="n-signin" id="signin" hidden>
+  <div class="n-signin__card">
+    <div class="n-signin__hero"><img id="heroLogo" src="/brand/logos/animated/atomic-orbital-hero-animated-for-light-backgrounds.svg" alt="" width="210" height="210"></div>
+    <h1>Nucleus</h1>
+    <p class="lede" id="signinLede">The Atomic Orbital home for our processes, tools and project sites.</p>
+    <div id="googleBlock" hidden>
+      <a class="ao-btn ao-btn--primary n-google" id="googleBtn" href="/api/nucleus/google/start"><span class="n-g" aria-hidden="true"><svg viewBox="0 0 18 18" width="18" height="18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg></span>Sign in with Google</a>
+      <p class="ao-muted n-gnote" id="googleNote">Use your company Google account.</p>
+    </div>
+    <form id="signinForm" novalidate hidden>
+      <div class="n-step" id="connectIntro" hidden></div>
+      <div class="n-field">
+        <label for="token">Your Pipedrive API token</label>
+        <div class="n-pw">
+          <input class="ao-input" id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" required aria-describedby="tokenHint">
+          <button type="button" id="showTok" aria-controls="token">Show</button>
+        </div>
+        <span class="ao-muted" id="tokenHint" style="font-size:14px">Everything in the Nucleus runs as you in Pipedrive.</span>
+      </div>
+      <label class="n-check" id="rememberRow"><input type="checkbox" id="remember"> Keep me signed in on this device for 30 days</label>
+      <button class="ao-btn ao-btn--primary" type="submit" id="signinBtn">Enter the Nucleus</button>
+    </form>
+    <div class="n-err" id="signinErr" role="alert" hidden></div>
+    <p class="n-switch" id="notYou" hidden><button type="button" class="n-linkbtn" id="notYouBtn">Not you? Sign out</button></p>
+    <details class="n-details" id="tokenHelp" hidden>
+      <summary>Where do I find my token?</summary>
+      <ol>
+        <li>Open Pipedrive and click your picture (top right).</li>
+        <li>Choose <b>Personal preferences</b>, then the <b>API</b> tab.</li>
+        <li>Copy <b>Your personal API token</b> and paste it above.</li>
+      </ol>
+      <p id="tokenPrivacy">Your token is checked with Pipedrive, then kept encrypted in a secure cookie that only the Nucleus server can read. It is never stored in this page or shown again. Signing out removes it from this browser.</p>
+    </details>
+  </div>
+</main>
+
+<!-- Hub -->
+<main class="n-main" id="hub" hidden>
+  <div class="ao-container">
+    <section class="n-greet" aria-labelledby="greetH">
+      <div>
+        <h1 id="greetH">Welcome</h1>
+        <p>Everything orbits the Nucleus. Pick a tool, a project or a system.</p>
+      </div>
+    </section>
+    <dl class="n-pulse" id="pulse" aria-label="Your Pipedrive today">
+      <div><dt>My open deals</dt><dd class="wait n-num" id="pMyDeals">—</dd></div>
+      <div><dt>My open pipeline</dt><dd class="wait n-num" id="pMyValue">—</dd></div>
+      <div><dt>My activities due</dt><dd class="wait n-num" id="pActs">—</dd></div>
+      <div><dt>Team open pipeline</dt><dd class="wait n-num" id="pTeam">—</dd></div>
+    </dl>
+  </div>
+
+  <section class="n-atom-wrap" aria-label="The Nucleus and its orbits">
+    <div class="n-atom" id="atom">
+      <svg class="n-orbits" id="orbits" aria-hidden="true"></svg>
+      <div class="n-core"><span id="coreMark"></span><b>Nucleus</b></div>
+    </div>
+    <div class="n-atom-legend" id="legend">
+      <span><i class="tools"></i>Tools &amp; Marketing</span>
+      <span><i></i>Project sites</span>
+      <span><i class="systems"></i>Connected systems</span>
+      <button type="button" id="pauseBtn" aria-pressed="false">Pause orbits</button>
+    </div>
+  </section>
+
+  <div class="ao-container">
+    <section class="n-dir" aria-labelledby="dirH">
+      <div class="n-dir__bar">
+        <h2 id="dirH">Everything in the Nucleus</h2>
+        <div class="n-search"><label class="n-sr" for="q">Search tools, projects and systems</label><input class="ao-input" id="q" type="search" placeholder="Search tools, projects and systems"></div>
+      </div>
+      <div id="dir"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="n-footer">
+  <div class="ao-container">
+    <span>&copy; <span id="yr">2026</span> Atomic Orbital Limited · Nucleus <span class="n-num" id="ver"></span> · Software &copy; 2026 Ashley Keeler. All rights reserved.</span>
+    <span><button type="button" id="helpLink">Help and version history</button></span>
+  </div>
+</footer>
+
+<!-- Account -->
+<dialog class="n-dialog" id="acctDlg" aria-labelledby="acctDlgH">
+  <div class="n-dialog__head"><h2 id="acctDlgH">Your account</h2><button class="n-x" type="button" data-close aria-label="Close"></button></div>
+  <div class="n-dialog__body">
+    <table id="acctTable"></table>
+    <h3>Pipedrive token</h3>
+    <p id="acctTokenNote">Reset your token in Pipedrive? Connect the new one here. You'll be asked for it straight away.</p>
+    <p style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="ao-btn ao-btn--secondary" type="button" id="changeTokBtn">Connect a different Pipedrive token</button><button class="ao-btn ao-btn--secondary" type="button" id="acctSignOut">Sign out</button></p>
+  </div>
+</dialog>
+
+<!-- Awaiting / item detail -->
+<dialog class="n-dialog" id="itemDlg" aria-labelledby="itemDlgH">
+  <div class="n-dialog__head"><h2 id="itemDlgH"></h2><button class="n-x" type="button" data-close aria-label="Close"></button></div>
+  <div class="n-dialog__body" id="itemDlgBody"></div>
+</dialog>
+
+<!-- Help -->
+<dialog class="n-dialog" id="helpDlg" aria-labelledby="helpDlgH">
+  <div class="n-dialog__head"><h2 id="helpDlgH">Help</h2><button class="n-x" type="button" data-close aria-label="Close"></button></div>
+  <div class="n-dialog__body">
+    <p>The Nucleus is Atomic Orbital's home for systems, processes and tooling. It sits at the centre; our own tools, project sites and the systems we use orbit around it.</p>
+
+    <h3>Signing in</h3>
+    <ul>
+      <li><b>Sign in with Google</b>, using your company account (once an administrator has switched Google sign-in on; until then you sign in with your Pipedrive token).</li>
+      <li><b>The first time</b>, you're asked for <b>your own Pipedrive API token</b> (Pipedrive → your picture → Personal preferences → API). It's stored encrypted against your Google account, so after that Google is all you need. Everything you do in the Nucleus happens in Pipedrive as you: deals you create are yours, notes carry your name, and you only see what Pipedrive lets you see.</li>
+      <li><b>Reset your token in Pipedrive?</b> Click your name (top right) → <i>Connect a different Pipedrive token</i>.</li>
+      <li>Only tokens from Atomic Orbital's Pipedrive company are accepted.</li>
+      <li>Your token is checked with Pipedrive, then sealed (encrypted) in a secure cookie that page code can't read, and, with Google sign-in, stored encrypted in the Nucleus against your Google account. It is never saved in the page or in your browser's storage.</li>
+      <li>With Google, a sign-in lasts 7 days on a device. (With a token only, 12 hours, or 30 days if you tick <i>Keep me signed in</i>.) <b>Sign out</b> ends it straight away; your stored Pipedrive token stays for next time.</li>
+      <li>Some areas, such as the Performance Hub and other people's KPI pages, are for administrators only.</li>
+    </ul>
+
+    <h3>Getting around</h3>
+    <ul>
+      <li><b>The atom.</b> The inner ring holds our <b>tools</b> and <b>marketing</b>, the middle ring the <b>project sites</b>, the outer dotted ring the <b>connected systems</b> (these open in a new tab). Hover over the atom or press <i>Pause orbits</i> to stop it moving. Orbits stand still if your device is set to reduce motion.</li>
+      <li><b>The directory</b> below the atom lists the same things as cards. Type in the search box to filter by name, description or tag.</li>
+      <li>A dashed outline means a tool is <b>reserved but its code hasn't been added yet</b>.</li>
+      <li>Tools open inside the Nucleus with a bar at the top: <i>Nucleus</i> takes you home, the menu jumps to another tool, and <i>Open on its own</i> opens the tool full-screen in a new tab.</li>
+      <li>The figures under the greeting come live from Pipedrive for you: your open deals and their value, your overdue and due-today activities, and the whole team's open pipeline.</li>
+    </ul>
+
+    <h3>What's here</h3>
+    <table>
+      <tr><th>Operations processes</th><td>The deal-to-project process map, with a link to the existing Operations Google Site.</td></tr>
+      <tr><th>System Designer</th><td>The TARGET3D System Designer (full edition). Its Pipedrive features (find deal, add note, add PDF, kit list to deal products) now run with your own token.</td></tr>
+      <tr><th>SOW Builder</th><td>StudioT3D Statements of Work. Drafts are saved in your browser. AI Assist uses an Anthropic key you enter in its own Settings.</td></tr>
+      <tr><th>Pipedrive Duplicate Eraser</th><td>The Account Merge Desk. Approvals, “not duplicates” and merge history are shared with the whole team. Merges and undos are written to Pipedrive as you.</td></tr>
+      <tr><th>Motive licence renewals</th><td>The Motive Upgrade Planner. The shared campaign tracker lives in the Nucleus; Pipedrive actions run as you.</td></tr>
+      <tr><th>Mocap Toolkit</th><td>Motion capture review, cleaning, retargeting and export, biomechanics (gait, bike fit, lifting, golf) and live capture. Files you open are processed in your browser and never uploaded. Live Capture connects to a streaming bridge on your own computer (<code>ws://localhost:8765</code>).</td></tr>
+      <tr><th>Assets &amp; Press Kit</th><td>Marketing: logos, colours, fonts, letterheads, the 2026 brand style guide and press copy, all downloadable, with one-click copy.</td></tr>
+      <tr><th>Support dashboard</th><td>The Pipedrive Support pipeline (read as you) and the support@ inbox (read by the Nucleus once an administrator connects it). Open <i>Sources</i> at its top to refresh or download CSV.</td></tr>
+      <tr><th>Clays</th><td>The Clays project repository.</td></tr>
+      <tr><th>Drift</th><td>The Drift project repository: Murmuring Minds by Studio DRIFT.</td></tr>
+      <tr><th>Little Lion</th><td>The Little Lion (LLE) project repository: the Arcade Arena's three OptiTrack systems and the R&amp;D test rig.</td></tr>
+    </table>
+
+    <h3>Theme and branding</h3>
+    <p>The sun and moon button switches between light and dark. Your choice is remembered on this device; otherwise the Nucleus follows your device setting. Every tool follows it, and switching theme inside a tool switches the Nucleus too.</p>
+    <p>Each tool's own screens use the Atomic Orbital style and logo. Documents the tools produce for clients (quotes, proposals, SOWs and the logo on the 3D floor) keep the branding set inside each tool.</p>
+
+    <h3>Adding a tool (for whoever maintains the Nucleus)</h3>
+    <ol>
+      <li>Put the tool's files in <code>public/tools/&lt;id&gt;/</code> (or <code>public/projects/&lt;id&gt;/</code>) with an <code>index.html</code>.</li>
+      <li>Add or update its entry in <code>public/nucleus/registry.js</code> and set <code>status: "live"</code>.</li>
+      <li>If it was built as a claude.ai artifact that uses the Pipedrive connector or a shared database, add <code>&lt;script src="/nucleus/claude-shim.js" data-ns="&lt;id&gt;"&gt;&lt;/script&gt;</code> before its own script. Its Pipedrive calls then run with the signed-in person's token and its data is shared through the Nucleus.</li>
+      <li>If it's a Claude <b>Dashboard</b>, copy its page into <code>&lt;div id="dash-root"&gt;</code> of a page that loads <code>/nucleus/dash-runtime.js</code> and lists its sources in <code>window.DASH_DATASETS</code>. The Support dashboard is the example to copy.</li>
+      <li>Redeploy. The full guide is in <code>README.md</code>.</li>
+    </ol>
+
+    <h3>Version</h3>
+    <p>Nucleus <b class="n-num" id="helpVer"></b>. Version numbers follow Semantic Versioning (major.minor.patch).</p>
+    <dl class="n-changelog" id="changelog"></dl>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var N = window.Nucleus, R = window.NUCLEUS_REGISTRY, $ = function (id) { return document.getElementById(id); }, esc = N.esc;
+  var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  $("brandMark").innerHTML = N.mark(34);
+  $("coreMark").innerHTML = N.mark(160, !reduceMotion, "Nucleus");
+  $("helpIcon").innerHTML = N.ICONS.help; $("outIcon").innerHTML = N.ICONS.out;
+  $("yr").textContent = new Date().getFullYear();
+  $("ver").textContent = "v" + N.VERSION; $("helpVer").textContent = "v" + N.VERSION;
+  $("changelog").innerHTML = N.CHANGELOG.map(function (c) { return "<dt>" + esc(c[0]) + " · " + esc(c[1]) + "</dt><dd>" + esc(c[2]) + "</dd>"; }).join("");
+  document.querySelectorAll("[data-close]").forEach(function (b) { b.innerHTML = N.ICONS.close; b.onclick = function () { b.closest("dialog").close(); }; });
+  N.bindThemeButton($("themeBtn"));
+  var paintHero = function () { $("heroLogo").src = "/brand/logos/animated/atomic-orbital-hero-animated-for-" + (N.theme() === "dark" ? "dark" : "light") + "-backgrounds.svg"; };
+  paintHero(); document.addEventListener("nucleus:theme", paintHero);
+
+  var openHelp = function () { $("helpDlg").showModal(); };
+  $("helpBtn").onclick = openHelp; $("helpLink").onclick = openHelp;
+  if (location.hash === "#help") setTimeout(openHelp, 50);
+  $("signOutBtn").onclick = function () { N.signOut(); };
+
+  // where to go after signing in
+  var params = new URLSearchParams(location.search);
+  var next = params.get("next");
+  if (!next || next.charAt(0) !== "/" || next.charAt(1) === "/" || next.charAt(1) === "\\") next = null;
+
+  /* ---------------- sign in ---------------- */
+  $("showTok").onclick = function () { var t = $("token"), show = t.type === "password"; t.type = show ? "text" : "password"; this.textContent = show ? "Hide" : "Show"; };
+  $("signinForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("signinErr"), btn = $("signinBtn"), tok = $("token").value.trim();
+    err.hidden = true;
+    if (!tok) { err.textContent = "Paste your Pipedrive API token first."; err.hidden = false; $("token").focus(); return; }
+    btn.disabled = true; btn.textContent = "Checking with Pipedrive…";
+    N.api("/api/nucleus/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: tok, remember: $("remember").checked }) })
+      .then(function (j) {
+        if (j.ok) { $("token").value = ""; if (next) { location.href = next; return; } history.replaceState(null, "", "/"); showSignin(false); start(j.user); return; }
+        if (j.code === "google_required") { location.href = "/"; return; }
+        var msg = j.message || "Sign-in didn't work (" + j.__status + ").";
+        if (j.__status === 404) msg = "The Nucleus server functions aren't running here. Deploy with the Netlify command-line tool or from Git (see README), not drag-and-drop of the public folder.";
+        err.textContent = msg; err.hidden = false;
+      })
+      .catch(function () { err.textContent = "Couldn't reach the Nucleus server. Check your connection and try again."; err.hidden = false; })
+      .then(function () { btn.disabled = false; btn.textContent = "Enter the Nucleus"; });
+  });
+
+  /* ---------------- sign-in screens ---------------- */
+  var ERRORS = {
+    google_domain: "That Google account isn't on one of our company domains. Sign in with your company account.",
+    google_cancelled: "Google sign-in was cancelled.",
+    google_state: "Sign-in took too long or was opened in another tab. Please try again.",
+    google_token: "Google didn't confirm the sign-in. Please try again.",
+    google_not_configured: "Google sign-in isn't set up on this Nucleus yet.",
+    pipedrive_unavailable: "Pipedrive didn't answer, so your saved token couldn't be checked. Try again in a moment."
+  };
+  function showErr(msg) { var e = $("signinErr"); e.textContent = msg; e.hidden = !msg; }
+  function showSignin(on) { $("signin").hidden = !on; }
+  function googleScreen() {
+    showSignin(true); $("googleBlock").hidden = false;
+    $("googleBtn").href = "/api/nucleus/google/start" + (next ? "?next=" + encodeURIComponent(next) : "");
+  }
+  function tokenScreen(pending, reason) {
+    showSignin(true); $("signinForm").hidden = false; $("tokenHelp").hidden = false;
+    if (pending) {
+      var first = String(pending.name || "").split(" ")[0];
+      $("signinLede").textContent = "Signed in as " + (pending.email || "") + ".";
+      $("connectIntro").hidden = false;
+      $("connectIntro").innerHTML = "<b>" + esc(first ? "Hi " + first + ", one" : "One") + " last step: connect Pipedrive.</b> You only do this once. After this, signing in with Google is all you need.";
+      if (reason === "token_rejected") showErr("Your saved Pipedrive token no longer works (it may have been reset). Paste your current one.");
+      $("rememberRow").hidden = true; $("notYou").hidden = false;
+      $("signinBtn").textContent = "Connect Pipedrive";
+      $("tokenPrivacy").textContent = "Your token is checked with Pipedrive, then stored encrypted against your Google account so you don't have to enter it again. Only the Nucleus server can read it. Use Your account → Connect a different Pipedrive token if you ever reset it.";
+    }
+    setTimeout(function () { $("token").focus(); }, 30);
+  }
+  $("notYouBtn").onclick = function () { N.signOut(); };
+  var errCode = params.get("error");
+  if (errCode) { showErr(ERRORS[errCode] ? ERRORS[errCode] + (params.get("email") ? " (" + params.get("email") + ")" : "") : "Sign-in didn't work."); history.replaceState(null, "", "/" + (next ? "?next=" + encodeURIComponent(next) : "")); }
+
+  /* ---------------- account ---------------- */
+  var me = null;
+  function openAccount() {
+    if (!me) return;
+    var rows = [];
+    if (me.google) rows.push(["Google account", me.google.email]);
+    if (me.pipedrive) rows.push(["Pipedrive user", me.pipedrive.name + (me.pipedrive.email ? " · " + me.pipedrive.email : "")]);
+    rows.push(["Pipedrive company", me.companyName || me.company || "—"]);
+    rows.push(["Role", me.isAdmin ? "Administrator" : "Team member"]);
+    $("acctTable").innerHTML = rows.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td></tr>"; }).join("");
+    $("acctTokenNote").textContent = me.google ? "Reset your token in Pipedrive? Connect the new one here. You'll be asked for it straight away." : "To use a different Pipedrive token, sign out and sign in with the new one.";
+    $("changeTokBtn").hidden = !me.google;
+    $("acctDlg").showModal();
+  }
+  $("changeTokBtn").onclick = function () {
+    N.api("/api/nucleus/pipedrive/forget", { method: "POST" }).then(function () { location.href = "/"; });
+  };
+  $("acctSignOut").onclick = function () { N.signOut(); };
+
+  /* ---------------- hub ---------------- */
+  function start(user) {
+    me = user;
+    $("signin").hidden = true; $("hub").hidden = false; $("signOutBtn").hidden = false;
+    var chip = $("userChip"); chip.hidden = false;
+    chip.setAttribute("role", "button"); chip.tabIndex = 0; chip.style.cursor = "pointer";
+    chip.onclick = openAccount; chip.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openAccount(); } };
+    chip.innerHTML = '<span class="n-avatar">' + (user.icon ? '<img alt="" src="' + esc(user.icon) + '">' : esc(N.initials(user.name))) + '</span><span class="hide-sm">' + esc(user.name) + "</span>";
+    chip.title = "Your account" + (user.google ? " · " + user.google.email : user.email ? " · " + user.email : "");
+    var h = new Date().getHours(), first = String(user.name || "").split(" ")[0];
+    $("greetH").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "");
+    renderDir(); buildAtom(); loadPulse();
+  }
+
+  function loadPulse() {
+    N.api("/api/nucleus/pulse").then(function (j) {
+      if (!j.ok) return;
+      var set = function (id, v) { var el = $(id); el.textContent = v == null ? "—" : v; el.classList.toggle("wait", v == null); };
+      set("pMyDeals", j.myOpenDeals); set("pMyValue", j.myOpenValue); set("pActs", j.myActivitiesDue); set("pTeam", j.teamOpenValue);
+    }).catch(function () {});
+  }
+
+  function hrefFor(it) { return it.status === "external" ? it.href : "/launch.html?t=" + encodeURIComponent(it.id); }
+  function activate(it, ev) {
+    if (it.status === "awaiting") { if (ev) ev.preventDefault(); showItem(it); }
+  }
+  function showItem(it) {
+    $("itemDlgH").textContent = it.name;
+    $("itemDlgBody").innerHTML = "<p>" + esc(it.desc) + "</p><h3>Not added yet</h3><p>This slot is reserved in the Nucleus, but the tool's code hasn't been added. Send the latest version (the HTML file, Netlify folder, or claude.ai artifact link) to whoever maintains the Nucleus.</p><p>To add it: put the files in <code>public" + esc(it.href) + "</code>, set <code>status: \"live\"</code> for <code>" + esc(it.id) + "</code> in <code>public/nucleus/registry.js</code>, and redeploy.</p>";
+    $("itemDlg").showModal();
+  }
+
+  function cardHTML(it) {
+    var ext = it.status === "external";
+    var label = it.status === "awaiting" ? "Awaiting code" : ext ? "Opens in new tab" : "Live";
+    var links = (it.links || []).map(function (l) { return '<span class="ao-tag n-sublink" role="link" tabindex="0" data-href="' + esc(l.href) + '"' + (l.internal ? ' data-internal="1"' : "") + ">" + esc(l.label) + (l.internal ? " →" : " ↗") + "</span>"; }).join("");
+    return '<a class="n-card" href="' + esc(hrefFor(it)) + '" data-id="' + esc(it.id) + '" data-orbit="' + it.orbit + '" data-status="' + it.status + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">"
+      + '<div class="n-card__top"><span class="n-card__icon">' + (N.ICONS[it.icon] || "") + "</span><h4>" + esc(it.name) + "</h4></div>"
+      + "<p>" + esc(it.desc) + "</p>"
+      + '<div class="n-card__foot">' + (it.tags || []).map(function (t) { return '<span class="ao-tag">' + esc(t) + "</span>"; }).join("") + links
+      + '<span class="n-status ' + it.status + '">' + label + "</span></div></a>";
+  }
+  function renderDir() {
+    var q = $("q").value.trim().toLowerCase();
+    var html = R.orbits.map(function (o) {
+      var items = R.items.filter(function (i) { return i.orbit === o.id && (!q || (i.name + " " + i.desc + " " + (i.tags || []).join(" ")).toLowerCase().indexOf(q) >= 0); });
+      if (!items.length) return "";
+      return '<section class="n-group"><h3>' + esc(o.name) + " <small>" + esc(o.blurb) + '</small></h3><div class="n-grid">' + items.map(cardHTML).join("") + "</div></section>";
+    }).join("");
+    $("dir").innerHTML = html || '<p class="n-empty">Nothing matches “' + esc(q) + "”.</p>";
+  }
+  $("q").addEventListener("input", renderDir);
+  $("dir").addEventListener("keydown", function (e) { var sub = e.target.closest("[data-href]"); if (sub && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSub(sub); } });
+  function openSub(sub) { if (sub.dataset.internal) location.href = sub.dataset.href; else window.open(sub.dataset.href, "_blank", "noopener"); }
+  $("dir").addEventListener("click", function (e) {
+    var sub = e.target.closest("[data-href]");
+    if (sub) { e.preventDefault(); openSub(sub); return; }
+    var a = e.target.closest(".n-card"); if (!a) return;
+    activate(N.item(a.dataset.id), e);
+  });
+
+  /* ---------------- the atom ---------------- */
+  // Each ring: size as a share of the stage, tilt, and how long one lap takes (negative = the other way).
+  var RINGS_WIDE = {
+    tools:    { rx: .255, ry: .25, tilt: -9, lap: 150 },
+    projects: { rx: .365, ry: .355, tilt: 7, lap: -190 },
+    systems:  { rx: .47, ry: .465, tilt: -3, lap: 240 }
+  };
+  var RINGS_NARROW = {
+    tools:    { rx: .28, ry: .25, tilt: -9, lap: 150 },
+    projects: { rx: .375, ry: .355, tilt: 7, lap: -190 },
+    systems:  { rx: .435, ry: .455, tilt: -3, lap: 240 }
+  };
+  var RINGS = RINGS_WIDE;
+  var nodes = [], paused = false, hover = false, last = 0, spin = { tools: 0, projects: .6, systems: 1.1 }, W = 0, H = 0, raf = 0;
+
+  function buildAtom() {
+    var atom = $("atom");
+    nodes.forEach(function (n) { n.el.remove(); }); nodes = [];
+    // orbits that share a ring (Marketing sits on the Tools ring) are spaced out together
+    var rings = {};
+    R.orbits.forEach(function (o) { var ring = o.ring || o.id; (rings[ring] = rings[ring] || []).push.apply(rings[ring], R.items.filter(function (i) { return i.orbit === o.id; }).map(function (it) { return { it: it, o: o }; })); });
+    Object.keys(rings).forEach(function (ring) {
+      var list = rings[ring];
+      list.forEach(function (x, k) {
+        var it = x.it, o = x.o;
+        var ext = it.status === "external";
+        var el = document.createElement("a");
+        el.className = "n-node"; el.href = hrefFor(it); el.dataset.orbit = ring; el.dataset.group = o.id; el.dataset.status = it.status; el.dataset.id = it.id;
+        if (ext) { el.target = "_blank"; el.rel = "noopener"; }
+        el.setAttribute("aria-label", it.name + (it.status === "awaiting" ? " (awaiting code)" : ext ? " (opens in a new tab)" : ""));
+        el.title = it.name;
+        el.innerHTML = '<span class="dot">' + (N.ICONS[it.icon] || "") + '</span><span class="lab">' + esc(it.name) + "</span>";
+        el.addEventListener("click", function (e) { activate(it, e); });
+        el.addEventListener("focus", function () { hover = true; });
+        el.addEventListener("blur", function () { hover = false; });
+        atom.appendChild(el);
+        nodes.push({ el: el, ring: ring, phase: (k / list.length) * Math.PI * 2 });
+      });
+    });
+    atom.onmouseenter = function () { hover = true; };
+    atom.onmouseleave = function () { hover = false; };
+    measure(); place();
+    if (!reduceMotion) { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); }
+    else { $("pauseBtn").hidden = true; }
+  }
+  function measure() {
+    var a = $("atom"); W = a.clientWidth; H = a.clientHeight; RINGS = W < 720 ? RINGS_NARROW : RINGS_WIDE;
+    var svg = $("orbits"); svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.innerHTML = Object.keys(RINGS).map(function (k) {
+      var r = RINGS[k];
+      return '<ellipse class="orb ' + k + '" cx="' + W / 2 + '" cy="' + H / 2 + '" rx="' + r.rx * W + '" ry="' + r.ry * H + '" transform="rotate(' + r.tilt + " " + W / 2 + " " + H / 2 + ')"/>';
+    }).join("");
+  }
+  function place() {
+    var cx = W / 2, cy = H / 2;
+    nodes.forEach(function (n) {
+      var r = RINGS[n.ring], th = n.phase + spin[n.ring], ph = r.tilt * Math.PI / 180;
+      var ex = r.rx * W * Math.cos(th), ey = r.ry * H * Math.sin(th);
+      var x = cx + ex * Math.cos(ph) - ey * Math.sin(ph), y = cy + ex * Math.sin(ph) + ey * Math.cos(ph);
+      n.el.style.left = x + "px"; n.el.style.top = y + "px";
+      n.el.classList.toggle("back", Math.sin(th) < -0.25);
+    });
+  }
+  function tick(t) {
+    var dt = last ? Math.min(.1, (t - last) / 1000) : 0; last = t;
+    if (!paused && !hover && !document.hidden) {
+      Object.keys(RINGS).forEach(function (k) { spin[k] += dt * Math.PI * 2 / RINGS[k].lap; });
+      place();
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  $("pauseBtn").onclick = function () { paused = !paused; this.setAttribute("aria-pressed", String(paused)); this.textContent = paused ? "Resume orbits" : "Pause orbits"; };
+  var ro = new ResizeObserver(function () { if (!$("hub").hidden) { measure(); place(); } });
+  ro.observe($("atom"));
+
+  /* ---------------- boot ---------------- */
+  Promise.all([N.api("/api/nucleus/me").catch(function () { return {}; }), N.api("/api/nucleus/config").catch(function () { return {}; })]).then(function (res) {
+    var m = res[0] || {}, cfg = res[1] || {};
+    if (m.signedIn) { if (next) { location.replace(next); return; } start(m.user); return; }
+    if (m.pending) { tokenScreen(m.user, m.reason); return; }
+    if (cfg.google) googleScreen(); else tokenScreen(null);
+  });
+})();
+</script>
+</body>
+</html>

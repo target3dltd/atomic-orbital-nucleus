@@ -1,0 +1,11 @@
+/* IBM Plex Sans and Mono, self-hosted (SIL Open Font License, see ../fonts/IBMPlex-OFL.txt). */
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:swap;src:url("../fonts/IBMPlexSans-400-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:italic;font-weight:400;font-display:swap;src:url("../fonts/IBMPlexSans-400-Italic-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:swap;src:url("../fonts/IBMPlexSans-500-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:italic;font-weight:500;font-display:swap;src:url("../fonts/IBMPlexSans-500-Italic-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:swap;src:url("../fonts/IBMPlexSans-600-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:italic;font-weight:600;font-display:swap;src:url("../fonts/IBMPlexSans-600-Italic-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:700;font-display:swap;src:url("../fonts/IBMPlexSans-700-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:italic;font-weight:700;font-display:swap;src:url("../fonts/IBMPlexSans-700-Italic-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url("../fonts/IBMPlexMono-400-Latin.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url("../fonts/IBMPlexMono-500-Latin.woff2") format("woff2")}

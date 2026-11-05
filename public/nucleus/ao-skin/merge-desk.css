@@ -1,0 +1,16 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the Pipedrive Duplicate Eraser (Account Merge Desk) v1.0.0 */
+html:not(#ao-skin){
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --sunk:var(--ao-sunk); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line);
+  --accent:var(--ao-teal-text); --accent-ink:#FFFFFF; --accent-soft:var(--ao-teal-soft);
+  --ok:var(--ao-green); --ok-soft:var(--ao-green-soft); --no:#C2362B; --no-soft:rgba(194,54,43,.10); --warn:#B4540B; --warn-soft:rgba(180,84,11,.10);
+  --chip:var(--ao-sunk); --f-display:var(--ao-font-display); --f-body:var(--ao-font-body); --f-mono:var(--ao-font-mono); --r:var(--ao-radius);
+  color-scheme:light;
+}
+html:not(#ao-skin)[data-theme="dark"]{--accent-ink:#0A0E14; --no:#FF7A6E; --no-soft:rgba(255,122,110,.14); --warn:#F5A35C; --warn-soft:rgba(245,163,92,.14); color-scheme:dark}
+html:not(#ao-skin) body{background:var(--ao-bg);color:var(--ao-text)}
+html:not(#ao-skin) h1, html:not(#ao-skin) h2, html:not(#ao-skin) h4{font-family:var(--ao-font-display);font-weight:600;letter-spacing:0}
+html:not(#ao-skin) header.top{border-top:3px solid var(--ao-teal)}
+html:not(#ao-skin) .seg button[aria-pressed="true"]{background:var(--ao-teal-text);color:var(--accent-ink)}
+html:not(#ao-skin) .btn.warn{color:#fff}
+html:not(#ao-skin)[data-theme="dark"] .btn.warn{color:#0A0E14}

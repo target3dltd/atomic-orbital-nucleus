@@ -1,0 +1,40 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Nucleus dash-runtime v1.0.0: the design tokens a claude.ai Dashboard page expects, mapped onto the Atomic Orbital brand. */
+:root{
+  --font-anthropic-sans:var(--ao-font-body); --font-anthropic-serif:var(--ao-font-display);
+  --color-fg:var(--ao-text); --color-fg-muted:var(--ao-muted); --color-bg:var(--ao-bg); --color-panel:var(--ao-surface);
+  --color-border-line:var(--ao-line); --color-ok:var(--ao-green); --color-warn:#B4540B; --color-bad:#C2362B;
+  --cds-gap-xs:4px; --cds-gap-sm:8px; --cds-gap-md:16px; --cds-gap-lg:28px;
+  --cds-pad-xs:6px; --cds-pad-sm:10px; --cds-pad-lg:18px; --cds-radius:var(--ao-radius);
+  --cds-font-size-caption:14px; --cds-font-size-body:16px; --cds-font-size-heading:18px; --cds-font-size-title:34px; --cds-font-weight-medium:600;
+  --cds-surface-popover:var(--ao-surface); --cds-border:var(--ao-line); --cds-shadow-popover:0 6px 24px rgb(14 22 32/.14); --cds-text-secondary:var(--ao-muted);
+  --cds-chart-grid:#E3E8EE; --cds-chart-axis:#9AA9B8; --cds-chart-status-critical:var(--ao-orange);
+  --cds-dur-slow:.45s; --cds-ease-out:cubic-bezier(.2,.7,.2,1);
+  --dash-c1:var(--ao-teal); --dash-c2:#5B6B7C; --dash-c3:var(--ao-green); --dash-c4:#7A5AC8; --dash-c5:#C08A12; --dash-c6:#2F6FD6; --dash-c7:#B4467A; --dash-c8:#6C8A2E;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--color-warn:#F5A35C;--color-bad:#FF7A6E;--cds-chart-grid:#1E2836;--cds-chart-axis:#5A7A8A;--cds-shadow-popover:0 8px 28px rgb(0 0 0/.5);--dash-c2:#A3B0BF;--dash-c4:#B49BFF;--dash-c5:#F0C04E;--dash-c6:#7FA8FF;--dash-c7:#F08AB8;--dash-c8:#A8D46A}}
+:root[data-theme="dark"]{--color-warn:#F5A35C;--color-bad:#FF7A6E;--cds-chart-grid:#1E2836;--cds-chart-axis:#5A7A8A;--cds-shadow-popover:0 8px 28px rgb(0 0 0/.5);--dash-c2:#A3B0BF;--dash-c4:#B49BFF;--dash-c5:#F0C04E;--dash-c6:#7FA8FF;--dash-c7:#F08AB8;--dash-c8:#A8D46A}
+
+body.dash-body{margin:0;background:var(--ao-bg)}
+#dash-root{max-width:1280px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left))}
+.dash-skeleton{position:relative;color:transparent!important;border-radius:6px;background:linear-gradient(90deg,var(--ao-line) 0,color-mix(in srgb,var(--ao-line) 40%,transparent) 50%,var(--ao-line) 100%);background-size:200% 100%;animation:dash-sh 1.4s linear infinite}
+.dash-skeleton > *{visibility:hidden}
+@keyframes dash-sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.dash-skeleton{animation:none}}
+
+/* sources strip (stands in for the claude.ai Sources panel) */
+.dash-src{margin:0 0 20px;border:1px solid var(--ao-line);border-radius:var(--ao-radius);background:var(--ao-surface);font:14px/1.45 var(--ao-font-body);color:var(--ao-muted)}
+.dash-src summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;list-style:none}
+.dash-src summary::-webkit-details-marker{display:none}
+.dash-src summary b{color:var(--ao-text);font-weight:600}
+.dash-src summary .dash-chev{margin-left:auto;color:var(--ao-teal-text);font-weight:600}
+.dash-src[open] summary .dash-chev::after{content:" ▲"} .dash-src:not([open]) summary .dash-chev::after{content:" ▼"}
+.dash-src ul{list-style:none;margin:0;padding:0 14px 12px;display:grid;gap:8px}
+.dash-src li{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;border-top:1px solid var(--ao-line);padding-top:8px}
+.dash-src li .t{color:var(--ao-text);font-weight:600}
+.dash-src li .d{flex-basis:100%}
+.dash-src button{font:600 13px var(--ao-font-body);background:none;border:1px solid var(--ao-line);border-radius:6px;padding:2px 9px;cursor:pointer;color:var(--ao-teal-text)}
+.dash-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ao-green);margin-right:6px;vertical-align:1px}
+.dash-dot.loading{background:var(--ao-line)} .dash-dot.error{background:var(--color-bad)} .dash-dot.connect{background:var(--color-warn)}
+.dash-warn{margin:0 0 16px;padding:10px 14px;border-radius:var(--ao-radius);border:1px solid var(--color-warn);background:color-mix(in srgb,var(--color-warn) 10%,transparent);color:var(--ao-text);font:14px/1.5 var(--ao-font-body)}
+#dash-root [hidden]{display:none!important}

@@ -1,0 +1,26 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the Motive Upgrade Planner v1.0.0 */
+html:not(#ao-skin){
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --sunk:var(--ao-sunk); --line:var(--ao-line); --line-strong:var(--ao-text); --fg:var(--ao-text); --ink:var(--ao-text); --muted:var(--ao-muted);
+  --accent:var(--ao-teal); --accent-ink:var(--ao-on-teal); --accent-soft:var(--ao-teal-soft); --accent-line:var(--ao-teal); --link:var(--ao-teal-text);
+  --brand-blue:var(--ao-teal); --brand-red:#C2362B; --accent-red:#C2362B; --bad:#C2362B; --bad-soft:rgba(194,54,43,.10);
+  --info:var(--ao-teal-text); --info-soft:var(--ao-teal-soft); --ok:var(--ao-green); --ok-soft:var(--ao-green-soft); --ok-bg:var(--ao-green-soft);
+  --f-display:var(--ao-font-display); --f-body:var(--ao-font-body); --f-mono:var(--ao-font-mono); --f-head:var(--ao-font-display); --r:var(--ao-radius);
+  color-scheme:light;
+}
+html:not(#ao-skin)[data-theme="dark"]{--brand-red:#FF7A6E; --accent-red:#FF7A6E; --bad:#FF7A6E; --bad-soft:rgba(255,122,110,.16); color-scheme:dark}
+html:not(#ao-skin) body{background:var(--ao-bg);color:var(--ao-text)}
+html:not(#ao-skin) h1, html:not(#ao-skin) h2, html:not(#ao-skin) h3.k, html:not(#ao-skin) nav.tabs a, html:not(#ao-skin) .sys-head .t,
+html:not(#ao-skin) .email-box h4, html:not(#ao-skin) .tile .n{font-family:var(--ao-font-display);font-weight:600;text-transform:none;letter-spacing:0}
+html:not(#ao-skin) h1{font-size:22px}
+html:not(#ao-skin) h2{font-size:26px}
+html:not(#ao-skin) h3.k{font-size:17px}
+html:not(#ao-skin) nav.tabs a{font-size:16px}
+html:not(#ao-skin) .tile .n{font-size:30px}
+html:not(#ao-skin) .sys-head .t{font-size:18px}
+html:not(#ao-skin) button.primary:hover{filter:brightness(1.08);background:var(--ao-teal)}
+html:not(#ao-skin) .pill.blk, html:not(#ao-skin) .sev.block{color:#fff}
+html:not(#ao-skin)[data-theme="dark"] .pill.blk, html:not(#ao-skin)[data-theme="dark"] .sev.block{color:#0A0E14}
+html:not(#ao-skin) .brand img{height:32px;width:auto}
+html:not(#ao-skin) header.top nav.tabs{margin-left:auto}
+html:not(#ao-skin) header.top .theme-btn{border-radius:var(--ao-radius)}

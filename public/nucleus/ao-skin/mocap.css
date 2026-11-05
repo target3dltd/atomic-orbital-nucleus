@@ -1,0 +1,20 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the Mocap Toolkit v1.0.0. Dark mode in this tool is body.dark-theme, kept in step with the Nucleus. */
+html:not(#ao-skin) body{
+  --bg:#F4F6F8; --panel:#FFFFFF; --ink:#0E1620; --ink-soft:#4A5A6B; --line:#D5DCE4; --accent:#03797F; --accent-soft:rgba(4,149,155,.12); --warn:#C2481A;
+  --l-color:#04959B; --r-color:#F2531A;
+  --sans:var(--ao-font-body); --mono:var(--ao-font-mono);
+  --viz-bg:#F4F6F8; --viz-bg-input:#FFFFFF; --viz-text:#0E1620; --viz-text-soft:#4A5A6B; --viz-accent:#03797F; --viz-border:#D5DCE4; --viz-glow:rgba(4,149,155,.30);
+}
+html:not(#ao-skin) body.dark-theme{
+  --bg:#0A0E14; --panel:#121923; --ink:#E8EEF5; --ink-soft:#A3B0BF; --line:#243040; --accent:#08DADB; --accent-soft:rgba(8,218,219,.14); --warn:#FF5B38;
+  --l-color:#08DADB; --r-color:#FF5B38;
+  --viz-bg:#0A0E14; --viz-bg-input:#121923; --viz-text:#E8EEF5; --viz-text-soft:#A3B0BF; --viz-accent:#08DADB; --viz-border:#243040; --viz-glow:rgba(8,218,219,.45);
+}
+html:not(#ao-skin) h1, html:not(#ao-skin) h2, html:not(#ao-skin) .section-title{font-family:var(--ao-font-display);font-weight:600;letter-spacing:0}
+html:not(#ao-skin) .wrap > header h1{display:flex;align-items:center;gap:12px}
+html:not(#ao-skin) .wrap > header h1::before{content:"";width:34px;height:34px;flex:none;background:url("/brand/logos/svg/atomic-orbital-mark-small-size-for-light-backgrounds.svg") center/contain no-repeat}
+html:not(#ao-skin) body.dark-theme .wrap > header h1::before{background-image:url("/brand/logos/svg/atomic-orbital-mark-small-size-for-dark-backgrounds.svg")}
+html:not(#ao-skin) body.dark-theme{color-scheme:dark}
+html:not(#ao-skin) .profile-grid input, html:not(#ao-skin) .profile-grid select, html:not(#ao-skin) input[type="text"], html:not(#ao-skin) input[type="number"],
+html:not(#ao-skin) input[type="search"], html:not(#ao-skin) select{background:var(--panel);color:var(--ink);border:1px solid var(--line)}

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Assets &amp; Press Kit · Nucleus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+<style>
+:root{--pk-sunk:#EAEEF2;--pk-shadow:0 1px 2px rgb(14 22 32/.06),0 8px 24px rgb(14 22 32/.06)}
+:root[data-theme="dark"]{--pk-sunk:#0E141C;--pk-shadow:0 1px 2px rgb(0 0 0/.4),0 10px 30px rgb(0 0 0/.35)}
+body{min-height:100vh}
+[hidden]{display:none!important}
+.pk-wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.pk-num,.pk-hex{font-family:var(--ao-font-mono);font-variant-numeric:tabular-nums}
+/* sub navigation */
+.pk-nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--ao-bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--ao-line)}
+.pk-nav .pk-wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px;scrollbar-width:none}
+.pk-nav a{flex:none;font:500 14px var(--ao-font-body);color:var(--ao-muted);text-decoration:none;padding:6px 12px;border-radius:999px}
+.pk-nav a:hover{color:var(--ao-text);background:var(--pk-sunk)}
+.pk-nav a[aria-current="true"]{color:var(--ao-teal-text);background:color-mix(in srgb,var(--ao-teal) 12%,transparent);font-weight:600}
+/* hero */
+.pk-hero{padding:40px 0 8px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;align-items:center}
+.pk-kicker{font:600 13px var(--ao-font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ao-teal-text);margin:0 0 6px}
+.pk-hero h1{font-size:clamp(34px,5vw,54px);margin:0}
+.pk-hero p.lede{color:var(--ao-muted);font-size:18px;max-width:58ch;margin:12px 0 22px}
+.pk-actions{display:flex;flex-wrap:wrap;gap:10px}
+.pk-hero-art{display:flex;justify-content:center}
+.pk-hero-art img{width:min(260px,60vw);height:auto}
+@media(max-width:820px){.pk-hero{grid-template-columns:1fr}.pk-hero-art{order:-1;justify-content:flex-start}.pk-hero-art img{width:120px}}
+/* sections */
+.pk-sec{padding:48px 0 8px;scroll-margin-top:56px}
+.pk-sec > h2{font-size:clamp(26px,3.4vw,36px);margin:0}
+.pk-sec > p.sub{color:var(--ao-muted);margin:6px 0 20px;max-width:70ch}
+.pk-sec h3{font-size:20px;margin:28px 0 10px}
+.pk-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.pk-card{background:var(--ao-surface);border:1px solid var(--ao-line);border-top:3px solid var(--ao-teal);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.pk-card h4{font:600 17px/1.25 var(--ao-font-display);margin:0}
+.pk-card p{margin:0;color:var(--ao-muted);font-size:15px;line-height:1.5}
+.pk-dl{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.pk-btn{display:inline-flex;align-items:center;gap:6px;font:600 14px var(--ao-font-body);padding:7px 12px;border-radius:8px;text-decoration:none;color:var(--ao-teal-text);border:1.5px solid var(--ao-teal-text);background:transparent;cursor:pointer;min-height:36px}
+.pk-btn:hover{background:color-mix(in srgb,var(--ao-teal) 10%,transparent)}
+.pk-btn small{font-weight:400;color:var(--ao-muted)}
+.pk-btn svg{width:16px;height:16px;flex:none}
+/* logo tiles */
+.pk-tile{border-radius:6px;display:grid;place-items:center;aspect-ratio:16/9;padding:18px;border:1px solid var(--ao-line)}
+.pk-tile img{max-width:100%;max-height:100%;object-fit:contain}
+.pk-tile.light{background:#FFFFFF}
+.pk-tile.dark{background:#0A0E14;border-color:#243040}
+.pk-tile.check{background:repeating-conic-gradient(var(--pk-sunk) 0 25%,transparent 0 50%) 0 0/16px 16px}
+.pk-rules{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-top:8px}
+.pk-rule{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.pk-rule b{display:block}
+.pk-rule i{font-style:normal;flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700}
+.pk-rule i.no{background:color-mix(in srgb,var(--ao-orange) 14%,transparent);color:var(--ao-orange)}
+.pk-rule i.yes{background:color-mix(in srgb,var(--ao-teal) 14%,transparent);color:var(--ao-teal-text)}
+/* colour */
+.pk-swatches{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.pk-sw{all:unset;cursor:pointer;border:1px solid var(--ao-line);border-radius:8px;overflow:hidden;background:var(--ao-surface);display:flex;flex-direction:column}
+.pk-sw:focus-visible{outline:3px solid var(--ao-teal-text);outline-offset:3px}
+.pk-sw .chip{height:72px;border-bottom:1px solid var(--ao-line)}
+.pk-sw .meta{padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.pk-sw .meta b{font-weight:600}
+.pk-sw .meta span{color:var(--ao-muted)}
+.pk-sw .copyhint{font-size:12px;color:var(--ao-teal-text);margin-top:4px}
+.pk-balance{display:flex;height:40px;border-radius:8px;overflow:hidden;border:1px solid var(--ao-line);margin:6px 0 8px}
+.pk-balance div{display:grid;place-items:center;font:600 13px var(--ao-font-body)}
+.pk-balance-legend{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));color:var(--ao-muted);font-size:15px}
+.pk-balance-legend b{color:var(--ao-text);display:block}
+/* type */
+.pk-type{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.pk-type .spec{font-size:56px;line-height:1;color:var(--ao-text)}
+.pk-type .sample{font-size:17px;color:var(--ao-text);line-height:1.5}
+.pk-hier{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:20px;display:grid;gap:14px}
+.pk-hier .row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:baseline}
+.pk-hier .row small{color:var(--ao-muted);font-size:13px}
+@media(max-width:640px){.pk-hier .row{grid-template-columns:1fr;gap:2px}}
+/* templates + slides */
+.pk-doc{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:start}
+.pk-doc img{width:100%;height:auto;border:1px solid var(--ao-line);border-radius:4px;background:#fff;box-shadow:var(--pk-shadow)}
+@media(max-width:520px){.pk-doc{grid-template-columns:100px minmax(0,1fr)}}
+.pk-slides{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}
+.pk-slides button{all:unset;cursor:pointer;flex:none;width:240px;scroll-snap-align:start;border-radius:6px;overflow:hidden;border:1px solid var(--ao-line);background:#fff}
+.pk-slides button:focus-visible{outline:3px solid var(--ao-teal-text);outline-offset:2px}
+.pk-slides img{display:block;width:100%;height:auto}
+dialog.pk-lb{border:0;padding:0;background:transparent;max-width:min(1100px,calc(100vw - 32px));width:100%}
+dialog.pk-lb::backdrop{background:rgb(10 14 20/.85)}
+.pk-lb img{width:100%;height:auto;border-radius:6px;display:block;background:#fff}
+.pk-lb .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;color:#E8EEF5;font:500 14px var(--ao-font-body)}
+.pk-lb .bar button{font:600 14px var(--ao-font-body);background:#121923;color:#E8EEF5;border:1px solid #243040;border-radius:8px;padding:8px 14px;cursor:pointer}
+/* press */
+.pk-copybox{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:16px 18px;position:relative}
+.pk-copybox p{margin:0 0 10px;line-height:1.6;max-width:75ch}
+.pk-copybox p:last-of-type{margin-bottom:0}
+.pk-copybox .pk-btn{margin-top:12px}
+.pk-two{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.pk-facts{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.pk-fact{background:var(--ao-surface);border:1px solid var(--ao-line);border-top:3px solid var(--ao-teal);border-radius:8px;padding:14px 16px}
+.pk-fact b{display:block;font:600 30px/1.1 var(--ao-font-display);color:var(--ao-text);margin-bottom:4px}
+.pk-fact span{color:var(--ao-muted);font-size:14px}
+ol.pk-values{margin:0;padding-left:20px;line-height:1.8}
+dl.pk-kv{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);margin:0;background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;overflow:hidden}
+dl.pk-kv dt,dl.pk-kv dd{margin:0;padding:10px 14px;border-bottom:1px solid var(--ao-line)}
+dl.pk-kv dt{font-weight:600;background:var(--pk-sunk)}
+dl.pk-kv dd{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+dl.pk-kv dt:last-of-type,dl.pk-kv dd:last-of-type{border-bottom:0}
+dl.pk-kv button{font:600 13px var(--ao-font-body);color:var(--ao-teal-text);background:none;border:1px solid var(--ao-line);border-radius:6px;padding:2px 9px;cursor:pointer}
+@media(max-width:560px){dl.pk-kv{grid-template-columns:1fr}dl.pk-kv dt{border-bottom:0}}
+/* help */
+.pk-help{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:6px 20px 20px;margin:48px 0 64px}
+.pk-help summary{cursor:pointer;font:600 20px var(--ao-font-display);padding:12px 0}
+.pk-help h4{font:600 16px var(--ao-font-display);margin:18px 0 6px}
+.pk-help p,.pk-help li{color:var(--ao-muted);max-width:72ch}
+.pk-help ul{padding-left:20px;margin:6px 0}
+.pk-help dt{font:500 14px var(--ao-font-mono);margin-top:8px}
+.pk-help dd{margin:2px 0 0;color:var(--ao-muted)}
+.pk-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ao-text);color:var(--ao-bg);padding:10px 16px;border-radius:8px;font:500 14px var(--ao-font-body);box-shadow:var(--pk-shadow);z-index:50}
+.pk-foot{border-top:1px solid var(--ao-line);color:var(--ao-muted);font-size:14px;padding:18px 0 28px}
+</style>
+</head>
+<body>
+
+<nav class="pk-nav" aria-label="Sections">
+  <div class="pk-wrap" id="pkNav">
+    <a href="#overview">Overview</a><a href="#logos">Logos</a><a href="#colour">Colour</a><a href="#type">Typography</a>
+    <a href="#templates">Templates &amp; guide</a><a href="#press">Press</a><a href="#company">Company details</a><a href="#web">Web</a><a href="#help">Help</a>
+  </div>
+</nav>
+
+<main class="pk-wrap">
+  <section class="pk-hero pk-sec" id="overview" style="padding-top:36px">
+    <div>
+      <p class="pk-kicker">Marketing</p>
+      <h1>Assets &amp; Press Kit</h1>
+      <p class="lede">Everything you need to present Atomic Orbital consistently: logos for every background, colours, fonts, letterheads, the 2026 brand style guide and ready-to-paste copy for press and partners.</p>
+      <div class="pk-actions">
+        <a class="ao-btn ao-btn--primary" href="files/atomic-orbital-press-kit-2026.zip" download>Download the press kit <span style="font-weight:400">· zip, 7 MB</span></a>
+        <a class="ao-btn ao-btn--secondary" href="files/atomic-orbital-brand-style-guide-2026.pdf" target="_blank" rel="noopener">Brand style guide (PDF)</a>
+      </div>
+    </div>
+    <div class="pk-hero-art"><img id="heroArt" src="/brand/logos/svg/atomic-orbital-mark-for-light-backgrounds.svg" alt="The Atomic Orbital Globe A"></div>
+  </section>
+
+  <!-- LOGOS -->
+  <section class="pk-sec" id="logos">
+    <h2>Logos</h2>
+    <p class="sub">The Globe A is our signature. Pick the file made for the background it sits on. SVG for screens and print, PNG when a tool won't take SVG.</p>
+    <div class="pk-grid" id="logoGrid"></div>
+    <h3>Icons and motion</h3>
+    <div class="pk-grid" id="iconGrid"></div>
+    <h3>Using the logo</h3>
+    <div class="pk-rules">
+      <div class="pk-rule"><i class="yes">✓</i><div><b>Minimum size</b>Never smaller than 24 px on screen or 8 mm in print. At 44 px and under, use the small-size mark.</div></div>
+      <div class="pk-rule"><i class="yes">✓</i><div><b>Clear space</b>Keep one eighth of the logo's width clear on every side: no text, photo edges or graphics inside it.</div></div>
+      <div class="pk-rule"><i class="no">✕</i><div><b>Don't rotate</b>the logo or the A.</div></div>
+      <div class="pk-rule"><i class="no">✕</i><div><b>Don't swap or recolour</b>the teal and orange. The orange is the only orange in the logo.</div></div>
+      <div class="pk-rule"><i class="no">✕</i><div><b>Don't use the light file on dark</b>backgrounds, or the dark file on light.</div></div>
+      <div class="pk-rule"><i class="no">✕</i><div><b>Don't stretch, squash, add shadows</b>or place it on busy backgrounds.</div></div>
+    </div>
+  </section>
+
+  <!-- COLOUR -->
+  <section class="pk-sec" id="colour">
+    <h2>Colour</h2>
+    <p class="sub">Teal and orange on calm neutrals. Click any swatch to copy its hex value.</p>
+    <div class="pk-balance" aria-label="Colour balance: 70% neutrals, 20% teal, 10% orange">
+      <div style="flex:70;background:#EAEEF2;color:#0E1620">70% neutrals</div><div style="flex:20;background:#04959B;color:#0E1620">20% teal</div><div style="flex:10;background:#F2531A;color:#0E1620">10%</div>
+    </div>
+    <div class="pk-balance-legend">
+      <div><b>Neutrals do the heavy lifting</b>Backgrounds, surfaces, body text and lines.</div>
+      <div><b>Teal carries the brand</b>Headings, links, card tops, icons and charts. Use text teal <span class="pk-hex">#03797F</span> for anything people read.</div>
+      <div><b>Orange is for one thing</b>One orange per view: the main button or the logo. Buttons take dark text, never white.</div>
+    </div>
+    <h3>Light theme <small class="ao-muted" style="font:400 15px var(--ao-font-body)">the default palette</small></h3>
+    <div class="pk-swatches" id="swLight"></div>
+    <h3>Dark theme <small class="ao-muted" style="font:400 15px var(--ao-font-body)">when the device is set to dark</small></h3>
+    <div class="pk-swatches" id="swDark"></div>
+    <p class="ao-muted" style="font-size:14px;margin-top:12px">Green is for conservation and sustainability tags only.</p>
+  </section>
+
+  <!-- TYPE -->
+  <section class="pk-sec" id="type">
+    <h2>Typography</h2>
+    <p class="sub">Space Grotesk brings the precision of engineering to headings; IBM Plex Sans keeps body copy warm and legible. All three families are free under the SIL Open Font License.</p>
+    <div class="pk-type">
+      <div class="pk-card"><div class="spec" style="font-family:var(--ao-font-display);font-weight:600">Aa</div><h4>Space Grotesk</h4><p>SemiBold 600 · headings and short display lines.</p><div class="sample" style="font-family:var(--ao-font-display);font-weight:600">With you every step of the way</div><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-fonts.zip" download>Fonts <small>zip</small></a></div></div>
+      <div class="pk-card"><div class="spec" style="font-family:var(--ao-font-body)">Aa</div><h4>IBM Plex Sans</h4><p>Regular 400 · Medium 500 · SemiBold 600 · body copy, interfaces and documents.</p><div class="sample">Our engineers design, install and commission motion capture systems.</div><div class="pk-dl"><a class="pk-btn" href="https://fonts.google.com/specimen/IBM+Plex+Sans" target="_blank" rel="noopener">Google Fonts ↗</a></div></div>
+      <div class="pk-card"><div class="spec" style="font-family:var(--ao-font-mono)">Aa</div><h4>IBM Plex Mono</h4><p>Regular 400 · figures, codes and colour values.</p><div class="sample" style="font-family:var(--ao-font-mono)">#04959B · 17518955</div><div class="pk-dl"><a class="pk-btn" href="https://fonts.google.com/specimen/IBM+Plex+Mono" target="_blank" rel="noopener">Google Fonts ↗</a></div></div>
+    </div>
+    <h3>Hierarchy</h3>
+    <div class="pk-hier">
+      <div class="row"><small>Heading 1<br>Space Grotesk 600 · 40–64 px</small><div style="font:600 clamp(26px,4vw,40px)/1.1 var(--ao-font-display)">With you every step of the way</div></div>
+      <div class="row"><small>Heading 2<br>Space Grotesk 600 · 28–42 px, teal</small><div style="font:600 clamp(20px,3vw,28px)/1.2 var(--ao-font-display);color:var(--ao-teal-text)">From first consultation to install and training</div></div>
+      <div class="row"><small>Body<br>IBM Plex Sans 400 · 17 px · 1.6</small><div style="font-size:17px;line-height:1.6">Our engineers design, install and commission motion capture, virtual production and volumetric capture systems, then stay with you through training and support.</div></div>
+      <div class="row"><small>Figures<br>IBM Plex Mono</small><div class="pk-num">#04959B · 17 px · 1.6</div></div>
+    </div>
+  </section>
+
+  <!-- TEMPLATES -->
+  <section class="pk-sec" id="templates">
+    <h2>Templates &amp; guide</h2>
+    <p class="sub">Open a letterhead, then save a copy before writing. Use the Title, Heading 1 and Heading 2 styles rather than formatting by hand.</p>
+    <div class="pk-two">
+      <div class="pk-card"><div class="pk-doc"><img src="img/lh-print-1.jpg" alt="Print letterhead, page one" loading="lazy"><div style="display:flex;flex-direction:column;gap:8px"><h4>Letterhead, UK print</h4><p>A4 Word template for printed letters: dark header band, contact and legal footer, styles set up. Orange stays in the logo only.</p><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-letterhead-uk-print.docx" download>Word <small>.docx</small></a><a class="pk-btn" href="files/atomic-orbital-letterhead-uk-print-preview.pdf" target="_blank" rel="noopener">Preview <small>PDF</small></a></div></div></div></div>
+      <div class="pk-card"><div class="pk-doc"><img src="img/lh-digital-1.jpg" alt="Digital letterhead" loading="lazy"><div style="display:flex;flex-direction:column;gap:8px"><h4>Letterhead, UK digital</h4><p>A4 Word template for letters sent as PDF or email attachments, with recipient, date and subject fields ready to fill in.</p><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-letterhead-uk-digital.docx" download>Word <small>.docx</small></a><a class="pk-btn" href="files/atomic-orbital-letterhead-uk-digital-preview.pdf" target="_blank" rel="noopener">Preview <small>PDF</small></a></div></div></div></div>
+    </div>
+    <h3>Brand style guide 2026</h3>
+    <p class="ao-muted" style="margin:0 0 12px">23 slides covering messaging, logo, colour, type and how the brand comes together. Replaces the 2024 Target3D guide. Click a slide to enlarge it.</p>
+    <div class="pk-slides" id="slides"></div>
+    <div class="pk-dl" style="margin-top:4px"><a class="pk-btn" href="files/atomic-orbital-brand-style-guide-2026.pdf" target="_blank" rel="noopener">Guide <small>PDF, 1.3 MB</small></a><a class="pk-btn" href="files/atomic-orbital-brand-style-guide-2026.pptx" download>Guide <small>PowerPoint, 3.4 MB</small></a></div>
+  </section>
+
+  <!-- PRESS -->
+  <section class="pk-sec" id="press">
+    <h2>Press</h2>
+    <p class="sub">Ready-to-paste copy, taken from the Brand Style Guide 2026. Press and partner enquiries go to <a href="mailto:info@atomicorbital.co.uk">info@atomicorbital.co.uk</a>.</p>
+    <h3>Tagline</h3>
+    <div class="pk-copybox"><p style="font:600 22px var(--ao-font-display)" data-copy-src>With you every step of the way.</p><button class="pk-btn" type="button" data-copy>Copy</button></div>
+    <h3>About Atomic Orbital</h3>
+    <div class="pk-two">
+      <div class="pk-copybox"><b style="display:block;margin-bottom:8px">Short <span class="ao-muted" style="font-weight:400">· about 50 words</span></b>
+        <div data-copy-src><p>Atomic Orbital delivers motion capture, 3D technologies, virtual production and volumetric capture to customers around the world. Built on the Target3D story, founded in London in 2017, its independent experts take each project from first consultation through design, installation and training, with support in the customer's time zone.</p></div>
+        <button class="pk-btn" type="button" data-copy>Copy</button></div>
+      <div class="pk-copybox"><b style="display:block;margin-bottom:8px">Long <span class="ao-muted" style="font-weight:400">· about 160 words</span></b>
+        <div data-copy-src><p>Atomic Orbital's mission is to deliver the best innovative motion capture, 3D technologies, virtual production and volumetric capture technologies to its customers, and its vision is to be globally the most trusted supplier of those solutions.</p>
+        <p>The company carries forward the heritage of Target3D, founded in May 2017 by Allan Rankin and Ashley Keeler. Beginning as resellers of motion capture equipment, Target3D grew to operate globally from London, Valencia and Gisborne, became the leading reseller of a diverse range of 3D and immersive technologies, and the sole distributor for key brands including OptiTrack, Noitom and Captury. Its London studio is part of the Advanced Media Production network, in partnership with Digital Catapult and Innovate UK.</p>
+        <p>Customers work with a team of independent, unbiased experts with over 30 years' combined experience: consultancy, try-before-you-buy demonstrations, logistics, installation and training, wet and dry hire, and support in their own time zone.</p></div>
+        <button class="pk-btn" type="button" data-copy>Copy</button></div>
+    </div>
+    <h3>Key facts</h3>
+    <div class="pk-facts">
+      <div class="pk-fact"><b class="pk-num">2017</b><span>Founded in London, as Target3D</span></div>
+      <div class="pk-fact"><b class="pk-num">3</b><span>Offices: London, Valencia, Gisborne</span></div>
+      <div class="pk-fact"><b class="pk-num">20+</b><span>Years of mocap install experience</span></div>
+      <div class="pk-fact"><b class="pk-num">30+</b><span>Years' combined expert experience</span></div>
+    </div>
+    <div class="pk-two" style="margin-top:16px">
+      <div class="pk-card"><h4>Mission</h4><p>To deliver the best innovative motion capture, 3D technologies, virtual production and volumetric capture technologies to our customers.</p><h4 style="margin-top:6px">Vision</h4><p>Globally the most trusted supplier of motion capture, 3D technologies, virtual production and volumetric capture technology solutions.</p></div>
+      <div class="pk-card"><h4>Core values</h4><ol class="pk-values"><li>Attention to detail</li><li>Innovative and dynamic</li><li>Knowledgeable and informative</li><li>Unbiased, consultative and trustworthy</li><li>Collaborative and solutions oriented</li></ol><h4 style="margin-top:6px">Voice</h4><p>Clear, expert, collaborative.</p></div>
+    </div>
+    <h3>Six reasons customers choose us</h3>
+    <div class="pk-grid">
+      <div class="pk-card"><h4>In your time zone</h4><p>Access our experts in real time, when your business needs us, so your project stays on time and on target.</p></div>
+      <div class="pk-card"><h4>Try before you buy</h4><p>Meet the onsite experts and experience our biomechanics area, edit suite, VR area, VP and mocap stages.</p></div>
+      <div class="pk-card"><h4>All logistics covered</h4><p>We handle shipping, duties and customs. Our one-year support contract keeps our expertise with you after set-up.</p></div>
+      <div class="pk-card"><h4>Install and training</h4><p>From design to install and training. Our engineers have installed mocap tech for 20+ years, with an SLA as standard.</p></div>
+      <div class="pk-card"><h4>Consultancy service</h4><p>A team of independent, unbiased motion capture experts with over 30 years' combined experience.</p></div>
+      <div class="pk-card"><h4>Hire and backup</h4><p>For affordability, or if you need the kit just once, we offer wet and dry system hire.</p></div>
+    </div>
+  </section>
+
+  <!-- COMPANY -->
+  <section class="pk-sec" id="company">
+    <h2>Company details</h2>
+    <p class="sub">Use these exactly, on letters, footers, proposals and press releases.</p>
+    <dl class="pk-kv" id="kv"></dl>
+    <h3>Legal footer</h3>
+    <div class="pk-copybox"><p data-copy-src>© Atomic Orbital Limited. Registered in England and Wales, company number 17518955.</p><button class="pk-btn" type="button" data-copy>Copy</button></div>
+    <p class="ao-muted" style="font-size:14px;margin-top:10px">Website footer links: Privacy Policy · GDPR Policy · Trademarks &amp; Disclaimer · Modern Slavery Statement · Environmental &amp; Sustainability · ESG Policy.</p>
+  </section>
+
+  <!-- WEB -->
+  <section class="pk-sec" id="web">
+    <h2>Web</h2>
+    <p class="sub">One style sheet drives every Atomic Orbital page, in light and dark. The web kit holds the style sheet, design tokens, fonts, logos, the head snippet and the legal footer.</p>
+    <div class="pk-grid">
+      <div class="pk-card"><h4>Web brand kit</h4><p><span class="pk-hex">css/atomic-orbital.css</span>, <span class="pk-hex">tokens.json</span>, fonts, logos, snippets and the HTML style guide. Light is the default; dark follows the device, or set <span class="pk-hex">data-theme</span> on the html element.</p><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-web-brand-kit.zip" download>Web kit <small>zip, 1.1 MB</small></a></div></div>
+      <div class="pk-card"><h4>Logo pack</h4><p>Every logo file on its own: SVG and PNG lockups and marks, the small-size mark, favicons and the animated hero.</p><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-logos.zip" download>Logos <small>zip, 0.8 MB</small></a></div></div>
+      <div class="pk-card"><h4>Fonts</h4><p>Space Grotesk desktop files and the web fonts. IBM Plex desktop files come free from Google Fonts or IBM.</p><div class="pk-dl"><a class="pk-btn" href="files/atomic-orbital-fonts.zip" download>Fonts <small>zip, 0.5 MB</small></a></div></div>
+    </div>
+  </section>
+
+  <details class="pk-help" id="help">
+    <summary>Help · <span class="pk-num" id="ver"></span></summary>
+    <h4>What this is</h4>
+    <p>The Atomic Orbital brand and press kit, in the Nucleus Marketing section. It replaces the 2024 Target3D kit. Everything on the page can be downloaded, and the press copy can be copied with one click.</p>
+    <h4>Finding things</h4>
+    <ul>
+      <li>The bar at the top jumps to each section and shows where you are.</li>
+      <li><b>Download the press kit</b> gets everything in one zip: logos, fonts, letterheads and the style guide.</li>
+      <li><b>Logos:</b> each card shows the logo on the background it is made for. SVG for screens and print; PNG when a tool won't accept SVG.</li>
+      <li><b>Colour:</b> click a swatch to copy its hex value.</li>
+      <li><b>Templates:</b> download the Word letterhead, then save it as a new document before writing (the print template asks you not to edit it directly). The PDF previews are for looking only.</li>
+      <li><b>Style guide:</b> click a slide to enlarge it; use the arrow keys or the buttons to move between slides; Esc closes it.</li>
+      <li><b>Press:</b> the tagline, boilerplates and legal footer each have a Copy button. The wording comes from the Brand Style Guide 2026. If a fact changes (offices, years, people), update the guide and this page together.</li>
+    </ul>
+    <h4>Not in the kit yet</h4>
+    <ul><li>Business card artwork (85 × 55 mm) is shown in the guide but there is no print file here yet.</li></ul>
+    <h4>Questions</h4>
+    <p>Need a file that isn't here? Email <a href="mailto:info@atomicorbital.co.uk">info@atomicorbital.co.uk</a>.</p>
+    <h4>Version history</h4>
+    <dl id="changelog"></dl>
+  </details>
+</main>
+
+<footer class="pk-foot"><div class="pk-wrap">© Atomic Orbital Limited. Registered in England and Wales, company number 17518955.</div></footer>
+
+<dialog class="pk-lb" id="lb" aria-label="Style guide slide">
+  <img id="lbImg" alt="">
+  <div class="bar"><button type="button" id="lbPrev">← Previous</button><span id="lbCount" class="pk-num"></span><button type="button" id="lbNext">Next →</button><button type="button" id="lbClose">Close</button></div>
+</dialog>
+<div class="pk-toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  var VERSION = "1.0.0";
+  var CHANGELOG = [["v1.0.0", "2026-11-05", "First release: logos, colour, typography, letterheads, the Brand Style Guide 2026, press copy, company details and the web kit, with one-click copy and downloads."]];
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var DL = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>';
+  $("ver").textContent = "v" + VERSION;
+  $("changelog").innerHTML = CHANGELOG.map(function (c) { return "<dt>" + esc(c[0]) + " · " + esc(c[1]) + "</dt><dd>" + esc(c[2]) + "</dd>"; }).join("");
+
+  var L = "/brand/logos/";
+  var logos = [
+    { name: "Lockup, for light backgrounds", note: "Primary use: white and light grey.", bg: "light", img: L + "svg/atomic-orbital-logo-for-light-backgrounds.svg", files: [["SVG", L + "svg/atomic-orbital-logo-for-light-backgrounds.svg"], ["PNG", L + "png/atomic-orbital-logo-for-light-backgrounds.png"]] },
+    { name: "Lockup, for dark backgrounds", note: "Brighter teal and orange for dark surfaces.", bg: "dark", img: L + "svg/atomic-orbital-logo-for-dark-backgrounds.svg", files: [["SVG", L + "svg/atomic-orbital-logo-for-dark-backgrounds.svg"], ["PNG", L + "png/atomic-orbital-logo-for-dark-backgrounds.png"]] },
+    { name: "Mark, for light backgrounds", note: "Avatars, stickers, tight spaces.", bg: "light", img: L + "svg/atomic-orbital-mark-for-light-backgrounds.svg", files: [["SVG", L + "svg/atomic-orbital-mark-for-light-backgrounds.svg"], ["PNG", L + "png/atomic-orbital-mark-for-light-backgrounds.png"]] },
+    { name: "Mark, for dark backgrounds", note: "Social profiles, video end cards.", bg: "dark", img: L + "svg/atomic-orbital-mark-for-dark-backgrounds.svg", files: [["SVG", L + "svg/atomic-orbital-mark-for-dark-backgrounds.svg"], ["PNG", L + "png/atomic-orbital-mark-for-dark-backgrounds.png"]] }
+  ];
+  var icons = [
+    { name: "Small-size mark", note: "Thicker lines for 44 px and under.", bg: "check", img: L + "svg/atomic-orbital-mark-small-size-for-light-backgrounds.svg", small: true, files: [["SVG, light", L + "svg/atomic-orbital-mark-small-size-for-light-backgrounds.svg"], ["SVG, dark", L + "svg/atomic-orbital-mark-small-size-for-dark-backgrounds.svg"]] },
+    { name: "Favicons", note: "favicon.svg follows light or dark; PNGs at 32, 180 (Apple touch) and 512 px.", bg: "check", img: L + "favicon/icon-512.png", small: true, files: [["SVG", L + "favicon/favicon.svg"], ["32", L + "favicon/favicon-32.png"], ["180", L + "favicon/apple-touch-icon-180.png"], ["512", L + "favicon/icon-512.png"]] },
+    { name: "Animated hero", note: "Website hero banner only. Never in documents, email signatures or print.", bg: "dark", img: L + "animated/atomic-orbital-hero-animated-for-dark-backgrounds.svg", small: true, files: [["SVG, light", L + "animated/atomic-orbital-hero-animated-for-light-backgrounds.svg"], ["SVG, dark", L + "animated/atomic-orbital-hero-animated-for-dark-backgrounds.svg"]] }
+  ];
+  function card(o) {
+    return '<div class="pk-card"><div class="pk-tile ' + o.bg + '"' + (o.small ? ' style="padding:28px"' : "") + '><img src="' + o.img + '" alt="' + esc(o.name) + '" loading="lazy"></div><h4>' + esc(o.name) + "</h4><p>" + esc(o.note) + '</p><div class="pk-dl">' +
+      o.files.map(function (f) { return '<a class="pk-btn" href="' + f[1] + '" download>' + DL + esc(f[0]) + "</a>"; }).join("") + "</div></div>";
+  }
+  $("logoGrid").innerHTML = logos.map(card).join("");
+  $("iconGrid").innerHTML = icons.map(card).join("");
+
+  var light = [["Teal (logo)", "#04959B"], ["Teal (text, links)", "#03797F"], ["Orange", "#F2531A"], ["Green (conservation)", "#2E7D4F"], ["Text", "#0E1620"], ["Muted text", "#4A5A6B"], ["Line", "#D5DCE4"], ["Background", "#F4F6F8"], ["Surface", "#FFFFFF"], ["Text on orange", "#0E1620", "Dark, never white"]];
+  var dark = [["Teal (logo, text)", "#08DADB"], ["Orange", "#FF5B38"], ["Green (conservation)", "#6FE3A0"], ["Text", "#E8EEF5"], ["Muted text", "#A3B0BF"], ["Line", "#243040"], ["Surface", "#121923"], ["Background", "#0A0E14"], ["Text on orange", "#0A0E14", "Dark, never white"]];
+  var rgb = function (h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }).join(" "); };
+  function sw(list) {
+    return list.map(function (c) { return '<button class="pk-sw" type="button" data-hex="' + c[1] + '" aria-label="Copy ' + esc(c[0]) + " " + c[1] + '"><span class="chip" style="background:' + c[1] + '"></span><span class="meta"><b>' + esc(c[0]) + '</b><span class="pk-hex">' + c[1] + '</span><span class="pk-hex">RGB ' + rgb(c[1]) + "</span>" + (c[2] ? "<span>" + esc(c[2]) + "</span>" : "") + '<span class="copyhint">Click to copy</span></span></button>'; }).join("");
+  }
+  $("swLight").innerHTML = sw(light); $("swDark").innerHTML = sw(dark);
+
+  var kv = [["Legal name", "Atomic Orbital Limited"], ["Registered in", "England and Wales"], ["Company number", "17518955"], ["Registered office", "66 Paul Street, London, England, EC2A 4NA"], ["Email", "info@atomicorbital.co.uk"], ["Telephone", "+44 (0)203 488 2575"]];
+  $("kv").innerHTML = kv.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd><span>" + esc(r[1]) + '</span><button type="button" data-val="' + esc(r[1]) + '">Copy</button></dd>'; }).join("");
+
+  // slides + lightbox
+  var N = 23, pad = function (n) { return n < 10 ? "0" + n : "" + n; }, cur = 0;
+  var slides = []; for (var i = 1; i <= N; i++) slides.push("img/guide-" + pad(i) + ".jpg");
+  $("slides").innerHTML = slides.map(function (s, k) { return '<button type="button" data-k="' + k + '" aria-label="Slide ' + (k + 1) + ' of ' + N + '"><img src="' + s + '" alt="" loading="lazy" width="240" height="135"></button>'; }).join("");
+  function show(k) { cur = (k + N) % N; $("lbImg").src = slides[cur]; $("lbImg").alt = "Brand style guide, slide " + (cur + 1); $("lbCount").textContent = (cur + 1) + " / " + N; }
+  $("slides").addEventListener("click", function (e) { var b = e.target.closest("button[data-k]"); if (!b) return; show(+b.dataset.k); $("lb").showModal(); });
+  $("lbPrev").onclick = function () { show(cur - 1); }; $("lbNext").onclick = function () { show(cur + 1); }; $("lbClose").onclick = function () { $("lb").close(); };
+  $("lb").addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "ArrowRight") show(cur + 1); });
+  $("lb").addEventListener("click", function (e) { if (e.target === $("lb")) $("lb").close(); });
+
+  // copying
+  var tt;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, 1800); }
+  function copy(text, label) {
+    var done = function () { toast("Copied " + label); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+    function fallback() { var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.append(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Couldn't copy: select the text instead"); } ta.remove(); }
+  }
+  document.addEventListener("click", function (e) {
+    var s = e.target.closest("[data-hex]"); if (s) { copy(s.dataset.hex, s.dataset.hex); return; }
+    var v = e.target.closest("[data-val]"); if (v) { copy(v.dataset.val, v.dataset.val.length > 30 ? "to clipboard" : v.dataset.val); return; }
+    var c = e.target.closest("[data-copy]"); if (c) { var src = c.parentElement.querySelector("[data-copy-src]"); var text = Array.prototype.map.call(src.matches("p") ? [src] : src.querySelectorAll("p"), function (p) { return p.textContent.trim(); }).join("\n\n"); copy(text, "to clipboard"); }
+  });
+
+  // hero art follows the theme
+  var paint = function () { $("heroArt").src = "/brand/logos/svg/atomic-orbital-mark-for-" + (document.documentElement.dataset.theme === "dark" ? "dark" : "light") + "-backgrounds.svg"; };
+  paint(); new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // section highlight in the sub navigation
+  var links = Array.prototype.slice.call(document.querySelectorAll("#pkNav a"));
+  var io = new IntersectionObserver(function (ents) {
+    ents.forEach(function (en) { if (en.isIntersecting) links.forEach(function (a) { a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + en.target.id)); }); });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  links.forEach(function (a) { var t = document.querySelector(a.getAttribute("href")); if (t) io.observe(t); });
+  $("help").addEventListener("toggle", function () {});
+  if (location.hash === "#help") $("help").open = true;
+  document.querySelector('a[href="#help"]').addEventListener("click", function () { $("help").open = true; });
+})();
+</script>
+</body>
+</html>

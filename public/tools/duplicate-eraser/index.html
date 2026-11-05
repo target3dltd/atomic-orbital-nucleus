@@ -1,0 +1,1042 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/merge-desk.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+</head><body>
+<title>Pipedrive Duplicate Eraser · Account Merge Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one review column of duplicate groups under a sticky control bar; each group is a ledger of records with a master radio, then a preview slip before anything is written. */
+:root{
+  --bg:#eef1ee; --surface:#ffffff; --sunk:#f5f7f4; --ink:#17201c; --muted:#5d6b64; --line:#d5dcd6;
+  --accent:#0d6e5b; --accent-ink:#ffffff; --accent-soft:#dcefe9;
+  --ok:#1f7a3d; --ok-soft:#e1f2e5; --no:#b4322a; --no-soft:#f8e3e1; --warn:#9a6200; --warn-soft:#fbefd6;
+  --chip:#e7ece8;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#18201d; --sunk:#141b18; --ink:#e4ebe7; --muted:#97a69f; --line:#2c3833;
+  --accent:#3fbf9f; --accent-ink:#06231c; --accent-soft:#16352d;
+  --ok:#5cc47e; --ok-soft:#173222; --no:#f07a70; --no-soft:#3a1e1c; --warn:#e2ac4b; --warn-soft:#3a2c12;
+  --chip:#232d29; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#18201d; --sunk:#141b18; --ink:#e4ebe7; --muted:#97a69f; --line:#2c3833;
+  --accent:#3fbf9f; --accent-ink:#06231c; --accent-soft:#16352d;
+  --ok:#5cc47e; --ok-soft:#173222; --no:#f07a70; --no-soft:#3a1e1c; --warn:#e2ac4b; --warn-soft:#3a2c12;
+  --chip:#232d29; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:12px}
+.muted{color:var(--muted)}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-direction:column;gap:10px;padding-block:12px}
+.titlerow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0}
+.ver{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 8px}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:6px 12px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.warn{background:var(--warn);border-color:var(--warn);color:#fff;font-weight:600}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:4px 9px;font-size:13px}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:5px 11px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg button .n{opacity:.7;margin-left:4px}
+input[type=search]{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:5px 10px;min-width:0;flex:1 1 180px}
+select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:5px 8px;max-width:100%}
+
+.status{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.status b{color:var(--ink);font-weight:600}
+.bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;flex:1 1 120px;max-width:220px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+.stamp{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;padding:8px 12px;border-radius:var(--r);background:var(--sunk);border:1px solid var(--line)}
+.stamp.need{background:var(--warn-soft);border-color:var(--warn)}
+.stamp label{font-weight:500}
+
+.banner{margin-top:14px;padding:10px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface)}
+.banner.err{border-color:var(--no);background:var(--no-soft)}
+.banner.warn{border-color:var(--warn);background:var(--warn-soft)}
+
+.batch{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding:10px 14px;border-radius:var(--r);background:var(--ok-soft);border:1px solid var(--ok)}
+.batch ul{margin:4px 0 0;padding-left:18px;flex-basis:100%}
+
+main{padding-block:16px 60px}
+.list{display:flex;flex-direction:column;gap:14px}
+
+.group{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.group.approved{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}
+.ghead{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line)}
+.gname{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.gname label,.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gname input{font-family:var(--f-display);font-weight:600;font-size:17px;border:1px solid transparent;border-radius:6px;padding:2px 6px;margin-left:-6px;background:transparent;width:100%}
+.gname input:hover{border-color:var(--line)}
+.gname input:focus{border-color:var(--accent);background:var(--sunk)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11.5px;background:var(--chip);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.chip.domain{background:var(--accent-soft);color:var(--accent)}
+.sum{font-size:12.5px;color:var(--muted);text-align:right}
+.sum b{color:var(--ink);font-size:15px}
+
+.rows{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:right;padding:6px 10px;white-space:nowrap}
+th.l,td.l{text-align:left}
+td{padding:7px 10px;border-top:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+td.name{white-space:normal;min-width:220px}
+td.name a{color:var(--ink);text-decoration:none;font-weight:500}
+td.name a:hover{text-decoration:underline;color:var(--accent)}
+td.dept input{width:190px;border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:3px 7px;font-size:12.5px}
+td.dept input::placeholder{color:var(--muted);opacity:.7}
+tr.master td{background:var(--accent-soft)}
+tr.out td{opacity:.45}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.tag.m{background:var(--accent);color:var(--accent-ink)}
+.tag.d{background:var(--warn-soft);color:var(--warn)}
+td input[type=radio],td input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.zero{color:var(--muted);opacity:.6}
+
+.gfoot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--sunk);border-top:1px solid var(--line)}
+.act{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r);padding:6px 12px;border:1px solid var(--line);background:var(--surface);font-weight:500}
+.act svg{width:16px;height:16px}
+.act.tick[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.act.tick:hover{border-color:var(--ok);color:var(--ok)}
+.act.tick[aria-pressed="true"]:hover{color:#fff}
+.act.cross:hover{border-color:var(--no);color:var(--no)}
+.act.merge{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.act:disabled{opacity:.5;cursor:not-allowed}
+.who{font-size:12px;color:var(--muted)}
+.addwrap{position:relative;margin-left:auto;flex:0 1 240px;min-width:0}
+.addwrap input{width:100%;border:1px dashed var(--line);background:transparent;border-radius:var(--r);padding:5px 10px;font-size:13px}
+.sugg{position:absolute;left:0;right:0;bottom:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 6px 24px rgb(0 0 0/.15);max-height:240px;overflow:auto;z-index:3}
+.sugg button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;border:0;background:transparent;padding:6px 10px;font-size:13px}
+.sugg button:hover,.sugg button:focus{background:var(--sunk)}
+
+.preview{border-top:1px solid var(--line);padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.preview h4{margin:0;font-family:var(--f-display);font-size:15px}
+.preview ul{margin:0;padding-left:18px}
+.preview li{margin:2px 0}
+.preview li.w{color:var(--warn)}
+.preview .btns{display:flex;gap:8px;flex-wrap:wrap}
+.log{padding:8px 14px 12px;font-family:var(--f-mono);font-size:12px;color:var(--muted);border-top:1px solid var(--line);max-height:180px;overflow:auto;white-space:pre-wrap}
+.log .e{color:var(--no)}
+.log .o{color:var(--ok)}
+
+.empty{padding:40px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px}
+.empty h2{font-family:var(--f-display);color:var(--ink);font-size:18px;margin:0 0 6px}
+.more{align-self:center}
+
+.help{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-top:16px;padding:6px 20px 18px}
+.help h2{font-family:var(--f-display);font-size:20px;margin:14px 0 6px}
+.help h3{font-size:14px;margin:16px 0 4px}
+.help p,.help li{max-width:68ch}
+.help ul,.help ol{padding-left:20px;margin:4px 0}
+.help code{font-family:var(--f-mono);font-size:12px;background:var(--chip);padding:0 4px;border-radius:3px}
+.help .legend{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;align-items:center}
+.changelog{font-size:13px}
+.changelog dt{font-family:var(--f-mono);font-weight:500;margin-top:8px}
+.changelog dd{margin:2px 0 0 0;color:var(--muted)}
+.setting{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.setting input[type=text]{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:5px 8px;width:160px}
+
+.history{margin-top:24px}
+.history h2{font-family:var(--f-display);font-size:18px;margin:0 0 8px}
+.hbox{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.hrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:9px 12px;border-top:1px solid var(--line);font-size:13px}
+.hrow:first-child{border-top:0}
+.hrow .what{flex:1 1 300px;min-width:0}
+.hrow.undone .what{text-decoration:line-through;color:var(--muted)}
+.hrow a{color:var(--ink)}
+.pill{font-size:11px;border-radius:99px;padding:1px 8px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.pill.no{background:var(--no-soft);color:var(--no)}
+.hmsg{flex-basis:100%;font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:pre-wrap}
+
+@media (max-width:640px){
+  .sum{text-align:left}
+  .addwrap{margin-left:0;flex-basis:100%}
+  h1{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="titlerow">
+      <h1>Account Merge Desk</h1>
+      <span class="ver" id="verChip">v1.2.0</span>
+      <span class="spacer"></span>
+      <button class="btn sm" id="domainBtn" title="Reads every contact's email to find records that share a university domain">Scan email domains</button>
+      <button class="btn sm" id="reloadBtn">Reload from Pipedrive</button>
+      <button class="btn sm" id="helpBtn" aria-expanded="false" aria-controls="help">Help</button>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Scope">
+        <button id="scopeUni" aria-pressed="true">Universities &amp; colleges</button>
+        <button id="scopeAll" aria-pressed="false">All accounts</button>
+      </div>
+      <div class="seg" role="group" aria-label="Status" id="statusSeg">
+        <button data-s="review" aria-pressed="true">To review<span class="n" id="nReview"></span></button>
+        <button data-s="approved" aria-pressed="false">✓ Approved<span class="n" id="nApproved"></span></button>
+        <button data-s="dismissed" aria-pressed="false">✗ Not duplicates<span class="n" id="nDismissed"></span></button>
+      </div>
+      <input type="search" id="q" placeholder="Filter groups by name" aria-label="Filter groups by name">
+      <select id="sort" aria-label="Sort">
+        <option value="deals">Most deals first</option>
+        <option value="size">Most records first</option>
+        <option value="az">A–Z</option>
+      </select>
+    </div>
+    <div class="stamp" id="stampStrip">
+      <span class="lbl">Stamp department on</span>
+      <label for="pStampSel">People</label>
+      <select id="pStampSel"><option value="">Loading fields…</option></select>
+      <label for="stampSel">Deals</label>
+      <select id="stampSel"><option value="">Loading fields…</option></select>
+      <span id="stampHint" class="muted"></span>
+    </div>
+    <div class="status" id="status">
+      <span id="statusText">Connecting to Pipedrive…</span>
+      <span class="bar" id="barWrap" hidden><i id="bar"></i></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="banner"></div>
+  <div class="batch" id="batch" hidden></div>
+
+  <section class="help" id="help" hidden>
+    <h2>Help</h2>
+    <p>This desk finds organisation records in Pipedrive that look like the same client, so universities and their departments roll up into one account and repeat business reports correctly. Department detail is kept on each deal, so you can still report by department.</p>
+
+    <h3>How to work through the list</h3>
+    <ol>
+      <li>Check each group. The highlighted row is the <b>master</b>, the record everything ends up on. Change it with the radio button.</li>
+      <li>Untick any record that does not belong. It stays as it is and the tool remembers that pair is different.</li>
+      <li>Check the <b>Department</b> box on each row. That text is written onto the contacts (and, if you choose, the deals) that come from that record. Clear it to stamp nothing.</li>
+      <li>Edit the name at the top if you want the master renamed (for example to the full university name).</li>
+      <li>Then choose one of:</li>
+    </ol>
+    <div class="legend">
+      <span class="act tick" aria-pressed="true" style="pointer-events:none">✓ Approve</span> queue it for a batch merge
+      <span class="act cross" style="pointer-events:none">✗ Not duplicates</span> hide it for good
+      <span class="act merge" style="pointer-events:none">Preview merge</span> see exactly what will change, then confirm
+    </div>
+    <p>Missing a record? Type in the <i>Add another account</i> box on a group to pull any organisation into it.</p>
+
+    <h3>What a merge does in Pipedrive</h3>
+    <ul>
+      <li>Moves every <b>contact, deal (open, won and lost), lead, activity and note</b> from each duplicate onto the master.</li>
+      <li><b>Stamps the department</b> into the contact's <i>Department</i> field for every person who came from a department record, and optionally into a deal field too. If the master was itself a department, its own contacts and deals are stamped as well. Anything that already has a value is left alone, so a contact's department you entered by hand is never replaced.</li>
+      <li><b>Fills blanks on the master</b> from the duplicates: website, LinkedIn, address, labels and custom fields such as the accounts email and phone. Anything the master already has is never overwritten.</li>
+      <li>Renames each emptied duplicate to <code>zz MERGED → #master name (was: old name)</code>, so they sort to the bottom and can be bulk-deleted in Pipedrive later. Nothing is deleted by this tool.</li>
+      <li>Adds a note on the master listing what was merged, by whom, and how much moved.</li>
+    </ul>
+
+    <h3>Preview and undo</h3>
+    <ul>
+      <li><b>Preview merge</b> reads Pipedrive and lists every change before anything is written. Nothing changes until you press <i>Confirm merge</i>. <b>Merge all approved</b> previews every approved group first and shows the totals.</li>
+      <li>Every merge is recorded in <b>Merge history</b> at the bottom with the exact records moved. <b>Undo</b> moves them all back, clears the department stamps and filled-in fields it added, restores the original names, and adds a note saying the merge was reversed.</li>
+      <li>Undo only reverses what the tool did. Deals or contacts added to the master by hand after the merge stay where they are.</li>
+    </ul>
+
+    <h3>Where departments are stamped</h3>
+    <p>The strip under the filters sets this for everyone using the page.</p>
+    <ul>
+      <li><b>People</b> defaults to your existing contact field <i>Department</i>. The department belongs to the person, which is usually right: it's the lecturer or technician who sits in that school.</li>
+      <li><b>Deals</b> is optional. Your deal field called <i>Department</i> is Target3D's own team (Tech Sales, Studio Work and so on), so the tool never offers it. If you want deal reports split by client department without going through the contact, create a <b>Text</b> deal field called <b>Client Department</b> and press <i>Reload from Pipedrive</i>.</li>
+      <li>In Pipedrive you can filter deals by the contact person's Department. A deal with no contact, or with a contact from a different school, won't carry the department unless you also stamp deals.</li>
+    </ul>
+    <p>Only text fields can be chosen.</p>
+
+    <h3>How groups are found</h3>
+    <ul>
+      <li><b>Same institution</b>: names are normalised and department text is set aside ("Edinburgh University - School of Informatics" → Edinburgh), and "University of X" matches "X University".</li>
+      <li><b>Known abbreviations</b>: UCL, KCL, LSE, QMUL, UWE, MMU, LJMU, UEA, UAL, RCA and a few others.</li>
+      <li><b>Similar spelling</b>: near-identical names, to catch typos.</li>
+      <li><b>Shared email domain</b>: after <i>Scan email domains</i>, records whose contacts use the same university domain (for example <code>kingston.ac.uk</code>) are grouped.</li>
+    </ul>
+
+    <h3>Good to know</h3>
+    <ul>
+      <li>Archived deals are not visible to the connector and stay on the duplicate. Check the renamed record before deleting it.</li>
+      <li>Email history linked only to the organisation cannot be moved by the connector.</li>
+      <li>If a merge is interrupted, preview it again. It re-reads what is still on the duplicate and only moves what is left.</li>
+      <li>Decisions, merges and undos record who made them. Everything is saved in the Nucleus, so everyone on the team sees the same progress.</li>
+    </ul>
+
+    <h3>Settings</h3>
+    <div class="setting">
+      <label for="subdomain">Pipedrive company address</label>
+      <span class="mono">https://</span><input type="text" id="subdomain" value="target3d2"><span class="mono">.pipedrive.com</span>
+    </div>
+    <div class="setting">
+      <input type="checkbox" id="optActs" checked><label for="optActs">Move activities when merging (slower on busy accounts)</label>
+    </div>
+    <div class="setting">
+      <input type="checkbox" id="optFill" checked><label for="optFill">Fill blank details on the master from duplicates</label>
+    </div>
+
+    <h3>Version</h3>
+    <dl class="changelog" id="changelog"></dl>
+  </section>
+</div>
+
+<main class="wrap">
+  <div class="list" id="list">
+    <div class="empty"><h2>Loading your organisations</h2>Duplicate groups will appear here once Pipedrive has answered. Pipedrive is reached with the token you signed in to the Nucleus with.</div>
+  </div>
+  <section class="history" id="history" hidden>
+    <h2>Merge history</h2>
+    <div class="hbox" id="historyList"></div>
+  </section>
+</main>
+
+<script src="/nucleus/claude-shim.js" data-ns="merge-desk"></script>
+<script>
+(() => {
+const VERSION = "1.3.0";
+const CHANGELOG = [
+  ["v1.3.0", "2026-11-05", "Moved into the Atomic Orbital Nucleus. Pipedrive calls now run as whoever is signed in to the Nucleus with their own API token, and decisions and merge history are shared through the Nucleus store."],
+  ["v1.2.0", "2026-11-05", "Department can now be stamped on contacts, using your existing person field “Department” by default. Deal stamping is optional. Undo clears contact stamps too."],
+  ["v1.1.0", "2026-11-04", "Preview before every merge and batch merge. Undo from Merge history. Client department stamped onto moved deals (editable per record, into a deal text field you choose). Blank details on the master filled from duplicates. Who approved, dismissed, merged or undid is recorded. Department text is set aside when matching abbreviations (e.g. “UCL Institute of Education”)."],
+  ["v1.0.0", "2026-11-04", "First release: live Pipedrive load, duplicate detection for universities and departments, ✓ / ✗ / merge, batch merge, email-domain scan, shared decisions and merge history."]
+];
+const SERVER = "Pipedrive";
+const ORG_CF = "293fad92cd60812edcfca7c4361870470d64d257";
+const PERSON_CF = "1a0c15656b9bdaf3ff9d6ad93f42a9a8eded1f34";
+const SKIP_FILL_CF = new Set(["ce0981eac6c4ead868baf1715f081b53dc02f2b9","ea013a2d68665953997eb536ec16b62876a34a14"]); // web-visitor tracking
+const MERGED_PREFIX = "zz MERGED";
+const PAGE = 40;
+const KIND = {p:{label:"people",get:"getPersons",upd:"updatePerson",fk:"org_id"}, d:{label:"deals",upd:"updateDeal",fk:"org_id"}, l:{label:"leads",upd:"updateLead",fk:"organization_id"}, a:{label:"activities",upd:"updateActivity",fk:"org_id"}, n:{label:"notes",upd:"updateNote",fk:"org_id"}};
+const STD_FILL = {website:"Website", linkedin:"LinkedIn", industry:"Industry", annual_revenue:"Annual revenue", employee_count:"Employees", address:"Address"};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ls = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
+const today = () => new Date().toISOString();
+const fmtDate = s => { try{ return new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short"}) }catch{ return "" } };
+
+$("verChip").textContent = "v" + VERSION;
+$("changelog").innerHTML = CHANGELOG.map(([v,d,t]) => `<dt>${esc(v)} · ${esc(d)}</dt><dd>${esc(t)}</dd>`).join("");
+$("subdomain").value = ls.get("md.sub", "target3d2");
+$("subdomain").addEventListener("change", e => { ls.set("md.sub", e.target.value.trim()); render(); });
+for (const [id,key] of [["optActs","md.acts"],["optFill","md.fill"]]){ $(id).checked = ls.get(key,true); $(id).addEventListener("change", e => { ls.set(key, e.target.checked); clearPlans(); render() }) }
+$("helpBtn").addEventListener("click", () => { const h=$("help"); h.hidden=!h.hidden; $("helpBtn").setAttribute("aria-expanded", String(!h.hidden)); if(!h.hidden) h.scrollIntoView({behavior:"smooth",block:"start"}); });
+const orgUrl = id => `https://${encodeURIComponent($("subdomain").value.trim()||"target3d2")}.pipedrive.com/organization/${id}`;
+
+/* ---------- state ---------- */
+let mcp=null, db=null, userNs=null, me=null;
+const names = new Map();
+let orgs = new Map(), domainOf = new Map(), decisions = new Map(), links = [], history = [];
+let groups = [], dealTextFields = [], personTextFields = [], orgFieldNames = {}, settings = {stampKey:null, pStampKey:undefined}, contextLoaded=false;
+let scope = ls.get("md.scope","uni"), statusView = "review", shown = PAGE;
+const ui = new Map();
+const undoState = new Map();
+let batch = {phase:"idle", plans:[]};
+
+/* ---------- people ---------- */
+const nameOf = id => id ? (id===me ? "you" : (names.get(id) || "a colleague")) : "";
+async function resolveNames(ids){
+  if (!userNs) return;
+  const need=[...new Set(ids.filter(id=>id && id!==me && !names.has(id)))]; if(!need.length) return;
+  try { const ps = await userNs.profiles(need); let changed=false; for (const id of need){ const n=ps && ps[id] && ps[id].name; if(n){ names.set(id,n); changed=true } } if(changed) render() } catch {}
+}
+
+/* ---------- messaging ---------- */
+function setStatus(html, frac){ $("statusText").innerHTML = html; const bw=$("barWrap"); if(frac==null){bw.hidden=true}else{bw.hidden=false;$("bar").style.width=Math.round(frac*100)+"%"} }
+function banner(kind, html){ $("banner").innerHTML = html ? `<div class="banner ${kind}">${html}</div>` : ""; }
+function explain(e){
+  const c = e && e.code;
+  const m = {
+    needs_reauth:"Your Nucleus session has ended or Pipedrive no longer accepts your token. Sign in to the Nucleus again, then press Reload.",
+    server_not_connected:"Pipedrive isn't available. Sign in to the Nucleus with your Pipedrive API token, then press Reload.",
+    selection_required:"You have more than one Pipedrive connector. Choose one in the prompt claude.ai shows, then press Reload.",
+    not_in_manifest:"Pipedrive access was turned off for this page. Allow it from the page's Permissions menu, then press Reload.",
+    approval_required:"This page needs your approval to use Pipedrive. Press Reload and allow it when asked.",
+    blocked_by_policy:"Your organisation's policy blocks this Pipedrive action.",
+    server_unavailable:"Pipedrive didn't answer in time. Wait a moment and try again.",
+    tool_error:"Pipedrive refused the request: " + (e && e.message ? e.message.slice(0,200) : "")
+  };
+  return m[c] || ("Something went wrong talking to Pipedrive" + (e && e.message ? ": " + e.message.slice(0,200) : "."));
+}
+
+/* ---------- Pipedrive calls ---------- */
+async function pd(tool, input){
+  const r = await mcp.callTool(SERVER, tool, input, {cache:false});
+  let p = r.payload;
+  if (typeof p === "string") { try { p = JSON.parse(p) } catch {} }
+  return p || {};
+}
+async function rd(tool, input){
+  try { return await pd(tool, input) }
+  catch(e){ if(e && e.retryable){ await new Promise(r=>setTimeout(r,(e.retryAfterMs||1200)+Math.random()*800)); return await pd(tool,input) } throw e }
+}
+async function allByCursor(tool, base){
+  const out=[]; let cursor;
+  do { const p = await rd(tool, cursor ? {...base, cursor} : base); out.push(...(p.data||[])); cursor = p.additional_data && p.additional_data.next_cursor; } while(cursor);
+  return out;
+}
+async function allByStart(tool, base){
+  const out=[]; let start=0;
+  for(;;){ const p = await rd(tool, {...base, start}); out.push(...(p.data||[])); const pg=p.additional_data&&p.additional_data.pagination; if(pg&&pg.more_items_in_collection&&pg.next_start!=null) start=pg.next_start; else break; }
+  return out;
+}
+async function pool(items, n, fn){ let i=0; const run=async()=>{ while(i<items.length){ const it=items[i++]; await fn(it) } }; await Promise.all(Array.from({length:Math.min(n,items.length)},run)) }
+
+/* ---------- name matching ---------- */
+const ALIAS = {
+  "ucl":"u:ucl","university college london":"u:ucl",
+  "kcl":"u:kcl","kings college london":"u:kcl","king s college london":"u:kcl",
+  "lse":"u:lse","london school of economics":"u:lse","london school of economics and political science":"u:lse",
+  "qmul":"u:qmul","queen mary university of london":"u:qmul","queen mary university":"u:qmul","queen mary":"u:qmul",
+  "imperial":"u:imperial","imperial college":"u:imperial","imperial college london":"u:imperial","icl":"u:imperial",
+  "uwe":"u:uwe","university of the west of england":"u:uwe","uwe bristol":"u:uwe",
+  "mmu":"u:mmu","manchester metropolitan university":"u:mmu","manchester met":"u:mmu",
+  "ljmu":"u:ljmu","liverpool john moores university":"u:ljmu",
+  "uea":"u:uea","university of east anglia":"u:uea",
+  "ual":"u:ual","university of the arts london":"u:ual","university of arts london":"u:ual",
+  "rca":"u:rca","royal college of art":"u:rca",
+  "uclan":"u:uclan","university of central lancashire":"u:uclan",
+  "ntu":"u:nottingham trent","nottingham trent university":"u:nottingham trent",
+  "heriot watt":"u:heriot watt","heriot watt university":"u:heriot watt","hwu":"u:heriot watt",
+  "lsbu":"u:london south bank","london south bank university":"u:london south bank",
+  "gsa":"u:gsa","glasgow school of art":"u:gsa",
+  "kingston university":"u:kingston","kingston university london":"u:kingston"
+};
+const UNI_WORD = /\b(university|universitat|universite|universidad|universita|universiteit|uni|college|polytechnic|conservatoire|academy|institute of technology)\b/;
+const DEPT = /\b(department|dept|school|faculty|institute|centre|center|lab|labs|laboratory|laboratories|division|group|unit|research|library|campus|college of|business school|medical school)\b/;
+const DEPT_RAW = /\b(department|dept\.?|school|faculty|institute|centre|center|lab|labs|laboratory|laboratories|division|unit)\b/i;
+const NOISE = new Set("the and of ltd limited plc inc llc gmbh aps ab bv sa srl co company uk holdings group".split(" "));
+const norm = s => String(s||"").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/&/g," and ").replace(/['’.]/g," ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+
+function analyse(name){
+  const raw = String(name||"");
+  const segs = raw.split(/\s+[-–—]\s+|[,;()|\/–—:]/).map(s=>s.trim()).filter(Boolean);
+  const seg0 = segs.find(s => UNI_WORD.test(norm(s))) || segs[0] || raw;
+  let seg = seg0, dept = segs.filter(s=>s!==seg0).join(" – ");
+  // department text inside the institution segment, e.g. "University of Leeds School of Mechanical Engineering" or "UCL Institute of Education"
+  const dm = seg0.match(DEPT_RAW);
+  if (dm && dm.index>0){
+    const before = seg0.slice(0,dm.index).trim();
+    if (UNI_WORD.test(norm(before)) || ALIAS[norm(before)]){ seg = before; dept = [seg0.slice(dm.index).trim(), dept].filter(Boolean).join(" – ") }
+  }
+  const n = norm(seg), full = norm(raw);
+  const out = (key, uni) => ({key, seg, dept, isDept: !!dept, uni});
+  if (ALIAS[full]) return {key:ALIAS[full], seg:raw, dept:"", isDept:false, uni:true};
+  if (ALIAS[n]) return out(ALIAS[n], true);
+  let m = n.match(/\buniversity of (?:the )?([a-z0-9 ]+)/);
+  if (m){
+    let tail = m[1]; const d = tail.match(DEPT); if(d) tail = tail.slice(0,d.index);
+    tail = tail.split(" ").filter(w=>w && !NOISE.has(w)).join(" ");
+    if (tail) return out(ALIAS[norm("university of "+tail)] || "u:"+tail, true);
+  }
+  m = n.match(/^(.*?)\s*\b(?:university|uni)\b/);
+  if (m && m[1]){
+    let words = m[1].split(" "); let cut=-1; words.forEach((w,i)=>{ if(DEPT.test(w)) cut=i });
+    if (cut>=0) words = words.slice(cut+1);
+    words = words.filter(w=>w && !NOISE.has(w)).slice(-3);
+    if (words.length) return out(ALIAS[norm(words.join(" ")+" university")] || "u:"+words.join(" "), true);
+  }
+  const core = n.split(" ").filter(w=>w && !NOISE.has(w)).join(" ");
+  return out(core ? (UNI_WORD.test(n)?"u:":"n:")+core : null, UNI_WORD.test(n));
+}
+function lev(a,b){ if(a===b) return 0; const m=a.length,n=b.length; if(!m||!n) return m||n; let p=Array.from({length:n+1},(_,i)=>i),c=new Array(n+1); for(let i=1;i<=m;i++){c[0]=i;for(let j=1;j<=n;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1))}[p,c]=[c,p]} return p[n]; }
+function academicDomain(email){
+  const d = String(email||"").toLowerCase().split("@")[1]; if(!d) return null;
+  let m = d.match(/([a-z0-9-]+)\.(ac|edu)\.([a-z]{2})$/); if(m) return `${m[1]}.${m[2]}.${m[3]}`;
+  m = d.match(/([a-z0-9-]+)\.edu$/); if(m) return m[1]+".edu";
+  m = d.match(/(uni-[a-z0-9-]+|[a-z0-9-]*univ[a-z0-9-]*)\.[a-z]{2,3}$/); if(m) return m[0];
+  return null;
+}
+
+/* ---------- grouping ---------- */
+const pairKey = (a,b) => a<b ? a+"_"+b : b+"_"+a;
+function excludedPairs(){
+  const ex = new Set();
+  for (const d of decisions.values()){
+    if (d.status==="dismissed" && Array.isArray(d.ids)) for(let i=0;i<d.ids.length;i++) for(let j=i+1;j<d.ids.length;j++) ex.add(pairKey(d.ids[i],d.ids[j]));
+    if (Array.isArray(d.notSame)) for (const [a,b] of d.notSame) ex.add(pairKey(a,b));
+  }
+  return ex;
+}
+function buildGroups(){
+  const live = [...orgs.values()].filter(o => !o.is_deleted && !String(o.name||"").startsWith(MERGED_PREFIX));
+  for (const o of live) if(!o._a) o._a = analyse(o.name);
+  const ex = excludedPairs();
+  const parent = new Map(live.map(o=>[o.id,o.id]));
+  const find = x => { while(parent.get(x)!==x){ parent.set(x, parent.get(parent.get(x))); x=parent.get(x) } return x };
+  const reasons = new Map();
+  const addReason = (id,r) => { if(!reasons.has(id)) reasons.set(id,new Set()); reasons.get(id).add(r) };
+  const edge = (a,b,r) => { if(a===b || !parent.has(a) || !parent.has(b) || ex.has(pairKey(a,b))) return; const ra=find(a), rb=find(b); if(ra!==rb) parent.set(ra,rb); addReason(a,r); addReason(b,r); };
+
+  const byKey = new Map();
+  for (const o of live){ const k=o._a.key; if(!k) continue; if(!byKey.has(k)) byKey.set(k,[]); byKey.get(k).push(o) }
+  for (const [k,arr] of byKey){ if(arr.length<2 || arr.length>40) continue; for(let i=0;i<arr.length;i++) for(let j=i+1;j<arr.length;j++) edge(arr[i].id,arr[j].id, k.startsWith("u:")?"Same institution":"Same name") }
+
+  const blocks = new Map();
+  for (const k of byKey.keys()){ const core=k.slice(2); if(core.length<7) continue; const b=k.slice(0,6); if(!blocks.has(b)) blocks.set(b,[]); blocks.get(b).push(k) }
+  for (const ks of blocks.values()){ if(ks.length>200) continue; for(let i=0;i<ks.length;i++) for(let j=i+1;j<ks.length;j++){ const a=ks[i].slice(2), b=ks[j].slice(2); const d=lev(a,b); if(d>0 && d<=Math.max(1,Math.floor(Math.max(a.length,b.length)*0.08))) edge(byKey.get(ks[i])[0].id, byKey.get(ks[j])[0].id, "Similar spelling") } }
+
+  const byDom = new Map();
+  for (const [id,dom] of domainOf){ if(!parent.has(id)) continue; if(!byDom.has(dom)) byDom.set(dom,[]); byDom.get(dom).push(id) }
+  for (const [dom,ids] of byDom){ if(ids.length<2 || ids.length>25) continue; for(let i=1;i<ids.length;i++) edge(ids[0],ids[i],"@"+dom) }
+
+  for (const [a,b] of links) edge(a,b,"Added by you");
+
+  const clusters = new Map();
+  for (const o of live){ const r=find(o.id); if(!clusters.has(r)) clusters.set(r,[]); clusters.get(r).push(o) }
+  const out=[];
+  for (const members of clusters.values()){
+    if (members.length<2) continue;
+    members.sort((a,b)=>a.id-b.id);
+    const key = "g-" + members.map(m=>m.id).join("-");
+    const rs = new Set(); members.forEach(m => (reasons.get(m.id)||[]).forEach(r=>rs.add(r)));
+    const uni = members.some(m=>m._a.uni) || [...rs].some(r=>r.startsWith("@"));
+    const deals = members.reduce((s,m)=>s+(m.closed_deals_count||0)+(m.open_deals_count||0),0);
+    out.push({key, members, reasons:[...rs], uni, deals});
+  }
+  groups = out;
+}
+function pickMaster(members){
+  const score = m => (m._a.isDept?0:1e9) + (m.won_deals_count||0)*1e5 + ((m.closed_deals_count||0)+(m.open_deals_count||0))*1e3 + (m.people_count||0)*10 - m.id/1e7;
+  return [...members].sort((a,b)=>score(b)-score(a))[0].id;
+}
+function suggestName(g, masterId){
+  const segs = g.members.map(m=>m._a.seg);
+  const uniOf = segs.filter(s => /^university of /i.test(s.trim()) && !DEPT.test(norm(s))).sort((a,b)=>a.length-b.length)[0];
+  if (uniOf) return uniOf.trim();
+  const m = orgs.get(masterId); return (m._a.isDept ? m._a.seg : m.name).trim();
+}
+function uiFor(g){
+  let s = ui.get(g.key);
+  if (!s){
+    const d = decisions.get(g.key);
+    const master = d && g.members.some(m=>m.id===d.master) ? d.master : pickMaster(g.members);
+    const include = new Set(d && Array.isArray(d.include) ? d.include.filter(id=>g.members.some(m=>m.id===id)) : g.members.map(m=>m.id));
+    include.add(master);
+    const dept = new Map(g.members.map(m=>[m.id, (d && d.dept && d.dept[m.id]!=null) ? d.dept[m.id] : (m._a.dept||"")]));
+    s = {master, include, dept, name: (d && d.name) || suggestName(g, master), log:[], phase:"idle", plan:null};
+    ui.set(g.key, s);
+  }
+  return s;
+}
+function clearPlans(){ for (const s of ui.values()) if (s.phase==="preview"){ s.phase="idle"; s.plan=null } if(batch.phase==="preview") batch={phase:"idle",plans:[]} }
+
+/* ---------- stamp field ---------- */
+const stampKey = () => settings.stampKey && dealTextFields.some(f=>f.field_code===settings.stampKey) ? settings.stampKey : null;
+const stampName = () => (dealTextFields.find(f=>f.field_code===stampKey())||{}).field_name || "";
+const pStampKey = () => settings.pStampKey && personTextFields.some(f=>f.field_code===settings.pStampKey) ? settings.pStampKey : null;
+const pStampName = () => (personTextFields.find(f=>f.field_code===pStampKey())||{}).field_name || "";
+function renderStamp(){
+  const sel=$("stampSel"), psel=$("pStampSel"), hint=$("stampHint"), strip=$("stampStrip");
+  if (!contextLoaded){ return }
+  sel.innerHTML = `<option value="">Don't stamp deals</option>` + dealTextFields.map(f=>`<option value="${esc(f.field_code)}">${esc(f.field_name)}</option>`).join("");
+  sel.value = stampKey() || "";
+  psel.innerHTML = `<option value="">Don't stamp people</option>` + personTextFields.map(f=>`<option value="${esc(f.field_code)}">${esc(f.field_name)}</option>`).join("");
+  psel.value = pStampKey() || "";
+  strip.classList.toggle("need", !stampKey() && !pStampKey());
+  hint.textContent = (stampKey()||pStampKey()) ? "Only empty values are filled; existing values are kept." : "Departments won't be recorded anywhere. Pick a field.";
+}
+async function saveSettings(){ if (db){ try{ await db.doc("settings/main").set({stampKey:settings.stampKey||null, pStampKey:settings.pStampKey||null, by:me, at:today()}) }catch{} } }
+$("stampSel").addEventListener("change", e => { settings.stampKey = e.target.value || null; clearPlans(); renderStamp(); render(); saveSettings() });
+$("pStampSel").addEventListener("change", e => { settings.pStampKey = e.target.value || null; clearPlans(); renderStamp(); render(); saveSettings() });
+
+/* ---------- rendering ---------- */
+const I = {
+  tick:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  cross:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  merge:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3c0 4 4 5 5 7v3M13 3c0 4-4 5-5 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+};
+const n0 = v => v ? `<span class="num">${v}</span>` : `<span class="zero">0</span>`;
+const plural = (n,w) => `${n} ${w}`;
+function statusOf(g){ const d=decisions.get(g.key); return d ? d.status : "review" }
+function visibleGroups(){
+  const q = norm($("q").value);
+  let gs = groups.filter(g => (scope==="all" || g.uni));
+  const counts = {review:0,approved:0,dismissed:0};
+  gs.forEach(g=>{ const s=statusOf(g); if(s==="review"||s==="approved") counts[s]++ });
+  counts.dismissed = [...decisions.values()].filter(d=>d.status==="dismissed").length;
+  $("nReview").textContent = counts.review; $("nApproved").textContent = counts.approved; $("nDismissed").textContent = counts.dismissed;
+  if (q) gs = gs.filter(g => g.members.some(m => norm(m.name).includes(q)));
+  gs = gs.filter(g => statusOf(g)===statusView);
+  const sort = $("sort").value;
+  gs.sort((a,b)=> sort==="size" ? b.members.length-a.members.length || b.deals-a.deals : sort==="az" ? a.members[0].name.localeCompare(b.members[0].name) : b.deals-a.deals || b.members.length-a.members.length);
+  return {gs, counts};
+}
+function planSummary(p){
+  const c=p.counts, li=[];
+  const moveBits = Object.keys(KIND).filter(k=>c[k]).map(k=>plural(c[k],KIND[k].label));
+  li.push(moveBits.length ? `Move ${moveBits.join(", ")} from ${plural(p.dups.length, p.dups.length===1?"record":"records")}` : `Nothing left to move on the ${p.dups.length===1?"duplicate":"duplicates"}`);
+  if (p.pStampKey){ const n=p.moves.filter(m=>m.k==="p"&&m.stamp).length + p.pstamps.length; if(n) li.push(`Stamp department on ${plural(n, n===1?"contact":"contacts")} into “${esc(pStampName())}”`); else if (p.wantStamp) li.push(`No contacts need a department stamp (already filled, or none on department records)`) }
+  if (p.stampKey){ const n=p.moves.filter(m=>m.k==="d"&&m.stamp).length + p.stamps.length; if(n) li.push(`Stamp department on ${plural(n, n===1?"deal":"deals")} into “${esc(stampName())}”`); else if (p.wantStamp) li.push(`No deals need a department stamp (already filled, or none on department records)`) }
+  if (!p.stampKey && !p.pStampKey && p.wantStamp) li.push(`<span class="w">Departments won't be recorded: no field chosen above</span>`);
+  if (p.fillKeys.length) li.push(`Fill blanks on the master: ${p.fillKeys.map(k=>esc(fieldLabel(k))).join(", ")}`);
+  if (p.newLabels) li.push(`Add ${p.newLabels.length - p.labelsBefore.length} label(s) from duplicates`);
+  if (p.newName !== p.masterOldName) li.push(`Rename master to “${esc(p.newName)}”`);
+  li.push(`Rename ${plural(p.dups.length, p.dups.length===1?"duplicate":"duplicates")} to “zz MERGED…” (nothing is deleted)`);
+  if (p.excluded.length) li.push(`Leave ${p.excluded.map(x=>esc(x)).join(", ")} as a separate account`);
+  return li;
+}
+const fieldLabel = k => k.startsWith("cf:") ? (orgFieldNames[k.slice(3)] || "custom field") : (STD_FILL[k] || k);
+
+function groupHTML(g){
+  const s = uiFor(g), st = statusOf(g), d = decisions.get(g.key), busy = s.phase==="planning"||s.phase==="running";
+  const inc = g.members.filter(m=>s.include.has(m.id));
+  const won = inc.reduce((t,m)=>t+(m.won_deals_count||0),0), closed = inc.reduce((t,m)=>t+(m.closed_deals_count||0),0), open = inc.reduce((t,m)=>t+(m.open_deals_count||0),0);
+  const chips = g.reasons.map(r => `<span class="chip ${r.startsWith("@")?"domain":""}">${esc(r.startsWith("@")?"Shared email "+r:r)}</span>`).join("");
+  const rows = g.members.map(m => {
+    const isM = m.id===s.master, on = s.include.has(m.id);
+    return `<tr class="${isM?"master":""} ${on?"":"out"}">
+      <td class="l"><input type="radio" name="m-${g.key}" id="m-${g.key}-${m.id}" data-act="master" data-id="${m.id}" ${isM?"checked":""} ${busy?"disabled":""} aria-label="Make ${esc(m.name)} the master"></td>
+      <td class="l"><input type="checkbox" id="i-${g.key}-${m.id}" data-act="include" data-id="${m.id}" ${on?"checked":""} ${isM||busy?"disabled":""} aria-label="Include ${esc(m.name)} in the merge"></td>
+      <td class="l name"><a href="${orgUrl(m.id)}" target="_blank" rel="noopener">${esc(m.name)}</a>${isM?'<span class="tag m">Master</span>':""}${m._a.isDept?'<span class="tag d">Dept</span>':""}<div class="mono muted">#${m.id}${domainOf.get(m.id)?" · "+esc(domainOf.get(m.id)):""}</div></td>
+      <td class="l dept"><input id="d-${g.key}-${m.id}" data-act="dept" data-id="${m.id}" value="${esc(s.dept.get(m.id)||"")}" placeholder="No department" ${busy||!on?"disabled":""} aria-label="Department stamped on deals from ${esc(m.name)}"></td>
+      <td>${n0(m.won_deals_count)}</td><td>${n0(m.closed_deals_count)}</td><td>${n0(m.open_deals_count)}</td><td>${n0(m.people_count)}</td><td>${n0(m.activities_count)}</td><td>${n0(m.notes_count)}</td>
+      <td class="num muted">${esc((m.add_time||"").slice(0,4))}</td></tr>`;
+  }).join("");
+  const dupCount = inc.length-1;
+  const who = d && d.by && (st==="approved") ? `<span class="who">Approved by ${esc(nameOf(d.by))} · ${esc(fmtDate(d.at))}</span>` : "";
+  let preview = "";
+  if (s.phase==="planning") preview = `<div class="preview"><span class="muted">Reading what's on these records in Pipedrive…</span></div>`;
+  if (s.phase==="preview" && s.plan) preview = `<div class="preview"><h4>Ready to merge into #${s.plan.masterId} ${esc(s.plan.masterOldName)}</h4><ul>${planSummary(s.plan).map(x=>`<li>${x}</li>`).join("")}</ul>
+      <div class="btns"><button class="btn primary" data-act="confirm">Confirm merge</button><button class="btn" data-act="cancel">Cancel</button></div></div>`;
+  return `<article class="group ${st}" data-key="${g.key}">
+    <div class="ghead">
+      <div class="gname"><label for="n-${g.key}">Account name after merge</label>
+        <input id="n-${g.key}" data-act="name" value="${esc(s.name)}" ${busy?"disabled":""}>
+        <div class="chips">${chips}</div></div>
+      <div class="sum"><b class="num">${won}</b> won · <span class="num">${closed}</span> closed · <span class="num">${open}</span> open<br>across ${inc.length} record${inc.length===1?"":"s"}</div>
+    </div>
+    <div class="rows"><table>
+      <thead><tr><th class="l" title="Master">Keep</th><th class="l" title="Include in merge">In</th><th class="l">Organisation</th><th class="l">Department</th><th>Won</th><th>Closed</th><th>Open</th><th>People</th><th>Activities</th><th>Notes</th><th>Added</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div class="gfoot">
+      <button class="act tick" data-act="approve" aria-pressed="${st==="approved"}" ${busy?"disabled":""}>${I.tick}${st==="approved"?"Approved":"Approve"}</button>
+      <button class="act cross" data-act="dismiss" ${busy?"disabled":""}>${I.cross}Not duplicates</button>
+      <button class="act merge" data-act="preview" ${busy||dupCount<1||s.phase==="preview"?"disabled":""}>${I.merge}${s.phase==="running"?"Merging…":s.phase==="planning"?"Reading…":"Preview merge"}</button>
+      ${who}
+      <div class="addwrap"><input type="search" data-act="add" id="a-${g.key}" placeholder="Add another account…" aria-label="Add another account to this group" autocomplete="off" ${busy?"disabled":""}><div class="sugg" hidden></div></div>
+    </div>
+    ${preview}
+    ${s.log.length?`<div class="log" aria-live="polite">${s.log.map(l=>`<div class="${l.c||""}">${esc(l.t)}</div>`).join("")}</div>`:""}
+  </article>`;
+}
+function render(){
+  const {gs, counts} = visibleGroups();
+  renderBatch();
+  renderHistory();
+  const list = $("list");
+  if (!orgs.size) return;
+  if (!gs.length){
+    const msg = statusView==="review" ? (counts.approved ? "Everything here is reviewed. Merge your approved groups when ready." : "No more likely duplicates in this view. Try “All accounts” or “Scan email domains”.")
+      : statusView==="approved" ? "Nothing approved yet. Press ✓ Approve on a group to queue it."
+      : "Groups you mark ✗ Not duplicates are kept apart from now on. You have " + counts.dismissed + ".";
+    list.innerHTML = `<div class="empty"><h2>${statusView==="review"?"All clear":"Nothing here"}</h2>${esc(msg)}</div>` + (statusView==="dismissed" && counts.dismissed ? dismissedHTML() : "");
+    return;
+  }
+  // keep focus on a text input across re-render
+  const ae = document.activeElement, aeId = ae && ae.id, sel = ae && ae.selectionStart;
+  list.innerHTML = gs.slice(0,shown).map(groupHTML).join("") + (gs.length>shown?`<button class="btn more" id="moreBtn">Show ${Math.min(PAGE,gs.length-shown)} more of ${gs.length-shown}</button>`:"");
+  const mb=$("moreBtn"); if(mb) mb.onclick=()=>{shown+=PAGE;render()};
+  if (aeId && $(aeId) && list.contains($(aeId))){ const el=$(aeId); el.focus(); try{ if(sel!=null) el.setSelectionRange(sel,sel) }catch{} }
+  resolveNames([...decisions.values()].map(d=>d.by));
+}
+function dismissedHTML(){
+  const ds=[...decisions.entries()].filter(([,d])=>d.status==="dismissed");
+  return `<div class="hbox" style="margin-top:12px">${ds.map(([k,d])=>`<div class="hrow"><span class="what">${(d.ids||[]).map(id=>esc(orgs.get(id)?.name||"#"+id)).join(" · ")}</span><span class="who">${d.by?esc(nameOf(d.by))+" · ":""}${esc(fmtDate(d.at))}</span><button class="btn sm" data-undismiss="${esc(k)}">Restore</button></div>`).join("")}</div>`;
+}
+function renderHistory(){
+  if (!history.length){ $("history").hidden=true; return }
+  $("history").hidden=false;
+  resolveNames(history.flatMap(h=>[h.by, h.undone && h.undone.by]));
+  $("historyList").innerHTML = history.slice(0,60).map(h=>{
+    const u=undoState.get(h.id)||{}, c=h.counts||{};
+    const moved = Object.keys(KIND).filter(k=>c[k]).map(k=>`${c[k]} ${KIND[k].label}`).join(" · ");
+    const canUndo = !h.undone && Array.isArray(h.moves) && mcp;
+    const btn = canUndo ? (u.phase==="running" ? `<button class="btn sm" disabled>Undoing…</button>` : u.phase==="confirm" ? `<button class="btn sm warn" data-undo="${esc(h.id)}">Confirm undo</button>` : `<button class="btn sm" data-undo="${esc(h.id)}">Undo</button>`) : "";
+    return `<div class="hrow ${h.undone?"undone":""}">
+      <span class="mono muted">${esc(fmtDate(h.at))}</span>
+      <span class="what"><a href="${orgUrl(h.masterId)}" target="_blank" rel="noopener">${esc(h.masterName)}</a> ← ${(h.merged||[]).map(m=>esc(m.name)).join(", ")}</span>
+      <span class="num muted">${moved}${h.stamped?` · ${h.stamped} stamped`:""}</span>
+      ${h.by?`<span class="who">by ${esc(nameOf(h.by))}</span>`:""}
+      ${h.errors?`<span class="pill no">${h.errors} problem${h.errors>1?"s":""}</span>`:""}
+      ${h.undone?`<span class="pill">Undone${h.undone.by?" by "+esc(nameOf(h.undone.by)):""} · ${esc(fmtDate(h.undone.at))}</span>`:""}
+      ${btn}
+      ${u.msg?`<div class="hmsg">${esc(u.msg)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+function renderBatch(){
+  const approved = groups.filter(g=>statusOf(g)==="approved");
+  const el=$("batch");
+  if (!mcp || (!approved.length && batch.phase==="idle")){ el.hidden=true; return }
+  el.hidden=false;
+  if (batch.phase==="idle") el.innerHTML = `<span><b>${approved.length}</b> approved group${approved.length===1?"":"s"} ready to merge.</span><span class="spacer"></span><button class="btn primary" data-batch="preview">Preview all approved</button>`;
+  else if (batch.phase==="planning") el.innerHTML = `<span>Reading ${approved.length} groups from Pipedrive…</span>`;
+  else if (batch.phase==="preview"){
+    const t={p:0,d:0,l:0,a:0,n:0}; let stamp=0, recs=0;
+    batch.plans.forEach(p=>{ Object.keys(t).forEach(k=>t[k]+=p.counts[k]||0); stamp+=p.moves.filter(m=>m.stamp).length+p.stamps.length+p.pstamps.length; recs+=p.dups.length });
+    const bits=Object.keys(KIND).filter(k=>t[k]).map(k=>`${t[k]} ${KIND[k].label}`).join(", ");
+    el.innerHTML = `<span>Merging <b>${batch.plans.length}</b> groups will fold <b>${recs}</b> duplicate records into their masters.</span>
+      <ul><li>Move ${bits||"nothing"}</li>${stamp?`<li>Stamp department on ${stamp} contacts and deals</li>`:""}<li>Each group's details are listed on its card below</li></ul>
+      <button class="btn primary" data-batch="confirm">Confirm merge of ${batch.plans.length} groups</button><button class="btn" data-batch="cancel">Cancel</button>`;
+  }
+  else if (batch.phase==="running") el.innerHTML = `<span>Merging… keep this page open.</span>`;
+}
+
+/* ---------- events ---------- */
+$("scopeUni").onclick = () => { scope="uni"; ls.set("md.scope",scope); syncSeg(); shown=PAGE; render() };
+$("scopeAll").onclick = () => { scope="all"; ls.set("md.scope",scope); syncSeg(); shown=PAGE; render() };
+function syncSeg(){ $("scopeUni").setAttribute("aria-pressed",scope==="uni"); $("scopeAll").setAttribute("aria-pressed",scope==="all"); document.querySelectorAll("#statusSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===statusView)) }
+document.querySelectorAll("#statusSeg button").forEach(b=>b.onclick=()=>{statusView=b.dataset.s;syncSeg();shown=PAGE;render()});
+$("q").addEventListener("input", () => { shown=PAGE; render() });
+$("sort").addEventListener("change", render);
+syncSeg();
+
+const gByKey = k => groups.find(g=>g.key===k);
+$("list").addEventListener("change", e => {
+  const el=e.target, card=el.closest(".group"); if(!card) return;
+  const g=gByKey(card.dataset.key); if(!g) return; const s=uiFor(g), id=+el.dataset.id;
+  if (el.dataset.act==="master"){ s.master=id; s.include.add(id); s.phase="idle"; s.plan=null; render() }
+  if (el.dataset.act==="include"){ el.checked ? s.include.add(id) : s.include.delete(id); s.phase="idle"; s.plan=null; render() }
+  if (el.dataset.act==="name" || el.dataset.act==="dept"){
+    if (el.dataset.act==="name") s.name=el.value; else s.dept.set(id, el.value);
+    if (s.phase==="preview"){ s.phase="idle"; s.plan=null; render() }
+    if (statusOf(g)==="approved") saveDecision(g,"approved");
+  }
+});
+$("list").addEventListener("click", async e => {
+  const und = e.target.closest("[data-undismiss]");
+  if (und){ const k=und.dataset.undismiss; decisions.delete(k); try{ await db?.doc("decisions/"+k).delete() }catch{} buildGroups(); render(); return }
+  const pick = e.target.closest("[data-pick]");
+  if (pick){ const g=gByKey(pick.closest(".group").dataset.key); await addLink(uiFor(g).master, +pick.dataset.pick); return }
+  const btn=e.target.closest("button[data-act]"); if(!btn) return;
+  const g=gByKey(btn.closest(".group").dataset.key); if(!g) return; const s=uiFor(g);
+  const act=btn.dataset.act;
+  if (act==="approve"){ await saveDecision(g, statusOf(g)==="approved" ? null : "approved"); render() }
+  if (act==="dismiss"){ await saveDecision(g, "dismissed"); buildGroups(); render() }
+  if (act==="preview"){ await previewGroup(g) }
+  if (act==="cancel"){ s.phase="idle"; s.plan=null; render() }
+  if (act==="confirm"){ await executeGroup(g) }
+});
+$("list").addEventListener("input", e => {
+  const el=e.target; if(el.dataset.act!=="add") return;
+  const box=el.nextElementSibling, q=norm(el.value);
+  if (q.length<2){ box.hidden=true; return }
+  const g=gByKey(el.closest(".group").dataset.key);
+  const inG=new Set(g.members.map(m=>m.id));
+  const hits=[...orgs.values()].filter(o=>!inG.has(o.id) && !String(o.name).startsWith(MERGED_PREFIX) && norm(o.name).includes(q)).slice(0,12);
+  box.innerHTML = hits.length ? hits.map(o=>`<button data-pick="${o.id}"><span>${esc(o.name)}</span><span class="mono muted">#${o.id}</span></button>`).join("") : `<div style="padding:6px 10px" class="muted">No match</div>`;
+  box.hidden=false;
+});
+document.addEventListener("click", e => { if(!e.target.closest(".addwrap")) document.querySelectorAll(".sugg").forEach(b=>b.hidden=true) });
+$("batch").addEventListener("click", async e => {
+  const b=e.target.closest("[data-batch]"); if(!b) return;
+  if (b.dataset.batch==="preview") await previewBatch();
+  if (b.dataset.batch==="cancel"){ batch={phase:"idle",plans:[]}; clearPlans(); render() }
+  if (b.dataset.batch==="confirm") await executeBatch();
+});
+$("historyList").addEventListener("click", async e => {
+  const b=e.target.closest("[data-undo]"); if(!b) return;
+  const id=b.dataset.undo, u=undoState.get(id)||{};
+  if (u.phase!=="confirm"){ undoState.set(id,{phase:"confirm"}); renderHistory(); setTimeout(()=>{ const x=undoState.get(id); if(x&&x.phase==="confirm"){ undoState.delete(id); renderHistory() } },6000); return }
+  await undoMerge(history.find(h=>h.id===id));
+});
+
+/* ---------- persistence ---------- */
+async function saveDecision(g, status, extra){
+  const s=uiFor(g);
+  if (!status){ decisions.delete(g.key); try{ await db?.doc("decisions/"+g.key).delete() }catch{ banner("warn","Couldn't save that decision. It will be lost when the page reloads.") } return }
+  const doc = {status, ids:g.members.map(m=>m.id), master:s.master, include:[...s.include], name:s.name, dept:Object.fromEntries(s.dept), by:me, at:today(), ...(extra||{})};
+  decisions.set(g.key, doc);
+  if (db){ try{ await db.doc("decisions/"+g.key).set(doc) }catch(e){ banner("warn", e.code==="invalid_argument" ? "You can view this page but not save decisions on it." : "Couldn't save that decision. It will be lost when the page reloads.") } }
+}
+async function addLink(a,b){
+  links.push([a,b]);
+  if (db){ try{ await db.doc("links/l-"+pairKey(a,b)).set({a,b,by:me,at:today()}) }catch{} }
+  buildGroups(); render();
+}
+
+/* ---------- plan → preview ---------- */
+const isEmpty = v => v==null || v==="" || (Array.isArray(v)&&!v.length) || (typeof v==="object" && !Array.isArray(v) && "value" in v && !v.value);
+const ADDR_KEYS = ["value","subpremise","street_number","route","sublocality","locality","admin_area_level_1","admin_area_level_2","country","postal_code"];
+const pickAddr = a => Object.fromEntries(ADDR_KEYS.filter(k=>a[k]!=null && a[k]!=="").map(k=>[k,String(a[k])]));
+
+async function planMerge(g){
+  const s=uiFor(g), key=stampKey(), pkey=pStampKey();
+  const getOrg = async id => { const p = await rd("getOrganization",{id}); return p.data || p };
+  const master = await getOrg(s.master);
+  const dupIds = g.members.filter(m=>m.id!==s.master && s.include.has(m.id)).map(m=>m.id);
+  const plan = {key:g.key, masterId:s.master, masterOldName:master.name, newName:(s.name||master.name).trim(), dups:[], moves:[], stamps:[], fills:{}, fillKeys:[],
+    labelsBefore:master.label_ids||[], newLabels:null, stampKey:key, wantStamp:false, counts:{p:0,d:0,l:0,a:0,n:0},
+    excluded:g.members.filter(m=>m.id!==s.master && !s.include.has(m.id)).map(m=>m.name), dept:Object.fromEntries(s.dept), pStampKey:pkey, pstamps:[]};
+  const deptOf = id => (s.dept.get(id)||"").trim();
+  const stampFor = (rec, orgId, k) => { const d=deptOf(orgId); if(d) plan.wantStamp=true; if(!k || !d) return null; const cur=rec.custom_fields && rec.custom_fields[k]; return isEmpty(cur) ? d : null };
+  const pFields = [...new Set([PERSON_CF, pkey].filter(Boolean))];
+  const labels = new Set(plan.labelsBefore);
+  for (const id of dupIds){
+    const o = await getOrg(id);
+    plan.dups.push({id, name:o.name});
+    for (const p of await allByCursor("getPersons",{org_id:id,limit:500,custom_fields:pFields})) plan.moves.push({k:"p",id:p.id,from:id,stamp:stampFor(p,id,pkey)});
+    for (const x of (await allByCursor("getDeals",{org_id:id,limit:500,status:["open","won","lost"]})).filter(x=>x.org_id===id)) plan.moves.push({k:"d",id:x.id,from:id,stamp:stampFor(x,id,key)});
+    for (const x of await allByStart("getLeads",{organization_id:id,limit:500})) plan.moves.push({k:"l",id:x.id,from:id});
+    if ($("optActs").checked) for (const x of (await allByCursor("getActivities",{org_id:id,limit:500})).filter(x=>x.org_id===id)) plan.moves.push({k:"a",id:x.id,from:id});
+    for (const x of (await allByStart("getNotes",{org_id:id,limit:500})).filter(x=>x.org_id===id)) plan.moves.push({k:"n",id:x.id,from:id});
+    if ($("optFill").checked){
+      for (const f of ["website","linkedin","industry","annual_revenue","employee_count"]) if (isEmpty(master[f]) && !isEmpty(o[f]) && !(f in plan.fills)) plan.fills[f]={value:o[f], from:id};
+      if (isEmpty(master.address) && o.address && o.address.value && !plan.fills.address) plan.fills.address={value:pickAddr(o.address), from:id};
+      const mcf=master.custom_fields||{};
+      for (const [k,v] of Object.entries(o.custom_fields||{})) if (!SKIP_FILL_CF.has(k) && isEmpty(mcf[k]) && !isEmpty(v) && !plan.fills["cf:"+k]) plan.fills["cf:"+k]={value:v, from:id};
+      (o.label_ids||[]).forEach(l=>labels.add(l));
+    }
+  }
+  if ($("optFill").checked && labels.size>plan.labelsBefore.length) plan.newLabels=[...labels];
+  // master's own deals get its department too, when the master record was itself a department
+  if (deptOf(s.master)){
+    plan.wantStamp=true;
+    if (key) for (const x of (await allByCursor("getDeals",{org_id:s.master,limit:500,status:["open","won","lost"]})).filter(x=>x.org_id===s.master)){ if(isEmpty(x.custom_fields&&x.custom_fields[key])) plan.stamps.push({id:x.id, dept:deptOf(s.master)}) }
+    if (pkey) for (const p of await allByCursor("getPersons",{org_id:s.master,limit:500,custom_fields:pFields})){ if(isEmpty(p.custom_fields&&p.custom_fields[pkey])) plan.pstamps.push({id:p.id, dept:deptOf(s.master)}) }
+  }
+  plan.moves.forEach(m=>plan.counts[m.k]++);
+  plan.fillKeys = Object.keys(plan.fills);
+  return plan;
+}
+async function previewGroup(g){
+  const s=uiFor(g); s.phase="planning"; s.log=[]; render();
+  try { s.plan = await planMerge(g); s.phase="preview" }
+  catch(e){ s.phase="idle"; s.log=[{t:"Couldn't read these records: "+explain(e), c:"e"}] }
+  render();
+}
+
+/* ---------- execute ---------- */
+async function executePlan(plan, say){
+  const key=plan.stampKey, pkey=plan.pStampKey, done={moves:[], stamps:[], pstamps:[], fills:[], labels:false, renamedDups:[], masterRenamed:false};
+  let errors=0;
+  const byKind = k => plan.moves.filter(m=>m.k===k);
+  for (const k of Object.keys(KIND)){
+    const items=byKind(k); if(!items.length) continue;
+    say(`Moving ${items.length} ${KIND[k].label}…`);
+    await pool(items, 4, async m => {
+      const input = {id:m.id, [KIND[k].fk]: plan.masterId};
+      if (k==="d" && m.stamp) input.custom_fields = {[key]: m.stamp};
+      if (k==="p" && m.stamp) input.custom_fields = {[pkey]: m.stamp};
+      try { await pd(KIND[k].upd, input); done.moves.push([m.k, m.id, m.from, m.stamp?1:0]) }
+      catch(e){ errors++; say(`  ✗ ${KIND[k].label.replace(/s$/,"")} ${m.id}: ${explain(e)}`,"e") }
+    });
+  }
+  if (plan.stamps.length){
+    say(`Stamping department on ${plan.stamps.length} of the master's own deals…`);
+    await pool(plan.stamps, 4, async st => { try { await pd("updateDeal",{id:st.id, custom_fields:{[key]:st.dept}}); done.stamps.push(st.id) } catch(e){ errors++; say(`  ✗ stamp deal ${st.id}: ${explain(e)}`,"e") } });
+  }
+  if (plan.pstamps.length){
+    say(`Stamping department on ${plan.pstamps.length} of the master's own contacts…`);
+    await pool(plan.pstamps, 4, async st => { try { await pd("updatePerson",{id:st.id, custom_fields:{[pkey]:st.dept}}); done.pstamps.push(st.id) } catch(e){ errors++; say(`  ✗ stamp contact ${st.id}: ${explain(e)}`,"e") } });
+  }
+  if (plan.fillKeys.length || plan.newLabels){
+    const upd={id:plan.masterId}, cf={};
+    for (const k of plan.fillKeys){ const v=plan.fills[k].value; if(k.startsWith("cf:")) cf[k.slice(3)]=v; else upd[k]=v }
+    if (Object.keys(cf).length) upd.custom_fields=cf;
+    if (plan.newLabels) upd.label_ids=plan.newLabels;
+    try { await pd("updateOrganization", upd); done.fills=plan.fillKeys.slice(); done.labels=!!plan.newLabels; if(plan.fillKeys.length) say(`Filled on master: ${plan.fillKeys.map(fieldLabel).join(", ")}`,"o") }
+    catch(e){ errors++; say(`  ✗ fill master details: ${explain(e)}`,"e") }
+  }
+  for (const d of plan.dups){
+    const renamed = `${MERGED_PREFIX} → #${plan.masterId} ${plan.newName} (was: ${d.name})`.slice(0,250);
+    try { await pd("updateOrganization",{id:d.id, name:renamed}); done.renamedDups.push(d.id); const o=orgs.get(d.id); if(o) o.name=renamed }
+    catch(e){ errors++; say(`  ✗ rename #${d.id}: ${explain(e)}`,"e") }
+  }
+  if (plan.newName && plan.newName!==plan.masterOldName){
+    try { await pd("updateOrganization",{id:plan.masterId, name:plan.newName}); done.masterRenamed=true; const o=orgs.get(plan.masterId); if(o){ o.name=plan.newName; o._a=null } say(`Renamed master to “${plan.newName}”`,"o") }
+    catch(e){ errors++; say(`  ✗ rename master: ${explain(e)}`,"e") }
+  }
+  const c={p:0,d:0,l:0,a:0,n:0}; done.moves.forEach(m=>c[m[0]]++);
+  const stamped = done.moves.filter(m=>m[3]).length + done.stamps.length + done.pstamps.length;
+  const note = `<p><b>Account merge ${today().slice(0,10)}</b> (Account Merge Desk v${VERSION})</p><p>Merged into this organisation:</p><ul>${plan.dups.map(d=>`<li>#${d.id} ${esc(d.name)}${plan.dept[d.id]?` (department: ${esc(plan.dept[d.id])})`:""}</li>`).join("")}</ul><p>Moved: ${Object.keys(KIND).map(k=>`${c[k]} ${KIND[k].label}`).join(", ")}. Department stamped on ${stamped} contacts and deals.${done.fills.length?` Filled: ${done.fills.map(fieldLabel).join(", ")}.`:""}${errors?` ${errors} items could not be changed.`:""}</p>`;
+  try { await pd("addNote",{org_id:plan.masterId, content:note}) } catch(e){ say(`  ✗ note: ${explain(e)}`,"e") }
+  return {done, errors, counts:c, stamped};
+}
+async function executeGroup(g){
+  const s=uiFor(g); if(!s.plan || s.phase==="running") return;
+  const plan=s.plan; s.phase="running"; s.log=[]; render();
+  const say=(t,c)=>{ s.log.push({t,c}); render() };
+  let res;
+  try { res = await executePlan(plan, say) }
+  catch(e){ say("Stopped: "+explain(e)+" Preview again to continue from where it stopped.","e"); s.phase="idle"; s.plan=null; render(); return }
+  const fillsRecord = {}; for (const k of res.done.fills) fillsRecord[k]=plan.fills[k].value;
+  const entry = {id:"m-"+Date.now(), at:today(), by:me, groupKey:g.key, masterId:plan.masterId, masterName:plan.newName, masterOldName:plan.masterOldName,
+    merged:plan.dups, counts:res.counts, stamped:res.stamped, stampKey:plan.stampKey, pStampKey:plan.pStampKey, moves:res.done.moves, stamps:res.done.stamps, pstamps:res.done.pstamps,
+    fills:res.done.fills, fillValues:fillsRecord, labelsBefore:plan.labelsBefore, labelsChanged:res.done.labels, renamedDups:res.done.renamedDups,
+    masterRenamed:res.done.masterRenamed, errors:res.errors, undone:null, version:VERSION};
+  history.unshift(entry);
+  if (db){ try{ await db.doc("log/"+entry.id).set(entry) }catch{ say("The merge worked but its history couldn't be saved, so Undo won't be available for it.","e") } }
+  const master=orgs.get(plan.masterId);
+  if (master){ for (const d of plan.dups){ const o=orgs.get(d.id)||{}; for (const f of ["people_count","won_deals_count","closed_deals_count","open_deals_count","activities_count","notes_count"]) master[f]=(master[f]||0)+(o[f]||0) } }
+  const left = g.members.filter(m=>m.id!==plan.masterId && !s.include.has(m.id)).map(m=>[plan.masterId,m.id]);
+  await saveDecision(g,"merged",{notSame:left, logId:entry.id});
+  say(res.errors ? `Done with ${res.errors} problem${res.errors>1?"s":""}. Check the lines above; preview again to retry what's left.` : "Merged. The duplicates are renamed “zz MERGED…” in Pipedrive.", res.errors?"e":"o");
+  s.phase="done"; s.plan=null; render();
+  setTimeout(()=>{ ui.delete(g.key); buildGroups(); render() }, res.errors?9000:2500);
+  return res;
+}
+async function previewBatch(){
+  const todo = groups.filter(g=>statusOf(g)==="approved");
+  batch={phase:"planning",plans:[]}; statusView="approved"; syncSeg(); render();
+  let i=0;
+  for (const g of todo){
+    i++; setStatus(`Previewing group ${i} of ${todo.length}…`, i/todo.length);
+    const s=uiFor(g); s.phase="planning"; render();
+    try { s.plan=await planMerge(g); s.phase="preview"; batch.plans.push(s.plan) } catch(e){ s.phase="idle"; s.log=[{t:"Couldn't read these records: "+explain(e),c:"e"}] }
+    render();
+  }
+  batch.phase = batch.plans.length ? "preview" : "idle"; summary(); render();
+}
+async function executeBatch(){
+  const keys = batch.plans.map(p=>p.key); batch.phase="running"; render();
+  let i=0, problems=0;
+  for (const k of keys){ i++; setStatus(`Merging group ${i} of ${keys.length}…`, i/keys.length); const g=gByKey(k); if(!g) continue; const r=await executeGroup(g); if(!r||r.errors) problems++ }
+  batch={phase:"idle",plans:[]}; setStatus(`<b>${keys.length}</b> groups merged${problems?`, ${problems} with problems (see their cards)`:""}.`); render();
+}
+
+/* ---------- undo ---------- */
+async function undoMerge(h){
+  if (!h) return;
+  undoState.set(h.id,{phase:"running", msg:"Reading the merge record…"}); renderHistory();
+  const lines=[]; const say=t=>{ lines.push(t); undoState.set(h.id,{phase:"running", msg:lines.slice(-6).join("\n")}); renderHistory() };
+  let errors=0;
+  try{
+    const moves=h.moves||[];
+    for (const k of Object.keys(KIND)){
+      const items=moves.filter(m=>m[0]===k); if(!items.length) continue;
+      say(`Moving ${items.length} ${KIND[k].label} back…`);
+      await pool(items, 4, async ([kk,id,from,stamped]) => {
+        const input={id, [KIND[kk].fk]: from}; if (kk==="d" && stamped && h.stampKey) input.custom_fields={[h.stampKey]:null}; if (kk==="p" && stamped && h.pStampKey) input.custom_fields={[h.pStampKey]:null};
+        try { await pd(KIND[kk].upd, input) } catch(e){ errors++; say(`✗ ${KIND[kk].label.replace(/s$/,"")} ${id}: ${explain(e)}`) }
+      });
+    }
+    if ((h.stamps||[]).length && h.stampKey){ say("Clearing department stamps on the master's own deals…"); await pool(h.stamps,4,async id=>{ try{ await pd("updateDeal",{id, custom_fields:{[h.stampKey]:null}}) }catch(e){ errors++; say(`✗ deal ${id}: ${explain(e)}`) } }) }
+    if ((h.pstamps||[]).length && h.pStampKey){ say("Clearing department stamps on the master's own contacts…"); await pool(h.pstamps,4,async id=>{ try{ await pd("updatePerson",{id, custom_fields:{[h.pStampKey]:null}}) }catch(e){ errors++; say(`✗ contact ${id}: ${explain(e)}`) } }) }
+    if ((h.fills||[]).length || h.labelsChanged){
+      const upd={id:h.masterId}, cf={};
+      for (const k of (h.fills||[])){ if(k.startsWith("cf:")) cf[k.slice(3)]=null; else if(k==="address") upd.address={value:""}; else if(k==="website"||k==="linkedin") upd[k]=""; }
+      if (Object.keys(cf).length) upd.custom_fields=cf;
+      if (h.labelsChanged) upd.label_ids=h.labelsBefore||[];
+      if (Object.keys(upd).length>1){ try{ await pd("updateOrganization",upd); say("Cleared the details that were filled in on the master.") }catch(e){ errors++; say("✗ clearing filled details: "+explain(e)+" Clear them by hand if needed.") } }
+      const manual=(h.fills||[]).filter(k=>["industry","annual_revenue","employee_count"].includes(k));
+      if (manual.length) say(`Left as filled (clear by hand if wrong): ${manual.map(fieldLabel).join(", ")}`);
+    }
+    for (const d of (h.merged||[])){
+      if (h.renamedDups && !h.renamedDups.includes(d.id)) continue;
+      try { await pd("updateOrganization",{id:d.id, name:d.name}); const o=orgs.get(d.id); if(o){ o.name=d.name; o._a=null } } catch(e){ errors++; say(`✗ restore name #${d.id}: ${explain(e)}`) }
+    }
+    if (h.masterRenamed){ try{ await pd("updateOrganization",{id:h.masterId, name:h.masterOldName}); const o=orgs.get(h.masterId); if(o){ o.name=h.masterOldName; o._a=null } }catch(e){ errors++; say("✗ restore master name: "+explain(e)) } }
+    try { await pd("addNote",{org_id:h.masterId, content:`<p><b>Account merge undone ${today().slice(0,10)}</b> (Account Merge Desk v${VERSION})</p><p>Records moved back to: ${(h.merged||[]).map(d=>`#${d.id} ${esc(d.name)}`).join(", ")}.${errors?` ${errors} items could not be reversed.`:""}</p>`}) } catch {}
+  } catch(e){ errors++; say("Stopped: "+explain(e)) }
+  h.undone = {at:today(), by:me, errors};
+  if (db){ try{ await db.doc("log/"+h.id).update({undone:h.undone}) }catch{} if(h.groupKey){ try{ await db.doc("decisions/"+h.groupKey).delete() }catch{} } }
+  if (h.groupKey) decisions.delete(h.groupKey);
+  undoState.set(h.id,{phase:"done", msg: errors ? `Undone with ${errors} problem${errors>1?"s":""}:\n`+lines.filter(l=>l.startsWith("✗")).slice(0,8).join("\n") : "Undone. Press Reload to see the restored accounts with fresh counts."});
+  buildGroups(); render();
+}
+
+/* ---------- loading ---------- */
+async function loadContext(){
+  try {
+    const p = await rd("getAccountContext",{});
+    const cf = p.custom_fields || (p.data && p.data.custom_fields) || {};
+    dealTextFields = (cf.deal||[]).filter(f=>f.is_custom_field && f.is_writable!==false && ["varchar","text","varchar_auto"].includes(f.field_type));
+    personTextFields = (cf.person||[]).filter(f=>f.is_custom_field && f.is_writable!==false && ["varchar","text","varchar_auto"].includes(f.field_type));
+    orgFieldNames = Object.fromEntries((cf.organization||[]).map(f=>[f.field_code, f.field_name]));
+    contextLoaded = true;
+    if (settings.pStampKey===undefined){ const auto = personTextFields.find(f=>/^department$/i.test(f.field_name.trim())) || personTextFields.find(f=>/department|faculty|school/i.test(f.field_name)); settings.pStampKey = auto ? auto.field_code : null }
+    if (!stampKey()){ const auto = dealTextFields.find(f=>/client\s*dep|customer\s*dep|department|faculty/i.test(f.field_name)); if (auto) settings.stampKey = auto.field_code }
+  } catch(e){ contextLoaded=true; dealTextFields=[]; }
+  renderStamp();
+}
+async function loadOrgs(){
+  orgs.clear(); ui.clear();
+  setStatus("Loading organisations from Pipedrive…", 0.05);
+  let cursor, n=0;
+  do {
+    const p = await rd("getOrganizations", {limit:500, sort_by:"id", sort_direction:"asc", custom_fields:[ORG_CF], include_fields:["people_count","open_deals_count","closed_deals_count","won_deals_count","activities_count","notes_count"], ...(cursor?{cursor}:{})});
+    for (const o of (p.data||[])) orgs.set(o.id, o);
+    cursor = p.additional_data && p.additional_data.next_cursor; n++;
+    setStatus(`Loading organisations… <b class="num">${orgs.size}</b>`, Math.min(0.9, 0.1+n*0.12));
+  } while (cursor);
+}
+function summary(){
+  const live=[...orgs.values()].filter(o=>!String(o.name).startsWith(MERGED_PREFIX)).length;
+  const uniG=groups.filter(g=>g.uni).length;
+  setStatus(`<span><b class="num">${live}</b> organisations</span><span><b class="num">${groups.length}</b> possible duplicate groups (${uniG} universities &amp; colleges)</span>${domainOf.size?`<span>Email domains scanned</span>`:""}`);
+}
+async function reload(){
+  banner("",""); $("reloadBtn").disabled=true; batch={phase:"idle",plans:[]};
+  try { await Promise.all([loadOrgs(), loadContext()]); buildGroups(); summary(); render() }
+  catch(e){ setStatus("Couldn't load from Pipedrive."); banner("err", esc(explain(e))); if(!orgs.size) $("list").innerHTML=`<div class="empty"><h2>Pipedrive didn't load</h2>${esc(explain(e))}</div>` }
+  $("reloadBtn").disabled=false;
+}
+$("reloadBtn").onclick = reload;
+$("domainBtn").onclick = async () => {
+  const b=$("domainBtn"); b.disabled=true;
+  try{
+    setStatus("Reading contacts’ email domains…",0.05);
+    const tally=new Map(); let cursor, n=0, people=0;
+    do {
+      const p = await rd("getPersons",{limit:500, custom_fields:[PERSON_CF], ...(cursor?{cursor}:{})});
+      for (const per of (p.data||[])){ people++; if(!per.org_id) continue; for (const em of (per.emails||[])){ const d=academicDomain(em.value); if(!d) continue; if(!tally.has(per.org_id)) tally.set(per.org_id,new Map()); const t=tally.get(per.org_id); t.set(d,(t.get(d)||0)+1) } }
+      cursor=p.additional_data&&p.additional_data.next_cursor; n++;
+      setStatus(`Reading contacts… <b class="num">${people}</b>`, Math.min(0.95,0.05+n*0.08));
+    } while(cursor);
+    domainOf.clear();
+    for (const [org,t] of tally){ const top=[...t.entries()].sort((a,b)=>b[1]-a[1])[0]; if(top) domainOf.set(org, top[0]) }
+    buildGroups(); summary(); render();
+    b.textContent="Email domains scanned";
+  } catch(e){ banner("err", esc(explain(e))); setStatus("Email scan stopped."); b.disabled=false }
+};
+
+(async () => {
+  try { userNs = await window.claude?.use?.("user") } catch { userNs=null }
+  if (userNs){ try { me = await userNs.id() } catch { me=null } }
+  try { db = await window.claude?.use?.("db") } catch { db=null }
+  if (db){
+    try {
+      const [ds, lk, lg, st] = await Promise.all([db.collection("decisions").get(), db.collection("links").get(), db.collection("log").get(), db.doc("settings/main").get()]);
+      ds.docs.forEach(d=>decisions.set(d.id, d.data()));
+      lk.docs.forEach(d=>{ const v=d.data(); links.push([v.a,v.b]) });
+      history = lg.docs.map(d=>({...d.data(), id:d.id})).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+      if (st.exists){ const v=st.data(); settings.stampKey = v.stampKey ?? null; if ("pStampKey" in v) settings.pStampKey = v.pStampKey }
+    } catch(e){ banner("warn","Saved decisions couldn't be read, so groups you already reviewed may show again.") }
+  } else {
+    banner("warn","Decisions and merge history can't be saved in this view, so ✓, ✗ and Undo won't survive a reload. Merges still update Pipedrive.");
+  }
+  try { mcp = await window.claude?.use?.("mcp") } catch { mcp=null }
+  if (!mcp){
+    setStatus("Pipedrive isn't available here.");
+    $("stampSel").innerHTML = $("pStampSel").innerHTML = `<option value="">Pipedrive not connected</option>`;
+    $("list").innerHTML = `<div class="empty"><h2>Sign in to the Nucleus to connect Pipedrive</h2>The desk reads and updates Pipedrive as you, using the API token you signed in to the Nucleus with.</div>`;
+    $("reloadBtn").disabled = $("domainBtn").disabled = true;
+    renderHistory();
+    return;
+  }
+  reload();
+})();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,44 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the SOW Builder v1.0.0.
+   Restyles the builder only. The SOW document itself (preview, PDF, Word) keeps the logo and colours
+   chosen in the builder's own Settings. Light theme only, like the builder. */
+html:not(#ao-skin) body{font-family:var(--ao-font-body);background:var(--ao-bg);color:var(--ao-text);padding:16px}
+html:not(#ao-skin) .container{border-radius:12px;border:1px solid var(--ao-line);box-shadow:var(--ao-shadow)}
+html:not(#ao-skin) h1, html:not(#ao-skin) h2, html:not(#ao-skin) .modal-header h2{font-family:var(--ao-font-display);font-weight:600;letter-spacing:0}
+html:not(#ao-skin) .header{background:var(--ao-surface)!important;color:var(--ao-text);border-bottom:3px solid var(--ao-teal);padding:28px 84px 28px 40px}
+html:not(#ao-skin) .header::before{content:"";flex:none;width:220px;height:56px;background:url("/brand/logos/svg/atomic-orbital-logo-for-light-backgrounds.svg") left center/contain no-repeat}
+html:not(#ao-skin) .header .header-logo{display:none!important}
+html:not(#ao-skin) .header h1{font-size:2em;color:var(--ao-text)}
+html:not(#ao-skin) .header p{color:var(--ao-muted);opacity:1}
+html:not(#ao-skin) .header-content.no-logo{text-align:right}
+html:not(#ao-skin) .settings-icon{filter:grayscale(1);opacity:.7}
+html:not(#ao-skin) .tabs{background:var(--ao-sunk);border-bottom-color:var(--ao-line)}
+html:not(#ao-skin) .tab{color:var(--ao-muted)}
+html:not(#ao-skin) .tab.active{color:var(--ao-teal-text);border-bottom-color:var(--ao-teal)}
+html:not(#ao-skin) .prog-step.active .prog-dot{background:var(--ao-teal);border-color:var(--ao-teal);box-shadow:0 0 0 4px var(--ao-teal-soft);color:var(--ao-on-teal)}
+html:not(#ao-skin) .prog-step.active .prog-label{color:var(--ao-teal-text)}
+html:not(#ao-skin) .prog-step.completed .prog-dot{background:var(--ao-green);border-color:var(--ao-green)}
+html:not(#ao-skin) .prog-step.completed .prog-label{color:var(--ao-green)}
+html:not(#ao-skin) .form-section h2{color:var(--ao-text);border-bottom-color:var(--ao-line)}
+html:not(#ao-skin) label{color:var(--ao-text)}
+html:not(#ao-skin) input[type="text"], html:not(#ao-skin) input[type="email"], html:not(#ao-skin) input[type="tel"], html:not(#ao-skin) input[type="date"],
+html:not(#ao-skin) input[type="number"], html:not(#ao-skin) textarea, html:not(#ao-skin) select{border:1px solid var(--ao-muted);border-radius:6px}
+html:not(#ao-skin) input:focus, html:not(#ao-skin) textarea:focus, html:not(#ao-skin) select:focus{border-color:var(--ao-teal-text);box-shadow:0 0 0 3px var(--ao-teal-soft)}
+html:not(#ao-skin) .btn-primary{background:var(--ao-orange);color:var(--ao-on-orange)}
+html:not(#ao-skin) .btn-primary:hover:not(:disabled){box-shadow:0 6px 16px rgba(242,83,26,.3)}
+html:not(#ao-skin) .btn-secondary{background:transparent;color:var(--ao-teal-text);box-shadow:inset 0 0 0 1.5px var(--ao-teal-text)}
+html:not(#ao-skin) .btn-success, html:not(#ao-skin) .add-item-btn{background:var(--ao-teal-text);color:#fff}
+html:not(#ao-skin) .btn-success:hover:not(:disabled){box-shadow:0 6px 16px rgba(4,149,155,.3)}
+html:not(#ao-skin) .btn-danger, html:not(#ao-skin) .remove-btn, html:not(#ao-skin) .remove-logo-btn{background:#C2362B}
+html:not(#ao-skin) .info-banner{background:var(--ao-teal-soft);border-left-color:var(--ao-teal)}
+html:not(#ao-skin) .info-banner p{color:var(--ao-text)}
+html:not(#ao-skin) .ai-assist-btn{background:var(--ao-text);color:#fff}
+html:not(#ao-skin) .ai-output-box{background:var(--ao-teal-soft);border-color:var(--ao-teal);color:var(--ao-text)}
+html:not(#ao-skin) .ai-apply-btn{background:var(--ao-teal-text)}
+html:not(#ao-skin) .logo-upload-area:hover{border-color:var(--ao-teal);background:var(--ao-teal-soft)}
+html:not(#ao-skin) div[style*="#fefce8"]{background:var(--ao-sunk)!important;border-bottom-color:var(--ao-line)!important}
+html:not(#ao-skin) div[style*="#fefce8"] > span:first-child{color:var(--ao-text)!important}
+html:not(#ao-skin) div[style*="#fefce8"] > span[style*="border-left"]{border-left-color:var(--ao-line)!important}
+html:not(#ao-skin) .draft-btn{background:var(--ao-surface)!important;color:var(--ao-text)!important;box-shadow:inset 0 0 0 1px var(--ao-line);border-radius:6px}
+html:not(#ao-skin) .draft-btn:hover{box-shadow:inset 0 0 0 1.5px var(--ao-teal-text)}
+html:not(#ao-skin) #draftSelect{border-color:var(--ao-line)!important}

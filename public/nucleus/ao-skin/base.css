@@ -1,0 +1,43 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin, base (v1.0.0). Loaded by every tool in the Nucleus after its own styles.
+   1. Atomic Orbital colour tokens, light and dark, keyed to <html data-theme>.
+   2. Font aliases: the families the tools were built with now draw Space Grotesk (headings) and
+      IBM Plex Sans (body), self-hosted from /brand/fonts, so no tool code needs to change. */
+:root{
+  --ao-bg:#F4F6F8; --ao-surface:#FFFFFF; --ao-sunk:#EAEEF2; --ao-line:#D5DCE4; --ao-muted:#4A5A6B; --ao-text:#0E1620;
+  --ao-teal:#04959B; --ao-teal-text:#03797F; --ao-teal-soft:rgba(4,149,155,.12); --ao-orange:#F2531A; --ao-on-orange:#0E1620;
+  --ao-orange-soft:rgba(242,83,26,.10); --ao-green:#2E7D4F; --ao-green-soft:rgba(46,125,79,.12); --ao-meridian:#9AA9B8; --ao-on-teal:#0E1620; --ao-shadow:0 1px 2px rgb(14 22 32/.06),0 8px 24px rgb(14 22 32/.06);
+  --ao-font-display:"Space Grotesk",system-ui,sans-serif; --ao-font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ao-font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; --ao-radius:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ao-bg:#0A0E14; --ao-surface:#121923; --ao-sunk:#0E141C; --ao-line:#243040; --ao-muted:#A3B0BF; --ao-text:#E8EEF5;
+  --ao-teal:#08DADB; --ao-teal-text:#08DADB; --ao-teal-soft:rgba(8,218,219,.14); --ao-orange:#FF5B38; --ao-on-orange:#0A0E14;
+  --ao-orange-soft:rgba(255,91,56,.14); --ao-green:#6FE3A0; --ao-green-soft:rgba(111,227,160,.14); --ao-meridian:#5A7A8A; --ao-on-teal:#0A0E14; --ao-shadow:0 1px 2px rgb(0 0 0/.4),0 10px 30px rgb(0 0 0/.35)}}
+:root[data-theme="dark"]{
+  --ao-bg:#0A0E14; --ao-surface:#121923; --ao-sunk:#0E141C; --ao-line:#243040; --ao-muted:#A3B0BF; --ao-text:#E8EEF5;
+  --ao-teal:#08DADB; --ao-teal-text:#08DADB; --ao-teal-soft:rgba(8,218,219,.14); --ao-orange:#FF5B38; --ao-on-orange:#0A0E14;
+  --ao-orange-soft:rgba(255,91,56,.14); --ao-green:#6FE3A0; --ao-green-soft:rgba(111,227,160,.14); --ao-meridian:#5A7A8A; --ao-on-teal:#0A0E14; --ao-shadow:0 1px 2px rgb(0 0 0/.4),0 10px 30px rgb(0 0 0/.35)}
+
+/* Space Grotesk under the display names the tools use */
+@font-face{font-family:"Space Grotesk";font-weight:100 900;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+@font-face{font-family:"Bebas Neue";font-weight:100 900;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+@font-face{font-family:"Archivo";font-weight:100 900;font-stretch:50% 200%;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+@font-face{font-family:"Bricolage Grotesque";font-weight:100 900;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+@font-face{font-family:"Oswald";font-weight:100 900;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+/* IBM Plex Sans under the body names the tools use */
+@font-face{font-family:"Lato";font-weight:100 449;font-display:swap;src:url("/brand/fonts/IBMPlexSans-400-Latin.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:450 649;font-display:swap;src:url("/brand/fonts/IBMPlexSans-600-Latin.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:650 1000;font-display:swap;src:url("/brand/fonts/IBMPlexSans-700-Latin.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-weight:100 449;font-display:swap;src:url("/brand/fonts/IBMPlexSans-400-Latin.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-weight:450 549;font-display:swap;src:url("/brand/fonts/IBMPlexSans-500-Latin.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-weight:550 1000;font-display:swap;src:url("/brand/fonts/IBMPlexSans-600-Latin.woff2") format("woff2")}
+
+/* Logo pairs: <img class="ao-logo-on-light"> and <img class="ao-logo-on-dark">, one shown per theme */
+html:not(#ao-skin) .ao-logo-on-dark{display:none!important}
+html:not(#ao-skin)[data-theme="dark"] .ao-logo-on-light{display:none!important}
+html:not(#ao-skin)[data-theme="dark"] .ao-logo-on-dark{display:block!important}
+
+/* the Atomic Orbital mark, for skins that place it with CSS */
+.ao-skin-mark{display:inline-block;width:32px;height:32px;background:url("/brand/logos/svg/atomic-orbital-mark-small-size-for-light-backgrounds.svg") center/contain no-repeat;flex:none}
+:root[data-theme="dark"] .ao-skin-mark{background-image:url("/brand/logos/svg/atomic-orbital-mark-small-size-for-dark-backgrounds.svg")}

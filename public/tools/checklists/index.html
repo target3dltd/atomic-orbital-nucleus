@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Checklists &amp; templates · Nucleus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+<style>
+:root{--ck-sunk:#EAEEF2}
+:root[data-theme="dark"]{--ck-sunk:#0E141C}
+[hidden]{display:none!important}
+.ck-wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.ck-head{padding:36px 0 8px;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between}
+.ck-kicker{font:600 13px var(--ao-font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ao-teal-text);margin:0 0 6px}
+.ck-head h1{font-size:clamp(32px,4.6vw,48px);margin:0}
+.ck-head p{color:var(--ao-muted);max-width:62ch;margin:10px 0 0;font-size:17px}
+.ck-tools{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--ao-bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--ao-line);margin-top:18px}
+.ck-tools .ck-wrap{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding-top:10px;padding-bottom:10px}
+.ck-tools input{flex:1 1 240px;max-width:360px;font:inherit;font-size:15px;padding:8px 12px;border:1px solid var(--ao-muted);border-radius:8px;background:var(--ao-surface);color:var(--ao-text)}
+.ck-chip{font:500 14px var(--ao-font-body);padding:6px 12px;border-radius:999px;border:1px solid var(--ao-line);background:var(--ao-surface);color:var(--ao-muted);cursor:pointer}
+.ck-chip[aria-pressed="true"]{color:var(--ao-teal-text);border-color:var(--ao-teal-text);font-weight:600}
+.ck-count{margin-left:auto;color:var(--ao-muted);font-size:14px}
+.ck-group{padding:32px 0 4px;scroll-margin-top:64px}
+.ck-group h2{font-size:clamp(22px,2.8vw,28px);margin:0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ck-group h2 .ph{font:600 12px var(--ao-font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ao-teal-text)}
+.ck-group > p{color:var(--ao-muted);margin:6px 0 16px;max-width:72ch}
+.ck-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.ck-card{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;background:var(--ao-surface);border:1px solid var(--ao-line);border-top:3px solid var(--ao-teal);border-radius:8px;padding:14px;min-width:0}
+.ck-card img{width:96px;height:auto;border:1px solid var(--ao-line);border-radius:3px;background:#fff;align-self:start}
+.ck-card h3{font:600 16px/1.3 var(--ao-font-display);margin:0}
+.ck-kind{display:inline-block;font:600 11px var(--ao-font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ao-muted);background:var(--ck-sunk);border-radius:999px;padding:2px 8px;margin-bottom:6px}
+.ck-card p{margin:6px 0 0;color:var(--ao-muted);font-size:14px;line-height:1.5}
+.ck-dl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ck-btn{display:inline-flex;align-items:center;gap:6px;font:600 14px var(--ao-font-body);padding:6px 11px;border-radius:8px;text-decoration:none;color:var(--ao-teal-text);border:1.5px solid var(--ao-teal-text);min-height:34px}
+.ck-btn small{font-weight:400;color:var(--ao-muted)}
+.ck-btn:hover{background:color-mix(in srgb,var(--ao-teal) 10%,transparent)}
+.ck-empty{color:var(--ao-muted);padding:32px 0}
+.ck-note{background:color-mix(in srgb,var(--ao-teal) 9%,transparent);border-left:3px solid var(--ao-teal);border-radius:0 8px 8px 0;padding:12px 16px;margin:22px 0 0;max-width:80ch;font-size:15px}
+.ck-help{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:6px 20px 18px;margin:40px 0 56px}
+.ck-help summary{cursor:pointer;font:600 20px var(--ao-font-display);padding:12px 0}
+.ck-help h4{font:600 16px var(--ao-font-display);margin:16px 0 6px}
+.ck-help p,.ck-help li{color:var(--ao-muted);max-width:72ch}
+.ck-help ul{padding-left:20px;margin:6px 0}
+.ck-help dt{font:500 14px var(--ao-font-mono);margin-top:8px}
+.ck-help dd{margin:2px 0 0;color:var(--ao-muted)}
+.ck-foot{border-top:1px solid var(--ao-line);color:var(--ao-muted);font-size:14px;padding:18px 0 28px}
+@media(max-width:420px){.ck-card{grid-template-columns:1fr}.ck-card img{width:120px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="ck-wrap">
+    <header class="ck-head">
+      <div>
+        <p class="ck-kicker">Operations</p>
+        <h1>Checklists &amp; templates</h1>
+        <p>The working documents for every stage of a deal, from the first enquiry to support. Each one records the Pipedrive deal number, so it can be filed against the deal.</p>
+      </div>
+      <a class="ao-btn ao-btn--primary" href="files/atomic-orbital-checklists-and-templates.zip" download>Download all <span style="font-weight:400">· zip, 1.8 MB</span></a>
+    </header>
+  </div>
+  <div class="ck-tools">
+    <div class="ck-wrap" id="filters">
+      <label class="ao-sr" for="q" style="position:absolute;left:-9999px">Search checklists</label>
+      <input id="q" type="search" placeholder="Search checklists and templates">
+      <button class="ck-chip" type="button" data-g="" aria-pressed="true">All</button>
+      <span class="ck-count" id="count"></span>
+    </div>
+  </div>
+  <div class="ck-wrap">
+    <div id="list"></div>
+    <p class="ck-note">After using a checklist or report, attach it to the Pipedrive deal (or add the key points as a note), and update the deal within 24 hours. Open a template, then save it as a new document before filling it in.</p>
+
+    <details class="ck-help" id="help">
+      <summary>Help · <span id="ver"></span></summary>
+      <h4>What this is</h4>
+      <p>The operations checklists, reports and templates, rebranded to Atomic Orbital. They follow the phases of the Operations process map: enquiry, prove (pre-sale), deliver (post-sale) and support.</p>
+      <h4>Using it</h4>
+      <ul>
+        <li>Type in the search box, or pick a phase, to narrow the list.</li>
+        <li><b>Word</b> downloads the editable template. <b>Preview</b> opens a PDF to look at, or print and fill in by hand on site.</li>
+        <li><b>Download all</b> gets every template in one zip.</li>
+        <li>The templates use Space Grotesk and IBM Plex Sans. If they look different on your computer, install the fonts from Marketing → Assets &amp; Press Kit → Typography.</li>
+      </ul>
+      <h4>Changing a template</h4>
+      <p>Edit the original, then run <code>build/rebrand_checklists.py</code> (see the Nucleus README) so the branding stays consistent, and replace the files here.</p>
+      <h4>Version history</h4>
+      <dl id="changelog"></dl>
+    </details>
+  </div>
+</main>
+<footer class="ck-foot"><div class="ck-wrap">© Atomic Orbital Limited. Registered in England and Wales, company number 17518955.</div></footer>
+
+<script>
+(function () {
+  var VERSION = "1.0.0";
+  var CHANGELOG = [["v1.0.0", "2026-11-05", "First release: 19 operations checklists, reports and templates, rebranded to Atomic Orbital, grouped by process phase, with Word downloads, PDF previews and search."]];
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  $("ver").textContent = "v" + VERSION;
+  $("changelog").innerHTML = CHANGELOG.map(function (c) { return "<dt>" + esc(c[0]) + " · " + esc(c[1]) + "</dt><dd>" + esc(c[2]) + "</dd>"; }).join("");
+
+  var GROUPS = [
+    { id: "enquiry", phase: "Lead to deal", name: "Enquiry and qualification", blurb: "Every new enquiry, before anything is proposed." },
+    { id: "prove", phase: "Prove · pre-sale", name: "Demonstrations, surveys and proposals", blurb: "Building the case while the deal is open, then turning the proposal into an order." },
+    { id: "deliver", phase: "Deliver · post-sale", name: "Supply, installation and handover", blurb: "From order to handover: supply-only orders, integration projects, install planning, sign-off and the people and kit that make it happen." },
+    { id: "support", phase: "Support", name: "Health checks and support", blurb: "Keeping installed systems healthy and resolving issues." }
+  ];
+  var DOCS = [
+    ["enquiry", "sales-enquiry-qualification-checklist", "Sales enquiry qualification", "Checklist", "Complete for every new enquiry before moving to a proposal: who, how they found us, what, why, when, and the actions after."],
+    ["enquiry", "sales-enquiry-qualification-report", "Sales enquiry qualification report", "Report", "Overview, requirements, success criteria, budget and timeline, the qualification assessment and the recommended solution."],
+    ["prove", "client-demonstration-checklist", "Client demonstration", "Checklist", "Pre-demo planning, technical set-up, during the demo, and follow-up."],
+    ["prove", "client-demonstration-report", "Client demonstration report", "Report", "Attendees, objectives, systems shown, feedback, questions, outcome and agreed next steps."],
+    ["prove", "client-site-survey-checklist", "Client site survey", "Checklist", "Before the survey, the room, infrastructure, access and logistics, and technical checks."],
+    ["prove", "client-site-survey-report", "Client site survey report", "Report", "Site overview, infrastructure, access, technical recommendations, risks and site readiness."],
+    ["prove", "proposal-to-order-checklist", "Proposal to order", "Checklist", "Preparing, writing and submitting the proposal, then confirming the order."],
+    ["deliver", "product-supply-delivery-checklist", "Product supply delivery", "Checklist", "For simple product orders without installation: processing, pre-dispatch, dispatch and after delivery."],
+    ["deliver", "system-integration-project-checklist", "System integration project", "Checklist", "For complex projects with installation: initiation, design, procurement, pre-install, install and commission, close."],
+    ["deliver", "installation-planning-template", "Installation planning", "Template", "Install team, equipment, client prerequisites, the day-by-day plan, travel and emergency contacts."],
+    ["deliver", "installation-signoff-checklist", "Installation sign-off and handover", "Checklist", "Complete with the client before leaving site; both parties sign. Includes snagging and the follow-up schedule."],
+    ["deliver", "installation-completion-report", "Installation completion report", "Report", "Project summary, team, system installed, training delivered, outstanding items and lessons learned."],
+    ["deliver", "client-weekly-update-template", "Client weekly project update", "Template", "A weekly status to the client: on track, at risk or off track, progress, next steps and anything needed from them."],
+    ["deliver", "shipping-logistics-checklist", "Shipping and logistics", "Checklist", "Outbound and returns: address checks, packing, dispatch and confirmation."],
+    ["deliver", "freelance-booking-checklist", "Freelance and contractor booking", "Checklist", "Selecting, booking and preparing a contractor, and wrapping up after the work."],
+    ["support", "client-health-check-checklist", "Client health check visit", "Checklist", "Pre-visit, system check, client discussion, business development and post-visit."],
+    ["support", "client-health-check-report", "Client health check report", "Report", "System overview, health assessment, issues, feedback, opportunities, case-study potential and the next visit."],
+    ["support", "technical-support-workflow", "Technical support ticket workflow", "Workflow", "The standard process for every support request, with severity levels and response times."],
+    ["support", "technical-support-report", "Technical support resolution report", "Report", "Issue, diagnosis, root cause, resolution, time and cost, prevention and client confirmation."]
+  ];
+  var filt = "";
+  GROUPS.forEach(function (g) { var b = document.createElement("button"); b.className = "ck-chip"; b.type = "button"; b.dataset.g = g.id; b.setAttribute("aria-pressed", "false"); b.textContent = g.phase.split(" · ")[0]; $("count").before(b); });
+  $("filters").addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (!b) return; filt = b.dataset.g; document.querySelectorAll("[data-g]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); render(); });
+  $("q").addEventListener("input", render);
+  function card(d) {
+    var f = "atomic-orbital-" + d[1];
+    return '<article class="ck-card"><img src="img/' + f + '.jpg" alt="" loading="lazy" width="96" height="136"><div><span class="ck-kind">' + esc(d[3]) + "</span><h3>" + esc(d[2]) + "</h3><p>" + esc(d[4]) + '</p><div class="ck-dl"><a class="ck-btn" href="files/' + f + '.docx" download>Word <small>.docx</small></a><a class="ck-btn" href="files/' + f + '-preview.pdf" target="_blank" rel="noopener">Preview <small>PDF</small></a></div></div></article>';
+  }
+  function render() {
+    var q = $("q").value.trim().toLowerCase(), n = 0;
+    var html = GROUPS.filter(function (g) { return !filt || g.id === filt; }).map(function (g) {
+      var docs = DOCS.filter(function (d) { return d[0] === g.id && (!q || (d[2] + " " + d[3] + " " + d[4]).toLowerCase().indexOf(q) >= 0); });
+      n += docs.length;
+      if (!docs.length) return "";
+      return '<section class="ck-group" id="' + g.id + '"><h2><span>' + esc(g.name) + '</span><span class="ph">' + esc(g.phase) + "</span></h2><p>" + esc(g.blurb) + '</p><div class="ck-grid">' + docs.map(card).join("") + "</div></section>";
+    }).join("");
+    $("list").innerHTML = html || '<p class="ck-empty">Nothing matches “' + esc(q) + "”.</p>";
+    $("count").textContent = n + " of " + DOCS.length;
+  }
+  render();
+  if (location.hash === "#help") $("help").open = true;
+  var h = location.hash.slice(1); if (h && h !== "help") { var b = document.querySelector('[data-g="' + h + '"]'); if (b) b.click(); }
+})();
+</script>
+</body>
+</html>

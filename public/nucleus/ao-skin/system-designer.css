@@ -1,0 +1,36 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the System Designer v1.0.0.
+   Loaded with data-t3d-theme-skip so the Designer's own light/dark engine leaves it alone; light and dark are written out here.
+   Only the app's chrome changes. Quotes, proposals, PDFs and the 3D floor logo keep their own branding. */
+html:not(#ao-skin){--blue:#03797F;--blue-light:#E1F2F3;--blue-mid:#04959B}
+html:not(#ao-skin) body{font-family:var(--ao-font-body)}
+
+/* top bar */
+html:not(#ao-skin)[data-ui-theme="light"] #topbar{background:#FFFFFF;border-bottom:1px solid #D5DCE4;box-shadow:none}
+html:not(#ao-skin)[data-ui-theme="dark"] #topbar{background:#121923;border-bottom:1px solid #243040;box-shadow:none}
+html:not(#ao-skin)[data-ui-theme="light"] #topbar .tab-group{background:#EAEEF2}
+html:not(#ao-skin)[data-ui-theme="dark"] #topbar .tab-group{background:#0A0E14}
+html:not(#ao-skin) #topbar .tab-btn.active{background:#04959B;color:#0E1620;box-shadow:none}
+html:not(#ao-skin)[data-ui-theme="dark"] #topbar .tab-btn.active{background:#08DADB;color:#0A0E14}
+html:not(#ao-skin) #topbar .gen-quote-btn{background:#F2531A;color:#0E1620;box-shadow:none}
+html:not(#ao-skin)[data-ui-theme="dark"] #topbar .gen-quote-btn{background:#FF5B38;color:#0A0E14}
+html:not(#ao-skin) #topbar .gen-quote-btn:hover{filter:brightness(1.06);box-shadow:none}
+html:not(#ao-skin) #topbar .action-btn.primary{background:#04959B;border-color:#04959B;color:#0E1620}
+html:not(#ao-skin)[data-ui-theme="dark"] #topbar .action-btn.primary{background:#08DADB;border-color:#08DADB;color:#0A0E14}
+
+/* the top-bar logo shows Atomic Orbital; the image underneath (used in documents) is unchanged */
+html:not(#ao-skin) #logo-img{box-sizing:border-box;width:148px!important;height:36px!important;padding-left:148px;object-fit:none;
+  background:url("/brand/logos/svg/atomic-orbital-logo-for-light-backgrounds.svg") left center/contain no-repeat}
+html:not(#ao-skin)[data-ui-theme="dark"] #logo-img{background-image:url("/brand/logos/svg/atomic-orbital-logo-for-dark-backgrounds.svg")}
+html:not(#ao-skin) #topbar #logo-img{filter:none!important}
+
+/* accents */
+html:not(#ao-skin) #tour-tooltip button:not(.tour-secondary){background:#04959B;color:#0E1620}
+html:not(#ao-skin) .qp-topbar button.primary{color:#03797F}
+html:not(#ao-skin) #cable-report-btn{background:#04959B!important;color:#0E1620!important;border-color:#04959B!important}
+html:not(#ao-skin)[data-ui-theme="dark"] #cable-report-btn{background:#08DADB!important;color:#0A0E14!important;border-color:#08DADB!important}
+html:not(#ao-skin)[data-ui-theme="light"] #controls h3{color:#03797F}
+html:not(#ao-skin)[data-ui-theme="dark"] #controls h3{color:#08DADB}
+html:not(#ao-skin)[data-ui-theme="light"] .qs-preset-btn{color:#03797F}
+html:not(#ao-skin)[data-ui-theme="dark"] .qs-preset-btn{color:#08DADB}
+html:not(#ao-skin) #controls h3, html:not(#ao-skin) .modal-header h2{font-family:var(--ao-font-display);font-weight:600}
