@@ -118,6 +118,7 @@ table.detail tbody tr:hover { background: var(--bg); }
   <div class="topnav-inner">
     <div class="topnav-brand">Sales Hub</div>
     <div class="topnav-links">
+      <a href="./">📋 Overview</a>
       <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
       <a href="sales-report.html">📈 Sales Report</a>
       <a href="supplier-forecast.html">📦 Suppliers</a>
@@ -658,7 +659,7 @@ function dealTable(key, deals, compact) {
     const pname = pipelines.find(p => p.id === getPipelineId(d))?.name || '';
     const fmt = (d.currency === 'EUR') ? fmtEUR : fmtGBP;
     return '<tr><td class="date-cell">' + (d.add_time ? d.add_time.split(' ')[0] : '—') + '</td>'
-      + '<td class="title-cell"><a href="https://target3d.pipedrive.com/deal/' + d.id + '" target="_blank">' + (d.title || '') + '</a></td>'
+      + '<td class="title-cell"><a href="https://target3d2.pipedrive.com/deal/' + d.id + '" target="_blank">' + (d.title || '') + '</a></td>'
       + (compact ? '' : '<td><span class="pipe-chip">' + pname + '</span></td>')
       + '<td>' + getOwnerName(d) + '</td>'
       + '<td class="num-cell">' + fmt(getRevenue(d)) + '</td>'

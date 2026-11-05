@@ -2,7 +2,7 @@
 <html lang="en-GB" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>Sales Hub · Nucleus</title>
+<title>Sales overview | Sales Hub · Nucleus</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
@@ -12,38 +12,128 @@
 <link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
 <script src="hub.js"></script>
 <style>
-body{margin:0}
-.shx-bar{background:var(--ao-surface);border-bottom:1px solid var(--ao-line)}
-.shx-bar .in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:36px}
-.shx-wrap{max-width:1080px;margin:0 auto;padding:36px 16px 64px}
-.shx-kicker{font:600 13px var(--ao-font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ao-teal-text);margin:0 0 6px}
-.shx-wrap h1{font:600 clamp(32px,4.6vw,46px)/1.1 var(--ao-font-display);margin:0}
-.shx-sub{color:var(--ao-muted);font-size:17px;max-width:62ch;margin:10px 0 28px}
-.shx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.shx-card{display:flex;flex-direction:column;gap:6px;background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:var(--ao-radius);padding:18px 18px 20px;text-decoration:none;color:inherit;transition:border-color .12s,transform .12s}
-.shx-card:hover{border-color:var(--ao-teal);transform:translateY(-1px)}
-.shx-card .n{font:600 13px var(--ao-font-mono);color:var(--ao-teal-text)}
-.shx-card .t{font:600 19px var(--ao-font-display)}
-.shx-card .d{font-size:14.5px;color:var(--ao-muted);line-height:1.5}
-.shx-foot{margin-top:28px;font-size:13px;color:var(--ao-muted)}
-@media (prefers-reduced-motion:reduce){.shx-card{transition:none}.shx-card:hover{transform:none}}
+body{margin:0;font-size:14px}
+[hidden]{display:none!important}
+.topnav{position:sticky;top:0;z-index:200}
+.topnav-inner{max-width:1500px;margin:0 auto;padding:0 20px;display:flex;align-items:center}
+.topnav-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.topnav-links{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.topnav-links a{display:flex;align-items:center;gap:5px;padding:6px 10px;font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap}
+.ov{max-width:1500px;margin:0 auto;padding:20px 20px 64px}
+.ov-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.ov-status h1{font:600 26px/1.15 var(--ao-font-display);margin:0}
+.ov-status .sub{color:var(--ao-muted);font-size:13px;margin-top:2px}
+.ov-status .live{display:flex;align-items:center;gap:8px;color:var(--ao-muted);font-size:13px;margin-left:auto}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--ao-line)}
+.sync-dot.live{background:var(--ao-green)} .sync-dot.error{background:#C2362B}
+.sync-dot.loading{background:#B4540B;animation:ovp 1s infinite}
+@keyframes ovp{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.sync-dot.loading{animation:none}}
+.btn{font:500 13px var(--ao-font-body);background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:6px;padding:6px 14px;cursor:pointer;color:var(--ao-text)}
+.btn:hover{border-color:var(--ao-teal);color:var(--ao-teal-text)}
+.err{background:rgba(194,54,43,.08);border:1px solid rgba(194,54,43,.3);color:#8E2219;border-radius:8px;padding:10px 14px;margin-bottom:16px}
+.tiles{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:22px}
+@media (min-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:900px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1440px){.tiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tile{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:14px 16px 16px;border-top:3px solid var(--ao-line);min-width:0}
+.tile.ok{border-top-color:var(--ao-green)} .tile.warn{border-top-color:#B4540B} .tile.bad{border-top-color:#C2362B} .tile.info{border-top-color:var(--ao-teal)}
+.tile .l{font:600 11.5px var(--ao-font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ao-muted)}
+.tile .v{font:600 30px/1.1 var(--ao-font-display);margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.tile .n{font-size:13px;color:var(--ao-muted);line-height:1.45}
+.tile .n b{color:var(--ao-text);font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--ao-sunk);margin-top:10px;position:relative;overflow:hidden}
+.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--ao-teal)}
+.meter i.ok{background:var(--ao-green)} .meter i.warn{background:#B4540B} .meter i.bad{background:#C2362B}
+.up{color:var(--ao-green);font-weight:600} .down{color:#C2362B;font-weight:600}
+.cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:16px;margin-bottom:24px}
+@media (max-width:1100px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;min-width:0}
+.panel-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px 10px}
+.panel-h h2{font:600 18px var(--ao-font-display);margin:0}
+.panel-h small{color:var(--ao-muted);font-size:12.5px}
+.seg{margin-left:auto;display:flex;border:1px solid var(--ao-line);border-radius:6px;overflow:hidden}
+.seg button{font:500 12.5px var(--ao-font-body);border:0;background:none;padding:5px 10px;cursor:pointer;color:var(--ao-muted)}
+.seg button[aria-pressed="true"]{background:var(--ao-teal);color:var(--ao-on-teal)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font:600 11px var(--ao-font-body);letter-spacing:.05em;text-transform:uppercase;color:var(--ao-muted);text-align:left;padding:8px 12px;border-bottom:1px solid var(--ao-line);white-space:nowrap;background:var(--ao-sunk)}
+td{padding:8px 12px;border-bottom:1px solid var(--ao-line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td a{color:var(--ao-teal-text);text-decoration:none;font-weight:500} td a:hover{text-decoration:underline}
+tfoot td{font-weight:600;background:var(--ao-sunk)}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip.ok{background:var(--ao-green-soft);color:var(--ao-green)} .chip.warn{background:rgba(180,84,11,.1);color:#8F420A} .chip.bad{background:rgba(194,54,43,.1);color:#A82C22} .chip.grey{background:var(--ao-sunk);color:var(--ao-muted)}
+.empty{color:var(--ao-muted);text-align:center;padding:24px}
+.sect{font:600 18px var(--ao-font-display);margin:6px 0 12px}
+.reports{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.rcard{display:flex;flex-direction:column;gap:4px;background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:8px;padding:14px 16px;text-decoration:none;color:inherit}
+.rcard:hover{border-color:var(--ao-teal)}
+.rcard .t{font:600 16px var(--ao-font-display)} .rcard .d{font-size:13px;color:var(--ao-muted);line-height:1.45}
+.foot{margin-top:22px;font-size:12.5px;color:var(--ao-muted);line-height:1.5}
+.sk{color:transparent!important;background:var(--ao-sunk);border-radius:4px}
 </style>
 </head>
 <body>
-<header class="shx-bar"><div class="in" data-sh-tools><div class="topnav-brand">Sales Hub</div></div></header>
-<main class="shx-wrap">
-  <p class="shx-kicker">Live from Pipedrive</p>
-  <h1>Sales Hub</h1>
-  <p class="shx-sub">Six views of where sales stand, built by Allan. Open to the sales team and Nucleus administrators.</p>
-  <div class="shx-grid">
-    <a class="shx-card" href="revenue-scoreboard.html"><span class="n">01</span><span class="t">Revenue Scoreboard</span><span class="d">Won revenue today, this week, month, quarter and year against the targets.</span></a>
-    <a class="shx-card" href="pipeline-triage.html"><span class="n">02</span><span class="t">Pipeline Triage</span><span class="d">Every open deal sorted into Hot, Warm, Stale and Dead, with the next action and probability updates.</span></a>
-    <a class="shx-card" href="sales-report.html"><span class="n">03</span><span class="t">Sales Report</span><span class="d">Won deals by pipeline, GBP and EUR kept separate, with period targets.</span></a>
-    <a class="shx-card" href="weekly-pulse.html"><span class="n">04</span><span class="t">Weekly Pulse</span><span class="d">New, won and lost this week, deal by deal.</span></a>
-    <a class="shx-card" href="weekly-deals-report.html"><span class="n">05</span><span class="t">Weekly Deals Report</span><span class="d">The weekly numbers across eight metrics, including demos and projects.</span></a>
-    <a class="shx-card" href="supplier-forecast.html"><span class="n">06</span><span class="t">Supplier Forecast</span><span class="d">What we expect to order from each supplier, from the pipeline.</span></a>
+<nav class="topnav"><div class="topnav-inner">
+  <div class="topnav-brand">Sales Hub</div>
+  <div class="topnav-links">
+    <a href="./" class="active">📋 Overview</a>
+    <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
+    <a href="sales-report.html">📈 Sales Report</a>
+    <a href="supplier-forecast.html">📦 Suppliers</a>
+    <a href="weekly-pulse.html">🩺 Weekly Pulse</a>
+    <a href="weekly-deals-report.html">📑 Deals Report</a>
+    <a href="revenue-scoreboard.html">💰 Scoreboard</a>
   </div>
-  <p class="shx-foot">Reports read company-wide figures with the Nucleus's shared read-only Pipedrive token. Open <b>Help</b> for details and the version history.</p>
+</div></nav>
+
+<main class="ov">
+  <div class="ov-status">
+    <div><h1>Sales overview</h1><div class="sub" id="scopeLine">FY2026 · from 1 April 2026 · UK Tech Sales (SI, PS) and Studio Sales, GBP</div></div>
+    <div class="live"><span class="sync-dot loading" id="dot"></span><span id="syncLabel">Loading from Pipedrive…</span></div>
+    <button class="btn" id="refresh" type="button">↻ Refresh</button>
+  </div>
+  <div class="err" id="err" hidden></div>
+
+  <section class="tiles" id="tiles" aria-label="Headline figures">
+    <div class="tile"><div class="l">FY to date</div><div class="v sk">£0,000,000</div><div class="n sk">loading</div></div>
+    <div class="tile"><div class="l">Still to find</div><div class="v sk">£0,000,000</div><div class="n sk">loading</div></div>
+    <div class="tile"><div class="l">Gross profit FY</div><div class="v sk">£000,000</div><div class="n sk">loading</div></div>
+    <div class="tile"><div class="l">Won this week</div><div class="v sk">£00,000</div><div class="n sk">loading</div></div>
+    <div class="tile"><div class="l">New this week</div><div class="v sk">00</div><div class="n sk">loading</div></div>
+    <div class="tile"><div class="l">Closing in 30 days</div><div class="v sk">00</div><div class="n sk">loading</div></div>
+  </section>
+
+  <div class="cols">
+    <section class="panel" aria-labelledby="ownH">
+      <div class="panel-h"><h2 id="ownH">By owner</h2><small>won this FY · open pipeline now</small></div>
+      <div class="tw"><table><thead><tr><th>Owner</th><th class="num">Won</th><th class="num">Revenue</th><th class="num">GP</th><th class="num">GP %</th><th class="num">Open</th><th class="num">Pipeline</th></tr></thead>
+      <tbody id="owners"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody><tfoot id="ownersFoot"></tfoot></table></div>
+    </section>
+    <section class="panel" aria-labelledby="closeH">
+      <div class="panel-h"><h2 id="closeH">Next to close</h2><small id="closeSub"></small>
+        <div class="seg" role="group" aria-label="Which deals">
+          <button type="button" data-v="soon" aria-pressed="true">Next 30 days</button>
+          <button type="button" data-v="late" aria-pressed="false">Past close date</button>
+        </div></div>
+      <div class="tw"><table><thead><tr><th>Deal</th><th>Owner</th><th>Stage</th><th class="num">Value</th><th class="num">Prob.</th><th class="num">Close</th><th class="num">Last activity</th></tr></thead>
+      <tbody id="closing"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
+    </section>
+  </div>
+
+  <h2 class="sect">Reports</h2>
+  <div class="reports">
+    <a class="rcard" href="revenue-scoreboard.html"><span class="t">💰 Revenue Scoreboard</span><span class="d">Today, week, month, quarter and year against the daily minimum and stretch, with weekly and monthly charts.</span></a>
+    <a class="rcard" href="pipeline-triage.html"><span class="t">🔍 Pipeline Triage</span><span class="d">Every open deal as Hot, Warm, Stale or Dead with the next action. Change a probability or move a deal's bucket.</span></a>
+    <a class="rcard" href="sales-report.html"><span class="t">📈 Sales Report</span><span class="d">Won deals by pipeline for any period, GBP and EUR kept separate, against the period targets.</span></a>
+    <a class="rcard" href="weekly-pulse.html"><span class="t">🩺 Weekly Pulse</span><span class="d">New, won and lost this week, deal by deal, plus demos booked.</span></a>
+    <a class="rcard" href="weekly-deals-report.html"><span class="t">📑 Weekly Deals Report</span><span class="d">The weekly numbers across eight metrics, including demos and projects.</span></a>
+    <a class="rcard" href="supplier-forecast.html"><span class="t">📦 Supplier Forecast</span><span class="d">What we expect to order from each supplier, from the open pipeline.</span></a>
+  </div>
+  <p class="foot">The overview counts the same deals as the Revenue Scoreboard: won deals in the UK Tech Sales (SI, PS) and Studio Sales pipelines, in GBP, from 1 April 2026, against £3.8m minimum and £4.56m stretch spread over 252 working days. Gross profit uses each deal's Expected GP Value, or value minus Cost Price when that's all there is. Open <b>Help</b> for more.</p>
 </main>
+<script src="overview.js"></script>
 </body>
 </html>

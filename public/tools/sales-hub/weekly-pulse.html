@@ -128,6 +128,7 @@ td { padding: 8px 10px; vertical-align: middle; }
   <div class="topnav-inner">
     <div class="topnav-brand">Sales Hub</div>
     <div class="topnav-links">
+      <a href="./">📋 Overview</a>
       <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
       <a href="sales-report.html">📈 Sales Report</a>
       <a href="supplier-forecast.html">📦 Suppliers</a>
@@ -580,7 +581,7 @@ function renderNewDealsDetail(deals, from, to) {
     const fmt = isEur ? fmtEUR : fmtGBP;
     return `<tr>
       <td class="date-cell">${d.add_time ? d.add_time.split(' ')[0] : '—'}</td>
-      <td class="title-cell"><a href="https://target3d.pipedrive.com/deal/${d.id}" target="_blank">${esc(d.title)}</a></td>
+      <td class="title-cell"><a href="https://target3d2.pipedrive.com/deal/${d.id}" target="_blank">${esc(d.title)}</a></td>
       <td>${esc(pname)}</td>
       <td>${esc(d.owner_name || (d.user_id && d.user_id.name) || '—')}</td>
       <td class="num-cell">${fmt(Number(d.value) || 0)}</td>
@@ -647,7 +648,7 @@ function renderWonLost(deals, from, to) {
       const fmt = isEurDeal(d) ? fmtEUR : fmtGBP;
       return `
       <tr>
-        <td class="title-cell"><a href="https://target3d.pipedrive.com/deal/${d.id}" target="_blank">${escapeHtml(d.title || 'Untitled')}</a></td>
+        <td class="title-cell"><a href="https://target3d2.pipedrive.com/deal/${d.id}" target="_blank">${escapeHtml(d.title || 'Untitled')}</a></td>
         <td>${ALLOWED_PIPELINES[d.pipeline_id] || ''}</td>
         <td><span class="status-chip ${status}">${status === 'won' ? 'Won' : 'Lost'}</span></td>
         <td class="date-cell">${formatDate(date)}</td>

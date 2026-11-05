@@ -7,7 +7,7 @@
 //   kpi_notes    <person>_*   monthly meeting notes  read and write: that person and admins
 //   milestones   <number>     plan progress          read: everyone   write: admins
 // A person is matched by the first name on their Pipedrive user (allan, ashley, jack…), the ids the dashboards use.
-import { sessionFrom, isAdmin, jsonResponse as json } from "../lib/session.mjs";
+import { sessionFrom, isAdmin, canUseSalesHub, jsonResponse as json } from "../lib/session.mjs";
 import { kv } from "../lib/kv.mjs";
 
 const KEYS = ["kpi_actuals", "kpi_notes", "milestones"];
@@ -35,7 +35,7 @@ export default async (req) => {
   const store = await kv();
 
   if (req.method === "GET") {
-    const out = { ok: true, me, isAdmin: admin, name: s.n || s.gn };
+    const out = { ok: true, me, isAdmin: admin, salesHub: canUseSalesHub(s), name: s.n || s.gn };
     for (const k of KEYS) {
       const all = (await store.get(docKey(k), { type: "json" })) || {};
       out[k] = Object.fromEntries(Object.entries(all).filter(([f]) => canRead(k, f, me, admin)));

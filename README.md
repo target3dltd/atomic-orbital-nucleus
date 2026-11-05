@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.7.0)
+# Atomic Orbital Nucleus (v1.8.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -8,7 +8,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 
 | Orbit | What's in it |
 |---|---|
-| **Tools** (inner ring) | Operations processes, Checklists & templates, System Designer, SOW Builder, Pipedrive Duplicate Eraser, Motive licence renewals, Sales dashboard, Sales Hub, Team performance, Support dashboard, Mocap Toolkit. |
+| **Tools** (inner ring) | Operations processes, Checklists & templates, System Designer, SOW Builder, Pipedrive Duplicate Eraser, Motive licence renewals, Sales, Team performance, Support dashboard, Mocap Toolkit. |
 | **Marketing** (shares the inner ring) | Assets & Press Kit: logos, colours, fonts, letterheads, the Brand Style Guide 2026 and press copy. |
 | **Project sites** (middle ring) | Clays, Drift and Little Lion (LLE). |
 | **Connected systems** (outer ring) | Pipedrive, QuickBooks, Google Drive, Gmail, the Operations Google Site, Netlify, Claude. These open in a new tab. |
@@ -31,7 +31,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (75 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (77 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 
@@ -142,7 +142,7 @@ The **Sources** strip at the top of the dashboard shows where each number comes 
 
 ## Team dashboards (Sales dashboard + Team performance)
 
-`public/tools/team-dashboards/` — six pages from the "Direction and Delivery" plan: Overview, Company performance, Sales, Performance Hub, My dashboard, and Plan & milestones. They appear in the hub as **Sales dashboard** (the sales page) and **Team performance** (the rest).
+`public/tools/team-dashboards/` — six pages from the "Direction and Delivery" plan: Overview, Company performance, Sales, Performance Hub, My dashboard, and Plan & milestones. They appear in the hub as **Team performance**. Their Sales tab now opens the Sales tool (see "Sales" above).
 
 What changed when they moved into the Nucleus:
 - **Pipedrive** goes through `/api/team/pipedrive` (`netlify/functions/team-pipedrive.mjs`), behind the sign-in. Company-wide totals need to see every deal, so this uses the read-only `PIPEDRIVE_API_TOKEN` when set; otherwise it falls back to each person's own token and they see only their deals. Read-only: it allows `GET` on deals, fields, users, stages, pipelines, activities, organisations and persons, nothing else.
@@ -150,11 +150,14 @@ What changed when they moved into the Nucleus:
 - **Admin-only:** the Performance Hub (hidden in the nav and blocked by `gate.js`). "My dashboard" shows the signed-in person their own page; admins get a people picker.
 - The plan data (`plan-data.js`) and the team list (`PEOPLE` in `core.js`) are the files to edit when roles or KPIs change. The KPIs there were re-based to August 2026.
 
-## Sales Hub (Allan's reports)
+## Sales (the Sales Hub)
 
-`public/tools/sales-hub/` — Revenue Scoreboard, Pipeline Triage, Sales Report, Weekly Pulse, Weekly Deals Report and Supplier Forecast, from Allan's Target3D Sales Hub, plus a Nucleus landing page and Help (`hub.js`, v1.0.0).
+`public/tools/sales-hub/` — the single sales tool, shown in the hub as **Sales**. It opens on the **Sales overview** (`index.html` + `overview.js`), then Allan's six reports: Revenue Scoreboard, Pipeline Triage, Sales Report, Weekly Pulse, Weekly Deals Report and Supplier Forecast. Help is in `hub.js` (v1.1.0).
+
+Since v1.8.0 the team dashboards' Sales page is merged in: its useful parts (gross profit, the by-owner table, deals closing in 30 days) live on the overview, `team-dashboards/sales.html` redirects here, and the Sales tab in Team performance links here (shown only to people with Sales access). Its simpler deals triage was dropped in favour of Pipeline Triage. The overview counts exactly what the Revenue Scoreboard counts (pipelines 1, 24 and 11, GBP, from 1 April 2026, £3.8m minimum and £4.56m stretch over 252 working days), so the two always agree. Note the plan in `team-dashboards/plan-data.js` says £4.6m stretch; the sales tools use Allan's £4.56m.
 
 What changed when it moved in:
+- **Deal links** point at `target3d2.pipedrive.com` (some pages used `target3d.pipedrive.com`).
 - **Sign-in.** Firebase is gone (no Firebase project or `FIREBASE_WEB_API_KEY` needed). The edge gate lets in the people in `NUCLEUS_SALES_HUB_USERS` and every administrator; anyone else gets a "Sales Hub" notice, and the tool doesn't appear in their hub.
 - **Pipedrive** goes through `/api/sales-hub/pipedrive` (`netlify/functions/sales-hub-pipedrive.mjs`). Reads (pipelines, stages, deals, deal fields, users, projects) use the shared read-only `PIPEDRIVE_API_TOKEN`. The one write, Pipeline Triage's probability change, is limited to `PUT /deals/<id>` with `probability` only, and is made with the signed-in person's own token so Pipedrive records who changed it. (Allan's proxy allowed any PUT/POST on those paths.)
 - **Bucket overrides** in Pipeline Triage moved from Firestore to the Nucleus store (`sales-hub` namespace, Sales Hub people only).

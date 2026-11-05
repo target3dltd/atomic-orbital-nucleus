@@ -237,7 +237,7 @@ const T3D = (() => {
   const NAV = [
     ['index.html','Overview'],
     ['company.html','Company performance'],
-    ['sales.html','Sales'],
+    ['/tools/sales-hub/','Sales'],
     ['performance-hub.html','Performance Hub'],
     ['individual.html','My dashboard'],
     ['milestones.html','Plan & milestones'],
@@ -262,7 +262,11 @@ const T3D = (() => {
         <footer class="ft">Direction and Delivery · strictly private and confidential</footer>
       </div>`);
     // Performance Hub is for administrators
-    who().then(w => { if (!w.isAdmin) document.querySelectorAll('nav.tabs a[href="performance-hub.html"]').forEach(a => a.remove()); });
+    who().then(w => {
+      if (!w.isAdmin) document.querySelectorAll('nav.tabs a[href="performance-hub.html"]').forEach(a => a.remove());
+      // Sales lives in the Sales Hub, which has its own access list
+      if (!w.salesHub) document.querySelectorAll('nav.tabs a[href="/tools/sales-hub/"]').forEach(a => a.remove());
+    });
   }
   function setSource() {
     const el=document.getElementById('datasrc'); if(!el) return;

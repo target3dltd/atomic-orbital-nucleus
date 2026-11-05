@@ -243,6 +243,11 @@ console.log("Sales Hub");
     eq((await gate.default(req("/tools/sales-hub/", { cookie: allan }), { next: () => "NEXT" })).status, 403, "list comes from the setting");
     delete process.env.NUCLEUS_SALES_HUB_USERS;
   });
+  await t("team dashboards know who can see Sales", async () => {
+    const ts = (await imp("netlify/functions/team-state.mjs")).default;
+    eq((await jbody(await ts(req("/api/team/state", { cookie: allan })))).j.salesHub, true);
+    eq((await jbody(await ts(req("/api/team/state", { cookie: outsider })))).j.salesHub, false);
+  });
   await t("/me says who can see the Sales Hub", async () => {
     eq((await jbody(await auth(req("/api/nucleus/me", { cookie: allan })))).j.user.salesHub, true);
     eq((await jbody(await auth(req("/api/nucleus/me", { cookie: outsider })))).j.user.salesHub, false);
@@ -297,6 +302,15 @@ await t("Sales Hub pages have no Firebase or CDN left and load the Nucleus shell
     ok(h.includes('<script src="hub.js"></script>') && h.includes("const PD_PROXY = '/api/sales-hub/pipedrive'"), n);
   }
   ok(pub("tools/sales-hub/pipeline-triage.html").includes("SalesHubStore.get('settings/pipeline-bucket-overrides')"));
+});
+await t("one Sales tool: old team Sales page redirects, registry has a single Sales entry", async () => {
+  ok(pub("tools/team-dashboards/sales.html").includes("location.replace('/tools/sales-hub/'"));
+  ok(!fs.existsSync(path.join(root, "public/tools/team-dashboards/page-sales.js")));
+  const w = {}; new Function("window", pub("nucleus/registry.js"))(w);
+  const ids = w.NUCLEUS_REGISTRY.items.map((i) => i.id); ok(!ids.includes("sales-dashboard") && ids.includes("sales-hub"));
+  ok(pub("tools/team-dashboards/core.js").includes("['/tools/sales-hub/','Sales']"));
+  ok(pub("tools/sales-hub/index.html").includes('<script src="overview.js"></script>'));
+  for (const n of ["revenue-scoreboard", "pipeline-triage", "weekly-pulse"]) ok(pub("tools/sales-hub/" + n + ".html").includes('<a href="./">📋 Overview</a>'), n);
 });
 await t("every live registry entry has an index.html", async () => {
   const src = pub("nucleus/registry.js"); const w = {}; new Function("window", src)(w);

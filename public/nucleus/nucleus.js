@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.7.0";
+  N.VERSION = "1.8.0";
   N.CHANGELOG = [
+    ["v1.8.0", "2026-11-05", "One Sales tool: the team Sales dashboard and the Sales Hub are merged. A new Sales overview opens first, showing FY to date against the minimum pace, what is still to find per working day, gross profit, this week, a league table by owner, and deals closing in 30 days or past their close date, using the same deals and targets as the Revenue Scoreboard so the figures agree. The six reports are one click away, and the Sales tab in Team performance now goes there."],
     ["v1.7.0", "2026-11-05", "Sales Hub added under Tools: Allan's six live reports (Revenue Scoreboard, Pipeline Triage, Sales Report, Weekly Pulse, Weekly Deals Report, Supplier Forecast), now on the Nucleus sign-in instead of Firebase, in Atomic Orbital style, with its own Help. Open to the sales team and administrators only; it doesn't appear in the hub for anyone else."],
     ["v1.6.0", "2026-11-05", "Sign in with Google: the first time you connect your Pipedrive token, then Google is all you need (token stored encrypted against your Google account; change it from Your account). Administrators set by email. Team dashboards added: Sales dashboard and Team performance (overview, company, Performance Hub for administrators, My dashboard, plan milestones) with KPI entries, notes and progress shared across the team. Checklists & templates: 19 operations documents rebranded to Atomic Orbital."],
     ["v1.5.0", "2026-11-05", "New Marketing section with Assets & Press Kit: logos, colour palette, fonts, UK letterheads (print and digital), the Brand Style Guide 2026 with slide viewer, press boilerplate, key facts and company details, all downloadable."],

@@ -53,7 +53,6 @@ PAGES = {
     "tools/sow-builder/index.html": dict(skin="sow", sync=None, fix=sow_light),
     "tools/team-dashboards/index.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/company.html": dict(skin="team-dashboards"),
-    "tools/team-dashboards/sales.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/performance-hub.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/individual.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/milestones.html": dict(skin="team-dashboards"),

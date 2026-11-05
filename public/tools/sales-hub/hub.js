@@ -6,11 +6,13 @@
    - a signed-out session sends you back to sign in, and you return to the same page afterwards */
 (function () {
   "use strict";
-  var VERSION = "1.0.0";
+  var VERSION = "1.1.0";
   var CHANGELOG = [
+    ["1.1.0", "One sales tool: the team Sales dashboard is merged in. New Overview page (FY position against minimum pace, what is still to find per working day, gross profit, this week, owners league table, deals closing in 30 days and deals past their close date) using the same deals and targets as the Revenue Scoreboard. Overview link on every report. Deal links fixed to target3d2.pipedrive.com."],
     ["1.0.0", "Brought into the Nucleus from Allan's Target3D Sales Hub. Sign-in is now the Nucleus Google sign-in (Firebase removed); Pipedrive reads go through the Nucleus with the shared read-only token; probability edits in Pipeline Triage are made with your own Pipedrive token; bucket overrides are kept in the Nucleus store; Atomic Orbital styling; SheetJS served from the Nucleus."]
   ];
   var PAGES = [
+    ["./", "Overview", "The headline: FY to date against the minimum pace, what is still to find (and what that means per working day), gross profit, this week's wins and new deals, a league table by owner, and the deals closing in the next 30 days or already past their close date. Deal names open in Pipedrive."],
     ["revenue-scoreboard.html", "Revenue Scoreboard", "Won revenue today, this week, month, quarter and year against the minimum and stretch targets. Export downloads the figures as Excel."],
     ["pipeline-triage.html", "Pipeline Triage", "Every open deal in the four sales pipelines, sorted into Hot, Warm, Stale and Dead with the next action. You can move a deal to another bucket (shared with everyone using the Sales Hub) or change its probability, which updates Pipedrive as you."],
     ["sales-report.html", "Sales Report", "Won deals by pipeline for a period you choose, GBP and EUR kept separate, against the period targets."],
@@ -60,6 +62,8 @@
       '<li>Reading uses the Nucleus\'s shared read-only Pipedrive token, so everyone sees the same company-wide figures.</li>' +
       '<li>Changing a probability in Pipeline Triage uses <b>your own</b> Pipedrive token, so Pipedrive records the change against you. Nothing else here writes to Pipedrive.</li>' +
       '<li>Bucket overrides in Pipeline Triage are saved in the Nucleus and shared with everyone using the Sales Hub.</li>' +
+      '<li>The Overview and the Revenue Scoreboard count the same deals: won in UK Tech Sales (SI, PS) and Studio Sales, GBP, from 1 April 2026, against £3.8m minimum and £4.56m stretch over 252 working days. Iberia (EUR) is in the Sales Report.</li>' +
+      '<li>Gross profit uses each deal\'s Expected GP Value, or value minus Cost Price; the Overview says how many won deals have it.</li>' +
       '<li>Targets and pipeline names are set in each report\'s own code; ask whoever maintains the Nucleus to change them.</li></ul>' +
       '<h3>Who can open it</h3><p>The people on the Sales Hub list (the Netlify setting <code>NUCLEUS_SALES_HUB_USERS</code>) and every Nucleus administrator.</p>' +
       '<h3>Version history</h3><ul>' + CHANGELOG.map(function (c) { return '<li><b>v' + c[0] + '</b>: ' + esc(c[1]) + '</li>'; }).join("") + '</ul>' +

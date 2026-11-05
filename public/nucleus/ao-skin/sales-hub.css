@@ -58,3 +58,6 @@ html:not(#ao-skin) :focus-visible{outline:2px solid var(--ao-teal);outline-offse
 .sh-help-body dd{margin-left:0;color:var(--ao-muted)}
 .sh-help-body a{color:var(--ao-teal-text)}
 .sh-help-body code{font:12.5px var(--ao-font-mono);background:var(--ao-sunk);padding:1px 4px;border-radius:3px}
+
+/* on phones the top bar wraps to several rows, so let it scroll away */
+@media (max-width:700px){html:not(#ao-skin) .topnav{position:static}}

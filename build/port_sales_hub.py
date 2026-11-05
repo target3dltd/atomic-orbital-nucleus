@@ -34,6 +34,10 @@ def port(src: pathlib.Path, name: str):
     s = must(s, "const PD_PROXY = '/.netlify/functions/pipedrive';", "const PD_PROXY = '/api/sales-hub/pipedrive';")
     s = re.sub(r"<title>([^<|]+)\| Target3D Sales Hub</title>", r"<title>\1| Sales Hub · Nucleus</title>", s)
     s = s.replace('<div class="topnav-brand"><span>📊</span> Target3D Sales Hub</div>', '<div class="topnav-brand">Sales Hub</div>')
+    # deal links: the company's Pipedrive address is target3d2 (some pages used target3d)
+    s = s.replace("https://target3d.pipedrive.com/", "https://target3d2.pipedrive.com/")
+    # every page's top bar starts with the Overview
+    s = re.sub(r'(<div class="topnav-links">)', r'\1\n      <a href="./">📋 Overview</a>', s, count=1)
     s = s.replace('<html lang="en">', '<html lang="en-GB" data-theme="light">', 1)
     if name == "pipeline-triage.html":
         s = must(s, """const firebaseConfig = window.SALES_HUB_FIREBASE;
