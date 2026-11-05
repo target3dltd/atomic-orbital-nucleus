@@ -15,7 +15,7 @@
 //   POST /api/nucleus/logout               → ends the session (the stored token stays for next time)
 import {
   seal, unseal, anySessionFrom, cookieValue, sessionCookie, clearCookie, allowedCompanies, pipedriveBase,
-  googleConfig, allowedGoogleDomains, sessionDays, isAdmin, envGet, jsonResponse as json,
+  googleConfig, allowedGoogleDomains, sessionDays, isAdmin, canUseSalesHub, envGet, jsonResponse as json,
 } from "../lib/session.mjs";
 import { kv } from "../lib/kv.mjs";
 
@@ -35,6 +35,7 @@ function publicUser(s) {
     google: s.gs ? { email: s.ge, name: s.gn } : null,
     pipedrive: s.t ? { id: s.uid, name: s.n, email: s.e } : null,
     isAdmin: isAdmin(s),
+    salesHub: canUseSalesHub(s),
   };
 }
 

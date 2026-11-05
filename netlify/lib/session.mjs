@@ -127,6 +127,18 @@ export function allowedCompanies() {
   return envGet("NUCLEUS_ALLOWED_COMPANIES", "target3d2").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
 }
 
+// Sales Hub: open to these people (NUCLEUS_SALES_HUB_USERS, comma separated) and to every administrator.
+const SALES_HUB_DEFAULT = "allan.r@target3d.co.uk,ashley.k@target3d.co.uk,jack.w@target3d.co.uk,charlie.w@target3d.co.uk,sheryl.a@target3d.co.uk,ruslana.b@target3d.co.uk";
+export function salesHubUsers() {
+  return (envGet("NUCLEUS_SALES_HUB_USERS") || SALES_HUB_DEFAULT).split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+}
+export function canUseSalesHub(s) {
+  if (!s) return false;
+  if (isAdmin(s)) return true;
+  const email = s.gs ? s.ge : s.e;
+  return !!email && salesHubUsers().includes(String(email).toLowerCase());
+}
+
 export function pipedriveBase() {
   return "https://api.pipedrive.com";
 }

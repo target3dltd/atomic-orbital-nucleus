@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Triage | Sales Hub · Nucleus</title>
+<script src="hub.js"></script>
+<style>
+:root {
+  --bg: #f8f8f6; --surface: #fff; --border: #e4e4e0;
+  --text: #1a1a18; --muted: #6b6b66;
+  --hot: #c0392b; --hot-bg: #fdf0ee; --hot-border: #f5c6c0;
+  --warm: #d97706; --warm-bg: #fef9ee;
+  --stale: #64748b; --stale-bg: #f4f6f8;
+  --dead: #9ca3af; --dead-bg: #f9fafb;
+  --gold: #b8860b; --gold-bg: #fdf6e3;
+  --green: #166534; --green-bg: #f0fdf4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13.5px; }
+
+.topnav { background: white; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 200; }
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.topnav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.topnav-links { display: flex; align-items: center; gap: 2px; }
+.topnav-links a { display: flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #6b7280; text-decoration: none; transition: all 0.12s; }
+.topnav-links a:hover { background: #f3f4f6; color: #111; }
+.topnav-links a.active { background: #c0392b; color: white; }
+
+.main { max-width: 1400px; margin: 0 auto; padding: 24px 24px; }
+
+/* STATUS BAR */
+.status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.status-left { display: flex; align-items: center; gap: 10px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sync-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+.sync-dot.live { background: #22c55e; }
+.sync-dot.error { background: #ef4444; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-label { font-size: 12px; color: var(--muted); }
+.refresh-btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all 0.12s; }
+.refresh-btn:hover { background: var(--bg); }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.bucket-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+.bucket-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.bucket-card.hot::before { background: var(--hot); }
+.bucket-card.warm::before { background: var(--warm); }
+.bucket-card.stale::before { background: var(--stale); }
+.bucket-card.dead::before { background: var(--dead); }
+.bucket-card.selected.hot { box-shadow: 0 0 0 2px var(--hot); }
+.bucket-card.selected.warm { box-shadow: 0 0 0 2px var(--warm); }
+.bucket-card.selected.stale { box-shadow: 0 0 0 2px var(--stale); }
+.bucket-card.selected.dead { box-shadow: 0 0 0 2px var(--dead); }
+.bucket-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.bucket-card.hot .bucket-label { color: var(--hot); }
+.bucket-card.warm .bucket-label { color: var(--warm); }
+.bucket-card.stale .bucket-label { color: var(--stale); }
+.bucket-card.dead .bucket-label { color: var(--dead); }
+.bucket-value { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 3px; }
+.bucket-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.bucket-action { font-size: 11.5px; background: var(--bg); border-radius: 5px; padding: 6px 8px; color: var(--muted); line-height: 1.4; }
+
+/* FINDINGS */
+.findings { background: var(--gold-bg); border: 1px solid #e8d080; border-left: 4px solid var(--gold); border-radius: 8px; padding: 12px 18px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.findings-title { font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold); flex-shrink: 0; }
+.finding-item { font-size: 12.5px; color: #5c4400; }
+.finding-item::before { content: '· '; font-weight: 700; }
+
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; }
+.tab-label { font-family: 'DM Serif Display', serif; font-size: 20px; }
+.deal-count { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+.search-box { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; }
+.search-box input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; width: 200px; background: transparent; }
+.sort-select { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; cursor: pointer; outline: none; }
+
+/* TABLE */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: var(--text); color: white; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; cursor: pointer; user-select: none; }
+thead th:hover { background: #333; }
+tbody tr { border-bottom: 1px solid #f0f0ee; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg); }
+td { padding: 9px 12px; vertical-align: middle; }
+.deal-title-cell { font-weight: 500; max-width: 260px; line-height: 1.4; }
+.deal-title-link { color: var(--text); text-decoration: none; }
+.deal-title-link:hover { color: var(--hot); text-decoration: underline; }
+.pipeline-chip { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+.deal-org { color: var(--muted); font-size: 12px; max-width: 180px; }
+.deal-value { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prob-badge { display: inline-block; width: 40px; text-align: center; padding: 2px 0; border-radius: 4px; font-size: 11.5px; font-weight: 600; }
+.prob-high { background: #dcfce7; color: #166534; }
+.prob-mid { background: #fef9c3; color: #854d0e; }
+.prob-low { background: #fee2e2; color: #991b1b; }
+.owner-chip { font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+.no-activity { color: #e53e3e; font-weight: 600; }
+.days-urgent { color: var(--hot); font-weight: 600; }
+.action-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.action-allan { background: #fdf0ee; color: var(--hot); }
+.action-charlie { background: #eff6ff; color: #1d4ed8; }
+.action-charlie-ashley { background: var(--green-bg); color: var(--green); }
+.action-delete { background: #f9fafb; color: #6b7280; }
+
+/* BUCKET OVERRIDE */
+.bucket-select { background: white; border: 1px solid var(--border); border-radius: 5px; padding: 3px 6px; font-size: 11px; cursor: pointer; outline: none; font-family: 'DM Sans', sans-serif; }
+.bucket-select:hover { border-color: #aaa; }
+
+/* PROB EDIT */
+.prob-input { width: 46px; text-align: center; border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; font-size: 12px; font-family: 'DM Sans', sans-serif; background: white; }
+.prob-input:focus { outline: none; border-color: var(--hot); }
+.save-btn { background: var(--hot); color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-left: 4px; }
+.save-btn:hover { background: #a93226; }
+
+/* TOTAL BAR */
+.total-bar { background: var(--bg); border-top: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.total-items { display: flex; gap: 20px; }
+.total-item { display: flex; gap: 5px; font-size: 12.5px; }
+.total-item strong { font-weight: 700; }
+
+/* LOADING / EMPTY */
+.loading-state { text-align: center; padding: 60px; color: var(--muted); }
+.loading-spinner { font-size: 24px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.empty-state { text-align: center; padding: 48px; color: var(--muted); }
+</style>
+<!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
+</head>
+<body>
+
+<div class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">Sales Hub</div>
+    <div class="topnav-links">
+      <a href="pipeline-triage.html" class="active">🔍 Pipeline Triage</a>
+      <a href="sales-report.html">📈 Sales Report</a>
+      <a href="supplier-forecast.html">📦 Suppliers</a>
+      <a href="weekly-pulse.html">🩺 Weekly Pulse</a>
+      <a href="weekly-deals-report.html">📑 Deals Report</a>
+      <a href="revenue-scoreboard.html">💰 Scoreboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-left">
+      <span class="sync-dot loading" id="sync-dot"></span>
+      <span class="sync-label" id="sync-label">Connecting to Pipedrive…</span>
+    </div>
+    <button class="refresh-btn" onclick="loadDeals()">↻ Refresh</button>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid">
+    <div class="bucket-card hot selected" onclick="selectBucket('HOT')" id="card-HOT">
+      <div class="bucket-label">🔴 Hot</div>
+      <div class="bucket-value" id="val-HOT">—</div>
+      <div class="bucket-meta" id="meta-HOT">Loading…</div>
+      <div class="bucket-action">Allan closes. Daily follow-up.</div>
+    </div>
+    <div class="bucket-card warm" onclick="selectBucket('WARM')" id="card-WARM">
+      <div class="bucket-label">🟡 Warm</div>
+      <div class="bucket-value" id="val-WARM">—</div>
+      <div class="bucket-meta" id="meta-WARM">Loading…</div>
+      <div class="bucket-action">Charlie/Ashley nurture. Weekly cadence.</div>
+    </div>
+    <div class="bucket-card stale" onclick="selectBucket('STALE')" id="card-STALE">
+      <div class="bucket-label">⬜ Stale</div>
+      <div class="bucket-value" id="val-STALE">—</div>
+      <div class="bucket-meta" id="meta-STALE">Loading…</div>
+      <div class="bucket-action">Breakup email. Revive or kill in 14 days.</div>
+    </div>
+    <div class="bucket-card dead" onclick="selectBucket('DEAD')" id="card-DEAD">
+      <div class="bucket-label">✕ Dead</div>
+      <div class="bucket-value" id="val-DEAD">—</div>
+      <div class="bucket-meta" id="meta-DEAD">Loading…</div>
+      <div class="bucket-action">Delete from Pipedrive immediately.</div>
+    </div>
+  </div>
+
+  <!-- FINDINGS -->
+  <div class="findings" id="findings-bar" style="display:none">
+    <span class="findings-title">⚠ Live Findings</span>
+    <span class="finding-item" id="finding-zero-activity"></span>
+    <span class="finding-item" id="finding-allan-load"></span>
+    <span class="finding-item" id="finding-real-pipeline"></span>
+    <span class="finding-item" id="finding-zero-value"></span>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="tab-label" id="tab-label">Hot Deals</span>
+      <span class="deal-count" id="deal-count">—</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="search-box">
+        <span style="color:#aaa">🔍</span>
+        <input type="text" id="search-input" placeholder="Search deals, orgs, owners…" oninput="renderTable()">
+      </div>
+      <select class="sort-select" id="sort-select" onchange="renderTable()">
+        <option value="value-desc">Sort: Value ↓</option>
+        <option value="value-asc">Sort: Value ↑</option>
+        <option value="prob-desc">Sort: Probability ↓</option>
+        <option value="days-inactive-desc">Sort: Days Inactive ↓</option>
+        <option value="days-old-desc">Sort: Age ↓</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Deal</th>
+          <th>Organisation</th>
+          <th>Value</th>
+          <th>Prob</th>
+          <th>Owner</th>
+          <th>Close Date</th>
+          <th>Last Activity</th>
+          <th>Inactive</th>
+          <th>Age</th>
+          <th>Bucket</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td colspan="11"><div class="loading-state"><span class="loading-spinner">↻</span>Loading deals from Pipedrive…</div></td></tr>
+      </tbody>
+    </table>
+    <div class="total-bar" id="total-bar" style="display:none">
+      <div class="total-items" id="total-items"></div>
+      <div style="font-size:11px;color:var(--muted)" id="last-updated"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+// API token stored securely as Netlify env var — never exposed in client code
+const PD_PROXY = '/api/sales-hub/pipedrive';
+
+// Bucket overrides are kept in the Nucleus store (SalesHubStore, from hub.js).
+
+// ── STATE ────────────────────────────────────────────────────────
+let allDeals = [];
+let bucketOverrides = {}; // deal_id -> bucket override stored in the Nucleus
+let probEdits = {};       // deal_id -> in-progress prob edit
+let currentBucket = 'HOT';
+let lastUpdated = null;
+
+// ── TRIAGE LOGIC ─────────────────────────────────────────────────
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function classifyDeal(deal) {
+  if (bucketOverrides[deal.id]) return bucketOverrides[deal.id];
+
+  const prob = deal.probability || 0;
+  const inactive = deal.daysSinceActivity;
+  const age = deal.daysOld;
+  const hasActivity = deal.last_activity_date != null;
+  const neverActive = !hasActivity;
+
+  // DEAD: probability ≤ 5 and never had any activity logged
+  if (prob <= 5 && neverActive) return 'DEAD';
+
+  // HOT: probability ≥ 50
+  if (prob >= 50) return 'HOT';
+
+  // STALE: no activity for 90+ days, or never had activity and deal is >30 days old, or prob < 10
+  if (inactive !== null && inactive >= 90) return 'STALE';
+  if (neverActive && age > 30) return 'STALE';
+  if (prob < 10) return 'STALE';
+
+  // WARM: everything else
+  return 'WARM';
+}
+
+function getAction(bucket, prob) {
+  if (bucket === 'HOT') return { label: 'Close deal', cls: 'action-allan', full: 'ALLAN: Close this deal. Daily follow-up.' };
+  if (bucket === 'WARM') {
+    if (prob >= 25) return { label: 'Advance', cls: 'action-allan', full: 'ALLAN: Advance to proposal/close.' };
+    return { label: 'Nurture', cls: 'action-charlie-ashley', full: 'CHARLIE/ASHLEY: Nurture & progress. Weekly follow-up.' };
+  }
+  if (bucket === 'STALE') return { label: 'Breakup email', cls: 'action-charlie', full: 'CHARLIE: Send breakup email. Revive or kill within 14 days.' };
+  if (bucket === 'DEAD') return { label: 'DELETE', cls: 'action-delete', full: 'DELETE from pipeline immediately.' };
+  return { label: '—', cls: '', full: '' };
+}
+
+// ── PIPEDRIVE API ────────────────────────────────────────────────
+async function fetchAllDeals() {
+  let deals = [], start = 0, moreItems = true;
+  while (moreItems) {
+    const res = await fetch(`${PD_PROXY}?path=/deals&status=open&limit=500&start=${start}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Pipedrive API error');
+    const items = json.data || [];
+    deals = deals.concat(items);
+    moreItems = json.additional_data?.pagination?.more_items_in_collection && items.length > 0;
+    start += items.length;
+    if (items.length === 0) break;
+  }
+  return deals;
+}
+
+async function updateDealProbability(dealId, probability) {
+  const res = await fetch(`${PD_PROXY}?path=/deals/${dealId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ probability })
+  });
+  return (await res.json()).success;
+}
+
+// ── MAIN LOAD ────────────────────────────────────────────────────
+async function loadDeals() {
+  setSyncState('loading', 'Fetching from Pipedrive…');
+  try {
+    const ALLOWED_PIPELINE_NAMES = [
+      'Target3D UK Tech Sales - SI',
+      'Target3D UK Tech Sales - PS',
+      'Target3D UK Studio Sales',
+      'Target3D Iberia Tech Sales'
+    ];
+
+    // Step 1: fetch pipeline list to get IDs and names
+    const plRes = await fetch(`${PD_PROXY}?path=/pipelines`);
+    const plJson = await plRes.json();
+    const pipelineMap = {}; // id -> name
+    const allowedIds = new Set();
+    (plJson.data || []).forEach(p => {
+      pipelineMap[p.id] = p.name;
+      if (ALLOWED_PIPELINE_NAMES.includes(p.name)) allowedIds.add(p.id);
+    });
+
+    // Step 2: fetch all deals and filter by pipeline_id
+    const raw = await fetchAllDeals();
+    allDeals = raw
+      .filter(d => allowedIds.has(d.pipeline_id))
+      .map(d => {
+        const addedDate = d.add_time ? d.add_time.split(' ')[0] : null;
+        const daysOld = daysSince(addedDate);
+        const daysSinceActivity = daysSince(d.last_activity_date);
+        const pipelineName = pipelineMap[d.pipeline_id] || '';
+        return {
+          id: d.id,
+          title: d.title || 'Untitled',
+          value: d.value || 0,
+          currency: d.currency || 'GBP',
+          probability: d.probability || 0,
+          owner: d.owner_name || (d.user_id && d.user_id.name) || '—',
+          org: d.org_name || (d.org_id && d.org_id.name) || '—',
+          pipeline: pipelineName.replace('Target3D UK Tech Sales - ', '').replace('Target3D UK Studio Sales', 'Studio').replace('Target3D Iberia Tech Sales', 'Iberia'),
+          expected_close: d.expected_close_date || null,
+          last_activity_date: d.last_activity_date || null,
+          daysSinceActivity,
+          addedDate,
+          daysOld,
+          pd_url: `https://target3d.pipedrive.com/deal/${d.id}`
+        };
+      });
+
+    lastUpdated = new Date();
+    updateSummaryCards();
+    updateFindings();
+    renderTable();
+    setSyncState('live', `Live · ${allDeals.length} open deals · updated ${lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`);
+  } catch(e) {
+    setSyncState('error', 'Pipedrive connection error — check API token');
+    console.error(e);
+  }
+}
+
+// ── SUMMARY CARDS ────────────────────────────────────────────────
+function updateSummaryCards() {
+  const buckets = { HOT: [], WARM: [], STALE: [], DEAD: [] };
+  allDeals.forEach(d => {
+    const b = classifyDeal(d);
+    if (buckets[b]) buckets[b].push(d);
+  });
+  Object.entries(buckets).forEach(([b, deals]) => {
+    const total = deals.reduce((s, d) => s + d.value, 0);
+    const weighted = deals.reduce((s, d) => s + (d.value * d.probability / 100), 0);
+    document.getElementById('val-' + b).textContent = fmt(total);
+    document.getElementById('meta-' + b).textContent = `${deals.length} deals · ${fmt(weighted)} weighted`;
+  });
+}
+
+// ── FINDINGS ────────────────────────────────────────────────────
+function updateFindings() {
+  const noActivity = allDeals.filter(d => !d.last_activity_date);
+  const noActivityVal = noActivity.reduce((s,d) => s + d.value, 0);
+  const allanDeals = allDeals.filter(d => d.owner.toLowerCase().includes('allan'));
+  const hotWarm = allDeals.filter(d => ['HOT','WARM'].includes(classifyDeal(d)));
+  const hwVal = hotWarm.reduce((s,d) => s + d.value, 0);
+  const zeroVal = allDeals.filter(d => d.value === 0);
+
+  document.getElementById('finding-zero-activity').textContent =
+    `${noActivity.length} deals (${fmt(noActivityVal)}) have zero logged activity`;
+  document.getElementById('finding-allan-load').textContent =
+    `Allan owns ${allanDeals.length} of ${allDeals.length} deals (${Math.round(allanDeals.length/allDeals.length*100)}%)`;
+  document.getElementById('finding-real-pipeline').textContent =
+    `Real closeable pipeline: ${fmt(hwVal)}`;
+  document.getElementById('finding-zero-value').textContent =
+    `${zeroVal.length} deals have £0 value — unqualified`;
+  document.getElementById('findings-bar').style.display = 'flex';
+}
+
+// ── BUCKET SELECT ────────────────────────────────────────────────
+function selectBucket(bucket) {
+  currentBucket = bucket;
+  document.querySelectorAll('.bucket-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + bucket).classList.add('selected');
+  const labels = { HOT: 'Hot Deals', WARM: 'Warm Deals', STALE: 'Stale Deals', DEAD: 'Dead Deals' };
+  document.getElementById('tab-label').textContent = labels[bucket];
+  document.getElementById('search-input').value = '';
+  renderTable();
+}
+
+// ── TABLE RENDER ─────────────────────────────────────────────────
+function renderTable() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+
+  let deals = allDeals.filter(d => classifyDeal(d) === currentBucket);
+
+  if (search) {
+    deals = deals.filter(d =>
+      d.title.toLowerCase().includes(search) ||
+      d.org.toLowerCase().includes(search) ||
+      d.owner.toLowerCase().includes(search)
+    );
+  }
+
+  deals.sort((a, b) => {
+    if (sort === 'value-desc') return b.value - a.value;
+    if (sort === 'value-asc') return a.value - b.value;
+    if (sort === 'prob-desc') return b.probability - a.probability;
+    if (sort === 'days-inactive-desc') {
+      const da = a.daysSinceActivity === null ? 9999 : a.daysSinceActivity;
+      const db = b.daysSinceActivity === null ? 9999 : b.daysSinceActivity;
+      return db - da;
+    }
+    if (sort === 'days-old-desc') return (b.daysOld || 0) - (a.daysOld || 0);
+    return 0;
+  });
+
+  const tbody = document.getElementById('table-body');
+
+  if (deals.length === 0) {
+    const msg = allDeals.length === 0 ? 'Loading deals from Pipedrive…' : 'No deals match your search.';
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">${msg}</div></td></tr>`;
+    document.getElementById('deal-count').textContent = '0 deals';
+    document.getElementById('total-bar').style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = deals.map(d => {
+    const bucket = classifyDeal(d);
+    const action = getAction(bucket, d.probability);
+    const inactive = d.daysSinceActivity;
+    const inactiveStr = inactive === null ? '<span class="no-activity">NEVER</span>' : (inactive < 0 ? 'Today' : `${inactive}d`);
+    const inactiveCls = (inactive === null || inactive > 90) ? 'days-urgent' : '';
+    const probCls = d.probability >= 70 ? 'prob-high' : d.probability >= 30 ? 'prob-mid' : 'prob-low';
+    const ownerFirst = d.owner.split(' ')[0];
+    const closeDate = d.expected_close || '—';
+    const lastAct = d.last_activity_date || null;
+    const lastActStr = lastAct ? lastAct : '<span class="no-activity">NEVER</span>';
+
+    return `<tr>
+      <td class="deal-title-cell">
+        <a href="${d.pd_url}" target="_blank" class="deal-title-link">${d.title}</a>
+        <span class="pipeline-chip">${d.pipeline}</span>
+      </td>
+      <td class="deal-org">${d.org}</td>
+      <td class="deal-value">${fmt(d.value)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input class="prob-input" id="prob-${d.id}" type="number" min="0" max="100"
+            value="${d.probability}" onchange="markProbEdit(${d.id})">
+          <button class="save-btn" id="save-${d.id}" onclick="saveProbability(${d.id})" style="display:none">✓</button>
+        </div>
+      </td>
+      <td><span class="owner-chip">${ownerFirst}</span></td>
+      <td style="white-space:nowrap;font-size:12px">${closeDate}</td>
+      <td style="white-space:nowrap;font-size:12px">${lastActStr}</td>
+      <td class="${inactiveCls}" style="text-align:center">${inactiveStr}</td>
+      <td style="text-align:center">${d.daysOld !== null ? d.daysOld + 'd' : '—'}</td>
+      <td>
+        <select class="bucket-select" onchange="overrideBucket(${d.id}, this.value)">
+          <option value="HOT" ${bucket==='HOT'?'selected':''}>🔴 Hot</option>
+          <option value="WARM" ${bucket==='WARM'?'selected':''}>🟡 Warm</option>
+          <option value="STALE" ${bucket==='STALE'?'selected':''}>⬜ Stale</option>
+          <option value="DEAD" ${bucket==='DEAD'?'selected':''}>✕ Dead</option>
+        </select>
+      </td>
+      <td><span class="action-badge ${action.cls}">${action.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  const total = deals.reduce((s,d) => s + d.value, 0);
+  const weighted = deals.reduce((s,d) => s + (d.value * d.probability / 100), 0);
+  document.getElementById('deal-count').textContent = `${deals.length} deal${deals.length !== 1 ? 's' : ''}`;
+  document.getElementById('total-items').innerHTML = `
+    <div class="total-item">Showing <strong>${deals.length}</strong> deals</div>
+    <div class="total-item">Total: <strong>${fmt(total)}</strong></div>
+    <div class="total-item">Weighted: <strong>${fmt(weighted)}</strong></div>
+  `;
+  if (lastUpdated) {
+    document.getElementById('last-updated').textContent =
+      `Last synced ${lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+  document.getElementById('total-bar').style.display = 'flex';
+}
+
+// ── PROB EDIT ────────────────────────────────────────────────────
+function markProbEdit(id) {
+  const saveBtn = document.getElementById('save-' + id);
+  if (saveBtn) saveBtn.style.display = 'inline-block';
+}
+
+async function saveProbability(id) {
+  const input = document.getElementById('prob-' + id);
+  const saveBtn = document.getElementById('save-' + id);
+  const newProb = parseInt(input.value);
+  if (isNaN(newProb) || newProb < 0 || newProb > 100) return;
+
+  saveBtn.textContent = '…';
+  saveBtn.disabled = true;
+
+  const ok = await updateDealProbability(id, newProb);
+  if (ok) {
+    // Update local state
+    const deal = allDeals.find(d => d.id === id);
+    if (deal) deal.probability = newProb;
+    saveBtn.textContent = '✓';
+    saveBtn.style.background = '#22c55e';
+    updateSummaryCards();
+    setTimeout(() => { saveBtn.style.display = 'none'; saveBtn.textContent = '✓'; saveBtn.style.background = ''; saveBtn.disabled = false; renderTable(); }, 1500);
+  } else {
+    saveBtn.textContent = '✗';
+    saveBtn.style.background = '#ef4444';
+    setTimeout(() => { saveBtn.style.display = 'none'; saveBtn.textContent = '✓'; saveBtn.style.background = ''; saveBtn.disabled = false; }, 2000);
+  }
+}
+
+// ── BUCKET OVERRIDE (Firebase) ───────────────────────────────────
+async function overrideBucket(id, newBucket) {
+  bucketOverrides[id] = newBucket;
+  await SalesHubStore.set('settings/pipeline-bucket-overrides', { overrides: bucketOverrides, updatedAt: new Date().toISOString() });
+  updateSummaryCards();
+  updateFindings();
+  renderTable();
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function fmt(v) {
+  if (!v && v !== 0) return '—';
+  if (v >= 1000000) return '£' + (v/1000000).toFixed(2) + 'M';
+  if (v >= 1000) return '£' + Math.round(v).toLocaleString('en-GB');
+  return '£' + Math.round(v);
+}
+
+function setSyncState(state, label) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+// Load bucket overrides from the Nucleus, then fetch deals
+SalesHubStore.get('settings/pipeline-bucket-overrides').then(data => {
+  if (data) bucketOverrides = data.overrides || {};
+}).catch(() => {}).finally(() => loadDeals());
+
+// Auto-refresh every 5 minutes
+setInterval(loadDeals, 5 * 60 * 1000);
+</script>
+</body>
+</html>

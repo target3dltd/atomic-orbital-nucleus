@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>Sales Hub · Nucleus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
+<script src="hub.js"></script>
+<style>
+body{margin:0}
+.shx-bar{background:var(--ao-surface);border-bottom:1px solid var(--ao-line)}
+.shx-bar .in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:36px}
+.shx-wrap{max-width:1080px;margin:0 auto;padding:36px 16px 64px}
+.shx-kicker{font:600 13px var(--ao-font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ao-teal-text);margin:0 0 6px}
+.shx-wrap h1{font:600 clamp(32px,4.6vw,46px)/1.1 var(--ao-font-display);margin:0}
+.shx-sub{color:var(--ao-muted);font-size:17px;max-width:62ch;margin:10px 0 28px}
+.shx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.shx-card{display:flex;flex-direction:column;gap:6px;background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:var(--ao-radius);padding:18px 18px 20px;text-decoration:none;color:inherit;transition:border-color .12s,transform .12s}
+.shx-card:hover{border-color:var(--ao-teal);transform:translateY(-1px)}
+.shx-card .n{font:600 13px var(--ao-font-mono);color:var(--ao-teal-text)}
+.shx-card .t{font:600 19px var(--ao-font-display)}
+.shx-card .d{font-size:14.5px;color:var(--ao-muted);line-height:1.5}
+.shx-foot{margin-top:28px;font-size:13px;color:var(--ao-muted)}
+@media (prefers-reduced-motion:reduce){.shx-card{transition:none}.shx-card:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="shx-bar"><div class="in" data-sh-tools><div class="topnav-brand">Sales Hub</div></div></header>
+<main class="shx-wrap">
+  <p class="shx-kicker">Live from Pipedrive</p>
+  <h1>Sales Hub</h1>
+  <p class="shx-sub">Six views of where sales stand, built by Allan. Open to the sales team and Nucleus administrators.</p>
+  <div class="shx-grid">
+    <a class="shx-card" href="revenue-scoreboard.html"><span class="n">01</span><span class="t">Revenue Scoreboard</span><span class="d">Won revenue today, this week, month, quarter and year against the targets.</span></a>
+    <a class="shx-card" href="pipeline-triage.html"><span class="n">02</span><span class="t">Pipeline Triage</span><span class="d">Every open deal sorted into Hot, Warm, Stale and Dead, with the next action and probability updates.</span></a>
+    <a class="shx-card" href="sales-report.html"><span class="n">03</span><span class="t">Sales Report</span><span class="d">Won deals by pipeline, GBP and EUR kept separate, with period targets.</span></a>
+    <a class="shx-card" href="weekly-pulse.html"><span class="n">04</span><span class="t">Weekly Pulse</span><span class="d">New, won and lost this week, deal by deal.</span></a>
+    <a class="shx-card" href="weekly-deals-report.html"><span class="n">05</span><span class="t">Weekly Deals Report</span><span class="d">The weekly numbers across eight metrics, including demos and projects.</span></a>
+    <a class="shx-card" href="supplier-forecast.html"><span class="n">06</span><span class="t">Supplier Forecast</span><span class="d">What we expect to order from each supplier, from the pipeline.</span></a>
+  </div>
+  <p class="shx-foot">Reports read company-wide figures with the Nucleus's shared read-only Pipedrive token. Open <b>Help</b> for details and the version history.</p>
+</main>
+</body>
+</html>

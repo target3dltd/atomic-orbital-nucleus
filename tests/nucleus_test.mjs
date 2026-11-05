@@ -226,8 +226,56 @@ await t("gmail via Apps Script, query fixed on the server", async () => {
 });
 await t("gmail refuses other tools", async () => { eq((await gm({ tool: "send_message" })).status, 400); });
 
+console.log("Sales Hub");
+{
+  const sh = (await imp("netlify/functions/sales-hub-pipedrive.mjs")).default;
+  const mk = async (email, extra = {}) => "nucleus_s=" + await session.seal({ t: GOOD, uid: 7, e: email, c: "target3d2", exp: Date.now() + 1e9, ...extra });
+  const allan = await mk("allan.r@target3d.co.uk"), outsider = await mk("sam@atomicorbital.co.uk");
+  process.env.NUCLEUS_ADMINS = "ashley.k@target3d.co.uk";
+  await t("Sales Hub pages: listed people in, others refused, admins in", async () => {
+    eq(await gate.default(req("/tools/sales-hub/pipeline-triage.html", { cookie: allan }), { next: () => "NEXT" }), "NEXT");
+    eq(await gate.default(req("/tools/sales-hub", { cookie: allan }), { next: () => "NEXT" }), "NEXT");
+    eq((await gate.default(req("/tools/sales-hub/", { cookie: outsider }), { next: () => "NEXT" })).status, 403);
+    process.env.NUCLEUS_ADMINS = "sam@atomicorbital.co.uk";
+    eq(await gate.default(req("/tools/sales-hub/", { cookie: outsider }), { next: () => "NEXT" }), "NEXT");
+    process.env.NUCLEUS_ADMINS = "ashley.k@target3d.co.uk";
+    process.env.NUCLEUS_SALES_HUB_USERS = "sam@atomicorbital.co.uk";
+    eq((await gate.default(req("/tools/sales-hub/", { cookie: allan }), { next: () => "NEXT" })).status, 403, "list comes from the setting");
+    delete process.env.NUCLEUS_SALES_HUB_USERS;
+  });
+  await t("/me says who can see the Sales Hub", async () => {
+    eq((await jbody(await auth(req("/api/nucleus/me", { cookie: allan })))).j.user.salesHub, true);
+    eq((await jbody(await auth(req("/api/nucleus/me", { cookie: outsider })))).j.user.salesHub, false);
+  });
+  await t("Sales Hub proxy: reads with the shared token, refuses outsiders and other paths", async () => {
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals"))).status, 401);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals", { cookie: outsider }))).status, 403);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/persons", { cookie: allan }))).status, 403);
+    process.env.PIPEDRIVE_API_TOKEN = OTHER; calls.length = 0;
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals&status=open&api_token=evil", { cookie: allan }))).status, 200);
+    eq(calls[0].token, OTHER); ok(!calls[0].search.includes("evil"));
+  });
+  await t("Sales Hub proxy: only a deal's probability can be changed, as the person", async () => {
+    calls.length = 0;
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals/3001", { method: "PUT", cookie: allan, body: { probability: 60 } }))).status, 200);
+    eq([calls[0].method, calls[0].token], ["PUT", GOOD]);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals/3001", { method: "PUT", cookie: allan, body: { probability: 60, value: 1 } }))).status, 403);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals/3001", { method: "PUT", cookie: allan, body: { probability: 300 } }))).status, 400);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/stages/1", { method: "PUT", cookie: allan, body: { probability: 5 } }))).status, 403);
+    eq((await sh(req("/api/sales-hub/pipedrive?path=/deals/3001", { method: "DELETE", cookie: allan }))).status, 405);
+    delete process.env.PIPEDRIVE_API_TOKEN;
+  });
+  await t("Sales Hub settings in the store are for Sales Hub people only", async () => {
+    const body = { ns: "sales-hub", doc: "settings/pipeline-bucket-overrides", op: "set", data: { overrides: { 3001: "HOT" } } };
+    eq((await store(req("/api/nucleus/store", { method: "POST", cookie: outsider, body }))).status, 403);
+    eq((await store(req("/api/nucleus/store", { method: "POST", cookie: allan, body }))).status, 200);
+    eq((await jbody(await store(req("/api/nucleus/store?ns=sales-hub&doc=settings/pipeline-bucket-overrides", { cookie: allan })))).j.data.overrides["3001"], "HOT");
+    eq((await store(req("/api/nucleus/store?ns=sales-hub&doc=settings/pipeline-bucket-overrides", { cookie: outsider }))).status, 403);
+  });
+}
+
 console.log("Pages");
-const pub = (p) => fs.readFileSync(path.join(root, "public", p), "utf8");
+const pub =(p) => fs.readFileSync(path.join(root, "public", p), "utf8");
 await t("merge desk loads the shim before its own script", async () => { const s = pub("tools/duplicate-eraser/index.html"); ok(s.indexOf("/nucleus/claude-shim.js") > 0 && s.indexOf("/nucleus/claude-shim.js") < s.indexOf('const VERSION = "1.3.0"')); });
 await t("motive page uses namespaced API", async () => { const s = pub("tools/motive/index.html"); ok(s.includes('fetch("/api/motive/health"') && s.includes('fetch("/api/motive/" + path')); });
 await t("system designer allows Nucleus hosts", async () => { ok(pub("tools/system-designer/index.html").includes("T3D_NUCLEUS_HOSTS=['atomic-orbital.netlify.app'")); });
@@ -241,6 +289,14 @@ await t("every tool and project page wears the Atomic Orbital skin, with no Goog
 });
 await t("Target3D header logos are replaced in the project sites", async () => {
   for (const id of ["clays", "lle", "drift"]) { const h = pub("projects/" + id + "/index.html"); ok(h.includes('class="ao-logo-on-light"') && !/<a class="logo"[^>]*><img src="data:/.test(h), id); }
+});
+await t("Sales Hub pages have no Firebase or CDN left and load the Nucleus shell", async () => {
+  for (const n of ["revenue-scoreboard", "pipeline-triage", "sales-report", "weekly-pulse", "weekly-deals-report", "supplier-forecast"]) {
+    const h = pub("tools/sales-hub/" + n + ".html");
+    ok(!/firebase|auth-guard|\.netlify\/functions|cdnjs/.test(h), n);
+    ok(h.includes('<script src="hub.js"></script>') && h.includes("const PD_PROXY = '/api/sales-hub/pipedrive'"), n);
+  }
+  ok(pub("tools/sales-hub/pipeline-triage.html").includes("SalesHubStore.get('settings/pipeline-bucket-overrides')"));
 });
 await t("every live registry entry has an index.html", async () => {
   const src = pub("nucleus/registry.js"); const w = {}; new Function("window", src)(w);

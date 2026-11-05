@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Forecast | Sales Hub · Nucleus</title>
+<script src="/nucleus/vendor/xlsx-0.18.5.full.min.js"></script>
+<style>
+:root {
+  --bg: #f8f8f6; --surface: #fff; --border: #e4e4e0;
+  --text: #1a1a18; --muted: #6b6b66;
+  --red: #c0392b; --red-bg: #fdf0ee;
+  --amber: #d97706; --amber-bg: #fef9ee; --amber-border: #fcd9a3;
+  --green: #166534; --green-bg: #f0fdf4;
+  --blue: #1e40af; --blue-bg: #eff6ff;
+  --slate: #475569; --slate-bg: #f1f5f9;
+  --gold: #b8860b; --gold-bg: #fdf6e3;
+  --violet: #6d28d9; --violet-bg: #ede9fe;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13.5px; }
+
+.topnav { background: white; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 200; }
+.topnav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.topnav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.topnav-links { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.topnav-links a { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: #6b7280; text-decoration: none; transition: all 0.12s; white-space: nowrap; }
+.topnav-links a:hover { background: #f3f4f6; color: #111; }
+.topnav-links a.active { background: var(--red); color: white; }
+
+.main { max-width: 1500px; margin: 0 auto; padding: 20px; }
+
+.status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.status-left { display: flex; align-items: center; gap: 10px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sync-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+.sync-dot.live { background: #22c55e; }
+.sync-dot.error { background: #ef4444; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-label { font-size: 12px; color: var(--muted); }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 24px; }
+.btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all 0.12s; font-weight: 500; }
+.btn:hover { background: var(--bg); }
+.btn-export { background: var(--green); color: white; border-color: var(--green); }
+.btn-export:hover { background: #0f4d27; }
+
+.filters { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.filter-control { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; outline: none; cursor: pointer; }
+.filter-control:focus { border-color: var(--red); }
+.filter-multi { min-height: 30px; position: relative; }
+.multi-display { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; cursor: pointer; min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.multi-display:hover { border-color: #999; }
+.multi-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; margin-top: 3px; max-height: 260px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.multi-dropdown.open { display: block; }
+.multi-item { padding: 6px 10px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.multi-item:hover { background: var(--bg); }
+.multi-controls { padding: 6px 10px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; font-size: 11.5px; }
+.multi-controls a { color: var(--red); cursor: pointer; text-decoration: underline; }
+.chk-group { display: flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 7px 0; }
+
+/* SUPPLIER TABS */
+.supplier-tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px; overflow-x: auto; }
+.supplier-tab { padding: 8px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; background: transparent; border: none; color: var(--muted); white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: all 0.12s; display: flex; align-items: center; gap: 6px; }
+.supplier-tab:hover { background: var(--bg); color: var(--text); }
+.supplier-tab.active { background: var(--red); color: white; }
+.supplier-tab.active .tab-count { background: rgba(255,255,255,0.25); color: white; }
+.tab-count { background: var(--bg); color: var(--muted); padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; position: relative; overflow: hidden; }
+.sum-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--slate); }
+.sum-card.value::before { background: var(--blue); }
+.sum-card.cost::before { background: var(--violet); }
+.sum-card.weighted::before { background: var(--gold); }
+.sum-card.count::before { background: var(--green); }
+.sum-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 6px; }
+.sum-value { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1; margin-bottom: 4px; }
+.sum-meta { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+.missing-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-left: 4px solid var(--amber); border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; font-size: 12.5px; display: flex; align-items: center; gap: 10px; }
+.missing-banner.hidden { display: none; }
+.missing-banner strong { color: var(--amber); }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+.tab-label { font-family: 'DM Serif Display', serif; font-size: 19px; }
+.deal-count { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+.search-box { display: flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; }
+.search-box input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 12.5px; width: 220px; background: transparent; }
+
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; max-height: 70vh; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: var(--text); color: white; padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
+thead th:hover { background: #333; }
+tbody tr { border-bottom: 1px solid #f0f0ee; }
+tbody tr.missing { background: var(--amber-bg); }
+tbody tr.missing:hover { background: #fdf0d6; }
+tbody tr:hover { background: var(--bg); }
+td { padding: 8px 10px; vertical-align: middle; }
+.title-cell { max-width: 340px; line-height: 1.4; font-weight: 500; }
+.title-cell a { color: var(--text); text-decoration: none; }
+.title-cell a:hover { color: var(--red); text-decoration: underline; }
+.org-cell { color: var(--muted); max-width: 200px; line-height: 1.4; }
+.num-cell { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.date-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.supplier-chip { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--violet-bg); color: var(--violet); white-space: nowrap; }
+.stage-chip { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--slate-bg); color: var(--slate); white-space: nowrap; }
+.prob-badge { display: inline-block; min-width: 42px; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.prob-high { background: var(--green-bg); color: var(--green); }
+.prob-mid { background: #fef9c3; color: #854d0e; }
+.prob-low { background: var(--red-bg); color: var(--red); }
+.close-overdue { color: var(--red); font-weight: 600; }
+.close-soon { color: var(--amber); font-weight: 600; }
+.missing-flag { display: inline-block; font-size: 10.5px; background: var(--amber); color: white; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.next-step-cell { font-size: 12px; color: var(--muted); max-width: 200px; line-height: 1.4; }
+
+.loading-state { padding: 40px; text-align: center; color: var(--muted); }
+.loading-spinner { display: inline-block; animation: spin 1s linear infinite; margin-right: 8px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.empty-state { padding: 60px 20px; text-align: center; color: var(--muted); }
+.empty-state strong { display: block; margin-bottom: 6px; color: var(--text); font-size: 15px; }
+
+.footer-bar { background: var(--bg); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+</style>
+<script src="hub.js"></script>
+<!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">Sales Hub</div>
+    <div class="topnav-links">
+      <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
+      <a href="sales-report.html">📈 Sales Report</a>
+      <a href="supplier-forecast.html" class="active">📦 Suppliers</a>
+      <a href="weekly-pulse.html">🩺 Weekly Pulse</a>
+      <a href="weekly-deals-report.html">📑 Deals Report</a>
+      <a href="revenue-scoreboard.html">💰 Scoreboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="page-title">Supplier Forecast</div>
+      <span class="sync-dot loading" id="sync-dot"></span>
+      <span class="sync-label" id="sync-label">Loading…</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" onclick="loadData()">↻ Refresh</button>
+      <button class="btn-export btn" onclick="exportToExcel()">⬇ Export to Excel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Forecast Horizon</label>
+      <select class="filter-control" id="f-horizon" onchange="onHorizonChange()">
+        <option value="any">All open deals</option>
+        <option value="30" selected>Next 30 days</option>
+        <option value="60">Next 60 days</option>
+        <option value="90">Next 90 days</option>
+        <option value="this-q">This quarter</option>
+        <option value="next-q">Next quarter</option>
+        <option value="custom">Custom…</option>
+      </select>
+    </div>
+    <div class="filter-group" id="custom-from-wrap" style="display:none">
+      <label class="filter-label">Close From</label>
+      <input type="date" class="filter-control" id="f-from" onchange="render()">
+    </div>
+    <div class="filter-group" id="custom-to-wrap" style="display:none">
+      <label class="filter-label">Close To</label>
+      <input type="date" class="filter-control" id="f-to" onchange="render()">
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Pipeline / Region</label>
+      <div class="filter-multi">
+        <div class="multi-display" onclick="toggleDropdown('pipeline')">
+          <span id="pipeline-label">All pipelines</span>
+          <span>▾</span>
+        </div>
+        <div class="multi-dropdown" id="pipeline-dropdown"></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Owner</label>
+      <div class="filter-multi">
+        <div class="multi-display" onclick="toggleDropdown('owner')">
+          <span id="owner-label">All owners</span>
+          <span>▾</span>
+        </div>
+        <div class="multi-dropdown" id="owner-dropdown"></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Min Probability</label>
+      <select class="filter-control" id="f-minprob" onchange="render()">
+        <option value="0">Any</option>
+        <option value="10">≥ 10%</option>
+        <option value="25">≥ 25%</option>
+        <option value="50">≥ 50%</option>
+        <option value="75">≥ 75%</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Show Missing Only</label>
+      <div class="chk-group"><input type="checkbox" id="f-missing-only" onchange="render()"> <label for="f-missing-only">Only rows missing data</label></div>
+    </div>
+  </div>
+
+  <!-- SUPPLIER TABS -->
+  <div class="supplier-tabs" id="supplier-tabs">
+    <button class="supplier-tab active" data-supplier="__all__">All suppliers <span class="tab-count" id="tc-all">—</span></button>
+  </div>
+
+  <!-- MISSING BANNER -->
+  <div class="missing-banner hidden" id="missing-banner">
+    <strong>⚠ Missing Info:</strong>
+    <span id="missing-text"></span>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid">
+    <div class="sum-card value">
+      <div class="sum-label">Pipeline Value</div>
+      <div class="sum-value" id="sum-value">—</div>
+      <div class="sum-meta" id="sum-value-meta">total deal value</div>
+    </div>
+    <div class="sum-card cost">
+      <div class="sum-label">Cost to Supplier</div>
+      <div class="sum-value" id="sum-cost">—</div>
+      <div class="sum-meta" id="sum-cost-meta">Deal Value − Expected GP</div>
+    </div>
+    <div class="sum-card weighted">
+      <div class="sum-label">Weighted Forecast</div>
+      <div class="sum-value" id="sum-weighted">—</div>
+      <div class="sum-meta" id="sum-weighted-meta">cost × probability</div>
+    </div>
+    <div class="sum-card count">
+      <div class="sum-label">Deal Count</div>
+      <div class="sum-value" id="sum-count">—</div>
+      <div class="sum-meta" id="sum-count-meta">by stage</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="toolbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="tab-label" id="table-title">All Suppliers</span>
+      <span class="deal-count" id="row-count">—</span>
+    </div>
+    <div class="search-box">
+      <span style="color:#aaa">🔍</span>
+      <input type="text" id="search" placeholder="Search client, project, next step…" oninput="render()">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="setSort('org')">Client</th>
+          <th onclick="setSort('title')">Project</th>
+          <th onclick="setSort('supplier')">Supplier</th>
+          <th onclick="setSort('value')" style="text-align:right">Deal Value</th>
+          <th onclick="setSort('cost')" style="text-align:right">Cost to Supplier</th>
+          <th onclick="setSort('close')">Expected Close</th>
+          <th onclick="setSort('stage')">Stage</th>
+          <th onclick="setSort('prob')" style="text-align:center">Prob</th>
+          <th>Next Step</th>
+          <th onclick="setSort('owner')">Owner</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="10"><div class="loading-state"><span class="loading-spinner">↻</span>Loading from Pipedrive…</div></td></tr>
+      </tbody>
+    </table>
+    <div class="footer-bar" id="footer" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const PD_PROXY = '/api/sales-hub/pipedrive';
+
+const FIELD_LABELS = {
+  mainSupplier:   ['main supplier', 'supplier'],
+  enquiryType:    ['enquiry type', 'enquiry source', 'source'],
+  expectedGpVal:  ['expected gp value', 'expected gp', 'gp value'],
+  expectedGpPct:  ['expected gp %', 'expected gp%', 'gp %', 'gp%', 'expected gross profit %'],
+  projectNumber:  ['project number', 'project #', 'project no', 'project_number'],
+  category:       ['category', 'deal category', 'project category'],
+  nextStep:       ['next step', 'next action']
+};
+
+let allDeals = [];
+let pipelines = [];
+let users = {};
+let stages = {};
+let customFieldKeys = {};
+let customFieldOptions = {};
+let enriched = [];
+let activeSupplier = '__all__';
+let sortKey = 'close';
+let sortDir = 'asc';
+let selection = {
+  pipeline: new Set(),
+  owner: new Set()
+};
+
+const fmtGBP = v => v == null || isNaN(v) ? '—' : '£' + Math.round(Number(v)).toLocaleString();
+const fmtEUR = v => v == null || isNaN(v) ? '—' : '€' + Math.round(Number(v)).toLocaleString();
+const setSync = (state, label) => {
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = label;
+};
+
+function todayMidnight() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function startOfMonth(d) { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(1); return x; }
+function startOfQuarter(d) { const x = startOfMonth(d); x.setMonth(Math.floor(x.getMonth() / 3) * 3); return x; }
+function endOfQuarter(d) { const s = startOfQuarter(d); const e = new Date(s); e.setMonth(e.getMonth() + 3); e.setDate(0); e.setHours(23,59,59,999); return e; }
+
+function getHorizon() {
+  const h = document.getElementById('f-horizon').value;
+  const t = todayMidnight();
+  if (h === 'any') return { from: null, to: null };
+  if (h === 'this-q') return { from: startOfQuarter(t), to: endOfQuarter(t) };
+  if (h === 'next-q') { const nq = new Date(t); nq.setMonth(nq.getMonth() + 3); return { from: startOfQuarter(nq), to: endOfQuarter(nq) }; }
+  if (h === 'custom') {
+    const fV = document.getElementById('f-from').value;
+    const tV = document.getElementById('f-to').value;
+    return { from: fV ? new Date(fV + 'T00:00:00') : null, to: tV ? new Date(tV + 'T23:59:59') : null };
+  }
+  const days = parseInt(h, 10);
+  return { from: t, to: addDays(t, days) };
+}
+
+function onHorizonChange() {
+  const h = document.getElementById('f-horizon').value;
+  const show = h === 'custom';
+  document.getElementById('custom-from-wrap').style.display = show ? 'flex' : 'none';
+  document.getElementById('custom-to-wrap').style.display   = show ? 'flex' : 'none';
+  render();
+}
+
+// Multi-select
+function toggleDropdown(key) {
+  document.querySelectorAll('.multi-dropdown').forEach(el => {
+    if (el.id !== key + '-dropdown') el.classList.remove('open');
+  });
+  document.getElementById(key + '-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.filter-multi')) {
+    document.querySelectorAll('.multi-dropdown').forEach(el => el.classList.remove('open'));
+  }
+});
+
+function renderMulti(key, items, labelAllSingular) {
+  const dd = document.getElementById(key + '-dropdown');
+  const selEl = document.getElementById(key + '-label');
+  const sel = selection[key];
+  dd.innerHTML = '<div class="multi-controls">'
+    + '<a onclick="multiClear(\'' + key + '\')">Clear</a>'
+    + '</div>';
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'multi-item';
+    row.innerHTML = '<input type="checkbox" ' + (sel.has(item.value) ? 'checked' : '') + '>'
+      + '<span>' + item.label + '</span>';
+    row.onclick = (e) => {
+      e.stopPropagation();
+      if (sel.has(item.value)) sel.delete(item.value); else sel.add(item.value);
+      renderMulti(key, items, labelAllSingular);
+      render();
+    };
+    dd.appendChild(row);
+  });
+  if (sel.size === 0 || sel.size === items.length) selEl.textContent = 'All ' + labelAllSingular;
+  else if (sel.size === 1) { const v = [...sel][0]; const it = items.find(i => i.value === v); selEl.textContent = it ? it.label : v; }
+  else selEl.textContent = sel.size + ' selected';
+}
+window.multiClear = (key) => { selection[key].clear(); renderAllMulti(); render(); };
+
+function renderAllMulti() {
+  renderMulti('pipeline', pipelines.map(p => ({ value: String(p.id), label: p.name })), 'pipelines');
+  renderMulti('owner', Object.values(users).filter(u => u.active).map(u => ({ value: String(u.id), label: u.name })), 'owners');
+}
+
+// Pipedrive
+async function pd(path, extra) {
+  const qs = new URLSearchParams({ path, ...(extra || {}) }).toString();
+  const res = await fetch(PD_PROXY + '?' + qs);
+  const j = await res.json();
+  if (!j.success && j.success !== undefined) throw new Error(j.error || 'API error');
+  return j;
+}
+async function fetchAllDeals(params) {
+  let all = [], start = 0;
+  while (true) {
+    const j = await pd('/deals', { ...params, limit: 500, start });
+    const items = j.data || [];
+    all = all.concat(items);
+    const more = j.additional_data?.pagination?.more_items_in_collection;
+    if (!more || items.length === 0) break;
+    start += items.length;
+    if (start > 10000) break;
+  }
+  return all;
+}
+async function fetchDealFields() {
+  let all = [], start = 0;
+  while (true) {
+    const j = await pd('/dealFields', { limit: 500, start });
+    const items = j.data || [];
+    all = all.concat(items);
+    if (!j.additional_data?.pagination?.more_items_in_collection || items.length === 0) break;
+    start += items.length;
+    if (start > 5000) break;
+  }
+  return all;
+}
+function discoverCustomFields(fields) {
+  const keys = {}, opts = {};
+  for (const [logical, candidates] of Object.entries(FIELD_LABELS)) {
+    for (const f of fields) {
+      const nm = (f.name || '').toLowerCase().trim();
+      if (candidates.includes(nm)) {
+        keys[logical] = f.key;
+        if (f.options && f.options.length) {
+          opts[logical] = {};
+          f.options.forEach(o => { opts[logical][String(o.id)] = o.label; });
+        }
+        break;
+      }
+    }
+  }
+  return { keys, opts };
+}
+
+// Pipelines this report is scoped to (confirmed live IDs — see Target3D Sales Hub chat 21 Jun 2026)
+const ALLOWED_PIPELINE_IDS = new Set([1, 24, 11, 10]); // SI, PS, Studio Sales, Iberia Tech Sales
+
+async function loadData() {
+  setSync('loading', 'Loading pipelines, users, fields…');
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="10"><div class="loading-state"><span class="loading-spinner">↻</span>Loading from Pipedrive…</div></td></tr>';
+  try {
+    const [plRes, usrRes, fieldsRaw] = await Promise.all([
+      pd('/pipelines'),
+      pd('/users'),
+      fetchDealFields()
+    ]);
+    // Scope to SI / PS / Studio Sales / Iberia only — previously pulled every
+    // pipeline in the account.
+    pipelines = (plRes.data || []).filter(p => ALLOWED_PIPELINE_IDS.has(p.id)).sort((a, b) => a.order_nr - b.order_nr);
+    (usrRes.data || []).forEach(u => { users[u.id] = { id: u.id, name: u.name, active: u.active_flag !== false }; });
+
+    const { keys, opts } = discoverCustomFields(fieldsRaw);
+    customFieldKeys = keys;
+    customFieldOptions = opts;
+
+    for (const p of pipelines) {
+      const sRes = await pd('/stages', { pipeline_id: p.id });
+      (sRes.data || []).forEach(s => { stages[s.id] = { id: s.id, name: s.name, pipeline_id: p.id, order_nr: s.order_nr, deal_probability: s.deal_probability }; });
+    }
+
+    setSync('loading', 'Loading open deals…');
+    const rawDeals = await fetchAllDeals({ status: 'open' });
+    // Scope deals to the same allowlist.
+    allDeals = rawDeals.filter(d => ALLOWED_PIPELINE_IDS.has(d.pipeline_id?.value ?? d.pipeline_id?.id ?? d.pipeline_id));
+
+    enriched = allDeals.map(d => enrichDeal(d)).filter(Boolean);
+
+    // Warn if fields weren't found
+    const warnings = [];
+    if (!customFieldKeys.mainSupplier) warnings.push('Main Supplier field not found');
+    if (!customFieldKeys.expectedGpVal) warnings.push('Expected GP Value field not found');
+    if (warnings.length) {
+      setSync('error', '⚠ ' + warnings.join(' · '));
+    } else {
+      setSync('live', 'Live · ' + enriched.length + ' open deals · updated ' + new Date().toLocaleTimeString('en-GB'));
+    }
+    renderAllMulti();
+    renderSupplierTabs();
+    render();
+  } catch (err) {
+    console.error(err);
+    setSync('error', 'Error: ' + err.message);
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="10"><div class="empty-state"><strong>Failed to load</strong>' + err.message + '</div></td></tr>';
+  }
+}
+
+function enrichDeal(d) {
+  const raw = (logical) => { const k = customFieldKeys[logical]; return k ? d[k] : undefined; };
+  const rawOpt = (logical) => {
+    const v = raw(logical);
+    if (v == null || v === '') return null;
+    const opts = customFieldOptions[logical];
+    if (opts && opts[String(v)]) return opts[String(v)];
+    return v;
+  };
+  const mainSupplier = rawOpt('mainSupplier');
+  const expGpVal = (() => { const v = raw('expectedGpVal'); return v != null && v !== '' ? Number(v) : null; })();
+  const nextStep  = raw('nextStep');
+  const projectNumber = raw('projectNumber') || (d.title?.match(/^(\d{4,5})/)?.[1]) || '';
+
+  const value = d.value != null ? Number(d.value) : null;
+  // Cost to supplier = Deal Value − Expected GP Value (user's preferred formula, no Cost Price field)
+  const cost = (value != null && expGpVal != null) ? value - expGpVal : null;
+
+  const stage = stages[d.stage_id?.value ?? d.stage_id?.id ?? d.stage_id];
+  const stageName = stage ? stage.name : '';
+  const stageProb = stage?.deal_probability != null ? Number(stage.deal_probability) : null;
+  const prob = d.probability != null ? Number(d.probability) : stageProb;
+
+  const ownerName = users[d.user_id?.value ?? d.user_id?.id ?? d.user_id]?.name || d.owner_name || 'Unassigned';
+  const pipelineId = String(d.pipeline_id?.value ?? d.pipeline_id?.id ?? d.pipeline_id ?? '');
+  const pipelineName = pipelines.find(p => p.id === (d.pipeline_id?.value ?? d.pipeline_id?.id ?? d.pipeline_id))?.name || '';
+
+  // Missing-info flags — Expected GP Value is the critical one since cost is derived from it
+  const missing = [];
+  if (expGpVal == null) missing.push('Expected GP Value');
+  if (!mainSupplier) missing.push('Supplier');
+  if (!d.expected_close_date) missing.push('Close Date');
+  if (!nextStep) missing.push('Next Step');
+
+  return {
+    id: d.id,
+    title: d.title || '',
+    projectNumber,
+    org: d.org_name || '',
+    value,
+    expGpVal,
+    cost,
+    currency: d.currency || 'GBP',
+    mainSupplier: mainSupplier || null,
+    expectedClose: d.expected_close_date ? new Date(d.expected_close_date + 'T00:00:00') : null,
+    stageName,
+    prob,
+    nextStep: nextStep || '',
+    owner: ownerName,
+    ownerId: String(d.user_id?.value || d.user_id?.id || d.user_id || ''),
+    pipelineId,
+    pipelineName,
+    missing
+  };
+}
+
+function renderSupplierTabs() {
+  // Build supplier list from current enriched
+  const counts = {};
+  enriched.forEach(r => {
+    if (r.mainSupplier) counts[r.mainSupplier] = (counts[r.mainSupplier] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+  const tabs = document.getElementById('supplier-tabs');
+  const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let html = `<button class="supplier-tab ${activeSupplier === '__all__' ? 'active' : ''}" data-supplier="__all__">All suppliers <span class="tab-count">${enriched.length}</span></button>`;
+  sorted.forEach(([name, count]) => {
+    html += `<button class="supplier-tab ${activeSupplier === name ? 'active' : ''}" data-supplier="${esc(name)}">${esc(name)} <span class="tab-count">${count}</span></button>`;
+  });
+  const missingCount = enriched.filter(r => !r.mainSupplier).length;
+  if (missingCount > 0) {
+    html += `<button class="supplier-tab ${activeSupplier === '__missing__' ? 'active' : ''}" data-supplier="__missing__">⚠ No supplier set <span class="tab-count">${missingCount}</span></button>`;
+  }
+  tabs.innerHTML = html;
+}
+
+// Event delegation — handles clicks on any supplier tab, now or rebuilt later
+document.getElementById('supplier-tabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.supplier-tab');
+  if (!btn || !btn.dataset.supplier) return;
+  activeSupplier = btn.dataset.supplier;
+  renderSupplierTabs();
+  render();
+});
+
+function setSort(key) {
+  if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortKey = key; sortDir = key === 'value' || key === 'cost' || key === 'prob' ? 'desc' : 'asc'; }
+  render();
+}
+window.setSort = setSort;
+
+function getFiltered() {
+  const { from, to } = getHorizon();
+  const minProb = Number(document.getElementById('f-minprob').value);
+  const missingOnly = document.getElementById('f-missing-only').checked;
+  const q = document.getElementById('search').value.trim().toLowerCase();
+
+  return enriched.filter(r => {
+    if (activeSupplier === '__missing__') { if (r.mainSupplier) return false; }
+    else if (activeSupplier !== '__all__') { if (r.mainSupplier !== activeSupplier) return false; }
+
+    if (selection.pipeline.size > 0 && !selection.pipeline.has(r.pipelineId)) return false;
+    if (selection.owner.size > 0 && !selection.owner.has(r.ownerId)) return false;
+    if (minProb > 0 && (r.prob == null || r.prob < minProb)) return false;
+    if (missingOnly && (!r.missing || r.missing.length === 0)) return false;
+    if (from || to) {
+      if (!r.expectedClose) return false;
+      if (from && r.expectedClose < from) return false;
+      if (to && r.expectedClose > to) return false;
+    }
+    if (q) {
+      const hay = [r.title, r.org, r.nextStep, r.owner, r.mainSupplier, r.projectNumber, r.pipelineName].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function sortRows(rows) {
+  const mult = sortDir === 'asc' ? 1 : -1;
+  const getVal = r => {
+    switch (sortKey) {
+      case 'org': return (r.org || '').toLowerCase();
+      case 'title': return (r.title || '').toLowerCase();
+      case 'supplier': return (r.mainSupplier || 'zzz').toLowerCase();
+      case 'value': return r.value ?? -Infinity;
+      case 'cost': return r.cost ?? -Infinity;
+      case 'close': return r.expectedClose ? r.expectedClose.getTime() : Infinity;
+      case 'stage': return (r.stageName || '').toLowerCase();
+      case 'prob': return r.prob ?? -1;
+      case 'owner': return (r.owner || '').toLowerCase();
+    }
+    return 0;
+  };
+  return [...rows].sort((a, b) => {
+    const va = getVal(a), vb = getVal(b);
+    if (va < vb) return -1 * mult;
+    if (va > vb) return 1 * mult;
+    return 0;
+  });
+}
+
+function probClass(p) {
+  if (p == null) return '';
+  if (p >= 50) return 'prob-high';
+  if (p >= 20) return 'prob-mid';
+  return 'prob-low';
+}
+
+function render() {
+  const rows = sortRows(getFiltered());
+  const title = activeSupplier === '__all__' ? 'All Suppliers' : activeSupplier === '__missing__' ? 'Deals Missing Supplier' : activeSupplier;
+  document.getElementById('table-title').textContent = title;
+  document.getElementById('row-count').textContent = rows.length + ' deals';
+
+  // £ and € kept separate, never summed together — Iberia trades in EUR
+  const gbpRows = rows.filter(r => r.currency !== 'EUR');
+  const eurRows = rows.filter(r => r.currency === 'EUR');
+
+  const totalValue  = gbpRows.reduce((s, r) => s + (r.value || 0), 0);
+  const totalCost   = gbpRows.reduce((s, r) => s + (r.cost || 0), 0);
+  const weighted    = gbpRows.reduce((s, r) => s + ((r.cost || 0) * ((r.prob || 0) / 100)), 0);
+  const eurValue    = eurRows.reduce((s, r) => s + (r.value || 0), 0);
+  const eurCost     = eurRows.reduce((s, r) => s + (r.cost || 0), 0);
+  const eurWeighted = eurRows.reduce((s, r) => s + ((r.cost || 0) * ((r.prob || 0) / 100)), 0);
+  const byStage = {};
+  rows.forEach(r => { byStage[r.stageName] = (byStage[r.stageName] || 0) + 1; });
+  const stageStr = Object.entries(byStage).sort((a,b) => b[1]-a[1]).slice(0,3).map(([n,c]) => c + ' ' + n).join(' · ') || '—';
+
+  const eurValueNote = eurRows.length ? ' · ' + fmtEUR(eurValue) + ' (Iberia, €)' : '';
+  const eurCostNote = eurRows.length ? ' · ' + fmtEUR(eurCost) + ' (Iberia, €)' : '';
+  const eurWeightedNote = eurRows.length ? ' · ' + fmtEUR(eurWeighted) + ' (Iberia, €)' : '';
+
+  document.getElementById('sum-value').textContent = fmtGBP(totalValue);
+  document.getElementById('sum-value-meta').textContent = gbpRows.length + ' deals (£)' + eurValueNote;
+  document.getElementById('sum-cost').textContent = fmtGBP(totalCost);
+  const costableCount = rows.filter(r => r.cost != null).length;
+  const noGpCount = rows.length - costableCount;
+  document.getElementById('sum-cost-meta').textContent = (noGpCount > 0
+    ? 'Deal Value − GP · ' + noGpCount + ' excluded (no GP)'
+    : 'Deal Value − Expected GP') + eurCostNote;
+  document.getElementById('sum-weighted').textContent = fmtGBP(weighted);
+  document.getElementById('sum-weighted-meta').textContent = (totalCost > 0 ? 'avg prob ' + Math.round(weighted / totalCost * 100) + '%' : '—') + eurWeightedNote;
+  document.getElementById('sum-count').textContent = rows.length;
+  document.getElementById('sum-count-meta').textContent = stageStr;
+
+  const missingRows = rows.filter(r => r.missing && r.missing.length);
+  const noGpRows = rows.filter(r => (r.missing || []).includes('Expected GP Value'));
+  const banner = document.getElementById('missing-banner');
+  if (missingRows.length > 0) {
+    banner.classList.remove('hidden');
+    const parts = [];
+    if (noGpRows.length > 0) {
+      parts.push('<strong>' + noGpRows.length + ' deal' + (noGpRows.length === 1 ? '' : 's') + ' missing Expected GP Value</strong> (excluded from cost forecast)');
+    }
+    // Tally the remaining gaps across all missing rows
+    const tally = {};
+    missingRows.forEach(r => r.missing.forEach(m => { if (m !== 'Expected GP Value') tally[m] = (tally[m] || 0) + 1; }));
+    const tallyEntries = Object.entries(tally);
+    if (tallyEntries.length > 0) {
+      parts.push('Other gaps: ' + tallyEntries.map(([k, v]) => v + ' × ' + k).join(', '));
+    }
+    document.getElementById('missing-text').innerHTML = parts.join(' · ') + '. All highlighted amber below.';
+  } else {
+    banner.classList.add('hidden');
+  }
+
+  const tbody = document.getElementById('tbody');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><strong>No deals match the filters</strong>Try widening the horizon or selecting a different supplier.</div></td></tr>';
+    document.getElementById('footer').style.display = 'none';
+    return;
+  }
+
+  const esc = s => String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const today = todayMidnight();
+  const soonThreshold = addDays(today, 14);
+
+  tbody.innerHTML = rows.map(r => {
+    const missing = r.missing || [];
+    const cls = missing.length ? 'missing' : '';
+    const fmt = r.currency === 'EUR' ? fmtEUR : fmtGBP;
+    let closeHtml = '—';
+    if (r.expectedClose) {
+      const isOverdue = r.expectedClose < today;
+      const isSoon = !isOverdue && r.expectedClose < soonThreshold;
+      const closeCls = isOverdue ? 'close-overdue' : isSoon ? 'close-soon' : '';
+      closeHtml = `<span class="${closeCls}">${r.expectedClose.toLocaleDateString('en-GB')}</span>`;
+    } else {
+      closeHtml = '<span class="missing-flag">MISSING</span>';
+    }
+    const supplierHtml = r.mainSupplier
+      ? `<span class="supplier-chip">${esc(r.mainSupplier)}</span>`
+      : '<span class="missing-flag">MISSING</span>';
+    const costHtml = r.cost != null
+      ? fmt(r.cost)
+      : '<span class="missing-flag">NO GP VALUE</span>';
+
+    return `<tr class="${cls}" title="${missing.length ? 'Missing: ' + missing.join(', ') : ''}">
+      <td class="org-cell">${esc(r.org)}</td>
+      <td class="title-cell"><a href="https://target3d2.pipedrive.com/deal/${r.id}" target="_blank">${esc(r.title)}</a></td>
+      <td>${supplierHtml}</td>
+      <td class="num-cell">${fmt(r.value)}</td>
+      <td class="num-cell">${costHtml}</td>
+      <td class="date-cell">${closeHtml}</td>
+      <td><span class="stage-chip">${esc(r.stageName)}</span></td>
+      <td style="text-align:center"><span class="prob-badge ${probClass(r.prob)}">${r.prob != null ? r.prob + '%' : '—'}</span></td>
+      <td class="next-step-cell">${r.nextStep ? esc(r.nextStep) : '<span class="missing-flag">MISSING</span>'}</td>
+      <td>${esc(r.owner)}</td>
+    </tr>`;
+  }).join('');
+
+  const footer = document.getElementById('footer');
+  footer.style.display = 'flex';
+  const eurPart = eurRows.length ? ` · <strong>${fmtEUR(eurValue)}</strong> Iberia value / <strong>${fmtEUR(eurCost)}</strong> cost (€)` : '';
+  footer.innerHTML = `<span><strong>${rows.length}</strong> deals · Pipeline <strong>${fmtGBP(totalValue)}</strong> · Cost <strong>${fmtGBP(totalCost)}</strong> · Weighted <strong>${fmtGBP(weighted)}</strong>${eurPart}</span><span>Last refresh: ${new Date().toLocaleTimeString('en-GB')}</span>`;
+}
+
+// EXPORT
+function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+  const { from, to } = getHorizon();
+  const horizonStr = from || to
+    ? (from ? from.toLocaleDateString('en-GB') : 'any') + ' to ' + (to ? to.toLocaleDateString('en-GB') : 'any')
+    : 'All open deals';
+
+  // Decide which supplier sheets to produce:
+  // - If a specific supplier tab is active: just that supplier
+  // - If "All": one sheet per supplier + combined
+  let suppliersForExport;
+  if (activeSupplier === '__all__') {
+    const counts = {};
+    enriched.forEach(r => { const k = r.mainSupplier || '__none__'; counts[k] = (counts[k] || 0) + 1; });
+    suppliersForExport = Object.keys(counts);
+  } else {
+    suppliersForExport = [activeSupplier];
+  }
+
+  // Summary sheet first
+  const summaryRows = [
+    ['Supplier Forecast Report'],
+    ['Generated', new Date().toLocaleString('en-GB')],
+    ['Horizon', horizonStr],
+    [],
+    ['Supplier', 'Deals (£)', 'Pipeline Value £', 'Cost to Supplier £', 'Weighted Forecast £', 'Deals (€, Iberia)', 'Pipeline Value €', 'Cost to Supplier €']
+  ];
+  const savedActive = activeSupplier;
+  let grandValue = 0, grandCost = 0, grandWeighted = 0;
+  let grandEurValue = 0, grandEurCost = 0;
+  for (const s of suppliersForExport) {
+    activeSupplier = s;
+    const rows = getFiltered();
+    const gbpRows = rows.filter(r => r.currency !== 'EUR');
+    const eurRows = rows.filter(r => r.currency === 'EUR');
+    const v = gbpRows.reduce((a, r) => a + (r.value || 0), 0);
+    const c = gbpRows.reduce((a, r) => a + (r.cost || 0), 0);
+    const w = gbpRows.reduce((a, r) => a + ((r.cost || 0) * ((r.prob || 0) / 100)), 0);
+    const ev = eurRows.reduce((a, r) => a + (r.value || 0), 0);
+    const ec = eurRows.reduce((a, r) => a + (r.cost || 0), 0);
+    summaryRows.push([s === '__none__' ? '(No supplier set)' : s === '__missing__' ? '(Missing)' : s, gbpRows.length, v, c, w, eurRows.length, ev, ec]);
+    grandValue += v; grandCost += c; grandWeighted += w;
+    grandEurValue += ev; grandEurCost += ec;
+  }
+  summaryRows.push([]);
+  summaryRows.push(['TOTAL', '', grandValue, grandCost, grandWeighted, '', grandEurValue, grandEurCost]);
+
+  const wsSum = XLSX.utils.aoa_to_sheet(summaryRows);
+  wsSum['!cols'] = [{ wch: 30 }, { wch: 9 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+  // Format money columns — £ for GBP columns (C,D,E), € for Iberia columns (G,H)
+  for (let R = 4; R < summaryRows.length; R++) {
+    ['C','D','E'].forEach(col => { const c = wsSum[col + (R + 1)]; if (c && typeof c.v === 'number') c.z = '£#,##0'; });
+    ['G','H'].forEach(col => { const c = wsSum[col + (R + 1)]; if (c && typeof c.v === 'number') c.z = '€#,##0'; });
+  }
+  XLSX.utils.book_append_sheet(wb, wsSum, 'Summary');
+
+  // One sheet per supplier
+  for (const s of suppliersForExport) {
+    activeSupplier = s;
+    const rows = sortRows(getFiltered());
+    const data = rows.map(r => ({
+      'Client': r.org,
+      'Project': r.title,
+      'Project #': r.projectNumber,
+      'Supplier': r.mainSupplier || '',
+      'Currency': r.currency || 'GBP',
+      'Deal Value': r.value,
+      'Cost to Supplier': r.cost,
+      'Cost Formula': r.cost != null ? 'Deal Value − Expected GP Value' : 'Missing (no GP Value)',
+      'Expected Close': r.expectedClose ? r.expectedClose.toLocaleDateString('en-GB') : '',
+      'Stage': r.stageName,
+      'Probability %': r.prob,
+      'Weighted Cost': r.cost != null && r.prob != null ? r.cost * r.prob / 100 : null,
+      'Next Step': r.nextStep,
+      'Owner': r.owner,
+      'Pipeline': r.pipelineName,
+      'Missing Fields': (r.missing || []).join(', ')
+    }));
+    if (data.length === 0) continue;
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [
+      { wch: 28 }, { wch: 40 }, { wch: 10 }, { wch: 14 }, { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 20 },
+      { wch: 14 }, { wch: 18 }, { wch: 10 }, { wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 22 }, { wch: 24 }
+    ];
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = 1; R <= range.e.r; ++R) {
+      // Only apply £ formatting to rows that are actually GBP — EUR rows are left
+      // as plain numbers (Currency column makes the unit explicit) so they're
+      // never visually mislabelled with the wrong symbol.
+      const currencyCell = ws['E' + (R + 1)];
+      const isEur = currencyCell && currencyCell.v === 'EUR';
+      const sym = isEur ? '€' : '£';
+      ['F','G','L'].forEach(col => { const c = ws[col + (R + 1)]; if (c && c.v != null) c.z = sym + '#,##0'; });
+      const p = ws['K' + (R + 1)]; if (p && p.v != null) p.z = '0"%"';
+    }
+    const sheetName = (s === '__none__' ? 'No supplier' : s === '__missing__' ? 'Missing' : s).slice(0, 31).replace(/[:\\\/\?\*\[\]]/g, '');
+    XLSX.utils.book_append_sheet(wb, ws, sheetName || 'Supplier');
+  }
+  activeSupplier = savedActive;
+
+  const supplierForFilename = activeSupplier === '__all__' ? 'All-Suppliers' : activeSupplier === '__missing__' ? 'Missing' : activeSupplier.replace(/[^A-Za-z0-9]/g, '-');
+  const stamp = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `Supplier-Forecast_${supplierForFilename}_${stamp}.xlsx`);
+}
+
+loadData();
+</script>
+</body>
+</html>

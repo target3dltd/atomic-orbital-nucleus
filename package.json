@@ -1,6 +1,6 @@
 {
   "name": "atomic-orbital-nucleus",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "description": "Atomic Orbital Nucleus: hub for processes, tools and project sites, unlocked with Google sign-in and a Pipedrive API token. Software © 2026 Ashley Keeler.",

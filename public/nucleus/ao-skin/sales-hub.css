@@ -1,0 +1,60 @@
+/*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
+/* Atomic Orbital skin for the Sales Hub v1.0.0 (six reports + landing page). Light theme only: the reports
+   draw many of their own white panels, so they stay light even when the Nucleus is dark. */
+@font-face{font-family:"DM Sans";font-weight:100 449;font-display:swap;src:url("/brand/fonts/IBMPlexSans-400-Latin.woff2") format("woff2")}
+@font-face{font-family:"DM Sans";font-weight:450 649;font-display:swap;src:url("/brand/fonts/IBMPlexSans-600-Latin.woff2") format("woff2")}
+@font-face{font-family:"DM Sans";font-weight:650 1000;font-display:swap;src:url("/brand/fonts/IBMPlexSans-700-Latin.woff2") format("woff2")}
+@font-face{font-family:"DM Serif Display";font-weight:100 1000;font-display:swap;src:url("/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff") format("woff")}
+
+html:not(#ao-skin){
+  --bg:var(--ao-bg); --surface:var(--ao-surface); --border:var(--ao-line); --text:var(--ao-text); --muted:var(--ao-muted);
+  --red:var(--ao-orange); --red-bg:var(--ao-orange-soft);
+  --hot:#C2362B; --hot-bg:rgba(194,54,43,.08); --hot-border:rgba(194,54,43,.30);
+  --warm:#B4540B; --warm-bg:rgba(180,84,11,.08);
+  --amber:#B4540B; --amber-bg:rgba(180,84,11,.08); --amber-border:rgba(180,84,11,.30);
+  --green:var(--ao-green); --green-bg:var(--ao-green-soft);
+  --blue:var(--ao-teal-text); --blue-bg:var(--ao-teal-soft);
+  --stale:#4A5A6B; --stale-bg:var(--ao-sunk); --slate:#4A5A6B; --slate-bg:var(--ao-sunk);
+  color-scheme:light;
+}
+html:not(#ao-skin) body{font-family:var(--ao-font-body);background:var(--ao-bg);color:var(--ao-text)}
+
+/* top bar */
+html:not(#ao-skin) .topnav{background:var(--ao-surface);border-bottom:1px solid var(--ao-line);box-shadow:none}
+html:not(#ao-skin) .topnav-inner{gap:12px;flex-wrap:wrap;height:auto;min-height:56px;padding-top:6px;padding-bottom:6px}
+html:not(#ao-skin) .topnav-links a{color:var(--ao-muted);border-radius:6px}
+html:not(#ao-skin) .topnav-links a:hover{background:var(--ao-sunk);color:var(--ao-text)}
+html:not(#ao-skin) .topnav-links a.active{background:var(--ao-teal);color:var(--ao-on-teal)}
+.sh-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ao-text);font:600 15px var(--ao-font-display)}
+.sh-brand img{height:22px;width:auto}
+.sh-brand span{padding-left:10px;border-left:1px solid var(--ao-line)}
+.sh-tools{display:flex;gap:4px;margin-left:auto}
+.sh-tool{font:500 12.5px var(--ao-font-body);color:var(--ao-teal-text);background:none;border:1px solid var(--ao-line);border-radius:6px;padding:5px 10px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.sh-tool:hover{border-color:var(--ao-teal);background:var(--ao-teal-soft)}
+
+/* headings, numbers, buttons */
+html:not(#ao-skin) .page-title, html:not(#ao-skin) .panel-title{font-family:var(--ao-font-display);font-weight:600;letter-spacing:0}
+html:not(#ao-skin) .btn{font-family:var(--ao-font-body);background:var(--ao-surface);border-color:var(--ao-line);border-radius:6px}
+html:not(#ao-skin) .btn:hover{border-color:var(--ao-teal);color:var(--ao-teal-text)}
+html:not(#ao-skin) .btn-export{background:var(--ao-teal);border-color:var(--ao-teal);color:var(--ao-on-teal)}
+html:not(#ao-skin) .btn-export:hover{background:var(--ao-teal-text);color:#fff}
+html:not(#ao-skin) .btn-primary{background:var(--ao-orange);border-color:var(--ao-orange);color:var(--ao-on-orange)}
+html:not(#ao-skin) .btn-primary:hover{background:#D9461A;color:var(--ao-on-orange)}
+html:not(#ao-skin) .sync-dot.live{background:var(--ao-green)}
+html:not(#ao-skin) :focus-visible{outline:2px solid var(--ao-teal);outline-offset:2px}
+
+/* help dialog */
+.sh-help{border:1px solid var(--ao-line);border-radius:var(--ao-radius);padding:0;max-width:min(680px,calc(100vw - 32px));width:100%;background:var(--ao-surface);color:var(--ao-text);box-shadow:var(--ao-shadow);font:14px/1.55 var(--ao-font-body)}
+.sh-help::backdrop{background:rgb(14 22 32/.45)}
+.sh-help-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--ao-line)}
+.sh-help-head h2{margin:0;font:600 20px var(--ao-font-display)}
+.sh-ver{font:500 12px var(--ao-font-mono);color:var(--ao-teal-text);background:var(--ao-teal-soft);border-radius:4px;padding:2px 6px}
+.sh-x{margin-left:auto;background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--ao-muted)}
+.sh-help-body{padding:8px 20px 20px;max-height:70vh;overflow:auto}
+.sh-help-body h3{font:600 15px var(--ao-font-display);margin:18px 0 6px}
+.sh-help-body p, .sh-help-body li, .sh-help-body dd{margin:0 0 6px}
+.sh-help-body ul{padding-left:20px;margin:0}
+.sh-help-body dt{font-weight:600;margin-top:8px}
+.sh-help-body dd{margin-left:0;color:var(--ao-muted)}
+.sh-help-body a{color:var(--ao-teal-text)}
+.sh-help-body code{font:12.5px var(--ao-font-mono);background:var(--ao-sunk);padding:1px 4px;border-radius:3px}

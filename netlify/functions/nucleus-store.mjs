@@ -4,7 +4,7 @@
 //   POST /api/nucleus/store { ns, doc:"decisions/g-1-2", op:"set"|"update"|"delete", data }
 // One blob per document, so two people saving different documents never overwrite each other.
 // Signed-in people only.
-import { sessionFrom, jsonResponse as json } from "../lib/session.mjs";
+import { sessionFrom, canUseSalesHub, jsonResponse as json } from "../lib/session.mjs";
 import { kv } from "../lib/kv.mjs";
 
 const NS = /^[a-z0-9-]{1,40}$/;
@@ -24,6 +24,10 @@ export default async (req) => {
   if (!s) return json({ code: "needs_reauth", message: "Sign in to the Nucleus first." }, 401);
   const st = await store();
   const url = new URL(req.url);
+  // Namespaces that belong to a restricted tool follow that tool's access list.
+  const nsOf = req.method === "GET" ? url.searchParams.get("ns") : null;
+  const restricted = (ns) => ns === "sales-hub" && !canUseSalesHub(s);
+  if (nsOf && restricted(nsOf)) return json({ code: "forbidden", message: "Not open to your account." }, 403);
 
   if (req.method === "GET") {
     const ns = url.searchParams.get("ns");
@@ -51,6 +55,7 @@ export default async (req) => {
   let body; try { body = await req.json(); } catch (e) { return json({ code: "invalid_argument", message: "Body must be JSON" }, 400); }
   const { ns, doc, op, data } = body || {};
   if (!NS.test(ns || "") || !validDoc(doc)) return json({ code: "invalid_argument", message: "Bad ns or doc" }, 400);
+  if (restricted(ns)) return json({ code: "forbidden", message: "Not open to your account." }, 403);
   const key = `${ns}/${doc}`;
   if (op === "delete") { await st.delete(key); return json({ ok: true }); }
   if (op !== "set" && op !== "update") return json({ code: "invalid_argument", message: "op must be set, update or delete" }, 400);

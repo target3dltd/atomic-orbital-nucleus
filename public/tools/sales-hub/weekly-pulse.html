@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Pulse | Sales Hub · Nucleus</title>
+<script src="/nucleus/vendor/xlsx-0.18.5.full.min.js"></script>
+<style>
+:root {
+  --bg: #f8f8f6; --surface: #fff; --border: #e4e4e0;
+  --text: #1a1a18; --muted: #6b6b66;
+  --red: #c0392b; --red-bg: #fdf0ee;
+  --amber: #d97706; --amber-bg: #fef9ee; --amber-border: #fcd9a3;
+  --green: #166534; --green-bg: #f0fdf4;
+  --blue: #1e40af; --blue-bg: #eff6ff;
+  --slate: #475569; --slate-bg: #f1f5f9;
+  --gold: #b8860b; --purple: #7c3aed; --purple-bg: #f3e8ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13.5px; }
+
+/* NAV */
+.topnav { background: white; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 200; }
+.topnav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.topnav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.topnav-links { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.topnav-links a { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: #6b7280; text-decoration: none; transition: all 0.12s; white-space: nowrap; }
+.topnav-links a:hover { background: #f3f4f6; color: #111; }
+.topnav-links a.active { background: var(--red); color: white; }
+
+.main { max-width: 1500px; margin: 0 auto; padding: 20px; }
+
+/* STATUS */
+.status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.status-left { display: flex; align-items: center; gap: 10px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sync-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+.sync-dot.live { background: #22c55e; }
+.sync-dot.error { background: #ef4444; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-label { font-size: 12px; color: var(--muted); }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 24px; }
+.btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all 0.12s; font-weight: 500; }
+.btn:hover { background: var(--bg); }
+.btn-export { background: var(--green); color: white; border-color: var(--green); }
+.btn-export:hover { background: #0f4d27; }
+
+/* FILTERS */
+.filters { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.filter-control { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; outline: none; cursor: pointer; }
+.filter-control:focus { border-color: var(--red); }
+.filter-multi { min-height: 30px; position: relative; }
+.multi-display { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; cursor: pointer; min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.multi-display:hover { border-color: #999; }
+.multi-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; margin-top: 3px; max-height: 260px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.multi-dropdown.open { display: block; }
+.multi-item { padding: 6px 10px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.multi-item:hover { background: var(--bg); }
+.multi-item input { cursor: pointer; }
+.multi-controls { padding: 6px 10px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; font-size: 11.5px; }
+.multi-controls a { color: var(--red); cursor: pointer; text-decoration: underline; }
+
+/* SECTION HEADERS */
+.section { margin-bottom: 22px; }
+.section-head { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.section-note { font-size: 11px; color: var(--muted); font-weight: 400; font-family: 'DM Sans', sans-serif; }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 1000px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; position: relative; overflow: hidden; }
+.sum-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--slate); }
+.sum-card.new::before { background: var(--blue); }
+.sum-card.won::before { background: var(--green); }
+.sum-card.lost::before { background: var(--red); }
+.sum-card.support::before { background: var(--purple); }
+.sum-card.demo::before { background: var(--gold); }
+.sum-card.complete::before { background: #0891b2; }
+.sum-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 6px; }
+.sum-value { font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1; margin-bottom: 4px; }
+.sum-meta { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* PIPELINE BREAKDOWN TABLE */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: var(--text); color: white; padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
+tbody tr { border-bottom: 1px solid #f0f0ee; }
+tbody tr:hover { background: var(--bg); }
+tbody tr.total-row { background: var(--bg); font-weight: 700; }
+td { padding: 8px 10px; vertical-align: middle; }
+.num-cell { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.title-cell { max-width: 380px; line-height: 1.4; font-weight: 500; }
+.title-cell a { color: var(--text); text-decoration: none; }
+.title-cell a:hover { color: var(--red); text-decoration: underline; }
+.date-cell { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
+.status-chip { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.status-chip.won { background: var(--green-bg); color: var(--green); }
+.status-chip.lost { background: var(--red-bg); color: var(--red); }
+.status-chip.delivered { background: #fdf6e3; color: var(--gold); }
+.status-chip.booked { background: var(--blue-bg); color: var(--blue); }
+
+.missing-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-left: 4px solid var(--amber); border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; font-size: 12.5px; }
+.missing-banner.hidden { display: none; }
+.missing-banner strong { color: var(--amber); }
+
+.loading-state { padding: 30px; text-align: center; color: var(--muted); }
+.loading-spinner { display: inline-block; animation: spin 1s linear infinite; margin-right: 8px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.empty-state { padding: 24px 20px; text-align: center; color: var(--muted); font-size: 12.5px; }
+.toggle-rows { font-size: 11.5px; color: var(--red); cursor: pointer; text-decoration: underline; margin-top: 8px; display: inline-block; }
+.empty-mini { color: var(--muted); font-size: 12px; padding: 10px 0; }
+.detail-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 4px 0 6px; }
+
+.methodology { font-size: 11px; color: var(--muted); line-height: 1.6; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-top: 20px; }
+.methodology strong { color: var(--text); }
+</style>
+<script src="hub.js"></script>
+<!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">Sales Hub</div>
+    <div class="topnav-links">
+      <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
+      <a href="sales-report.html">📈 Sales Report</a>
+      <a href="supplier-forecast.html">📦 Suppliers</a>
+      <a href="weekly-pulse.html" class="active">🩺 Weekly Pulse</a>
+      <a href="weekly-deals-report.html">📑 Deals Report</a>
+      <a href="revenue-scoreboard.html">💰 Scoreboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="page-title">Weekly Pulse</div>
+      <span class="sync-dot loading" id="sync-dot"></span>
+      <span class="sync-label" id="sync-label">Loading…</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" onclick="loadData()">↻ Refresh</button>
+      <button class="btn-export btn" onclick="exportToExcel()">⬇ Export to Excel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Date Range</label>
+      <select class="filter-control" id="f-range" onchange="onRangeChange()">
+        <option value="this-week">This Week</option>
+        <option value="last-week">Last Week</option>
+        <option value="this-month">This Month</option>
+        <option value="last-month">Last Month</option>
+        <option value="last-7">Last 7 Days</option>
+        <option value="last-30">Last 30 Days</option>
+        <option value="custom">Custom…</option>
+      </select>
+    </div>
+    <div class="filter-group" id="custom-from-wrap" style="display:none">
+      <label class="filter-label">From</label>
+      <input type="date" class="filter-control" id="f-from" onchange="render()">
+    </div>
+    <div class="filter-group" id="custom-to-wrap" style="display:none">
+      <label class="filter-label">To</label>
+      <input type="date" class="filter-control" id="f-to" onchange="render()">
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Pipeline</label>
+      <div class="filter-multi">
+        <div class="multi-display" onclick="toggleDropdown('pipeline')">
+          <span id="pipeline-label">All pipelines</span>
+          <span>▾</span>
+        </div>
+        <div class="multi-dropdown" id="pipeline-dropdown"></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Owner</label>
+      <div class="filter-multi">
+        <div class="multi-display" onclick="toggleDropdown('owner')">
+          <span id="owner-label">All owners</span>
+          <span>▾</span>
+        </div>
+        <div class="multi-dropdown" id="owner-dropdown"></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <select class="filter-control" id="f-status" onchange="render()">
+        <option value="all">Won &amp; Lost</option>
+        <option value="won">Won only</option>
+        <option value="lost">Lost only</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="missing-banner hidden" id="missing-banner">
+    <strong>⚠ Missing Info:</strong>
+    <span id="missing-text"></span>
+  </div>
+
+  <!-- 1-3: NEW DEALS BY PIPELINE -->
+  <div class="section">
+    <div class="section-head">① New Deals by Pipeline <span class="section-note">— count · revenue value · GP value, entered in period</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pipeline</th><th class="num-cell">New Deals</th><th class="num-cell">Revenue Total</th><th class="num-cell">GP Total</th></tr></thead>
+        <tbody id="new-by-pipeline-body"><tr><td colspan="4"><div class="loading-state"><span class="loading-spinner">↻</span>Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+    <div id="new-deals-detail" style="margin-top:10px"></div>
+  </div>
+
+  <!-- 4-5: WON / LOST -->
+  <div class="section">
+    <div class="section-head">② Won &amp; Lost Deals <span class="section-note">— by close date (won_time / lost_time) in period</span></div>
+    <div class="summary-grid" style="margin-bottom:12px">
+      <div class="sum-card won">
+        <div class="sum-label">Won Deals</div>
+        <div class="sum-value" id="sum-won">—</div>
+        <div class="sum-meta" id="sum-won-meta">revenue · GP</div>
+      </div>
+      <div class="sum-card lost">
+        <div class="sum-label">Lost Deals</div>
+        <div class="sum-value" id="sum-lost">—</div>
+        <div class="sum-meta" id="sum-lost-meta">revenue lost</div>
+      </div>
+      <div class="sum-card support">
+        <div class="sum-label">Support Deals</div>
+        <div class="sum-value" id="sum-support">—</div>
+        <div class="sum-meta" id="sum-support-meta">new · existing open</div>
+      </div>
+      <div class="sum-card demo">
+        <div class="sum-label">Demos</div>
+        <div class="sum-value" id="sum-demo">—</div>
+        <div class="sum-meta" id="sum-demo-meta">booked · delivered</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Deal</th><th>Pipeline</th><th>Status</th><th class="date-cell">Date</th><th class="num-cell">Revenue</th><th class="num-cell">GP</th></tr></thead>
+        <tbody id="won-lost-body"><tr><td colspan="6"><div class="loading-state"><span class="loading-spinner">↻</span>Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6: SUPPORT -->
+  <div class="section">
+    <div class="section-head">③ Support Pipeline <span class="section-note">— counts only, no revenue tracked on this pipeline</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Stage</th><th class="num-cell">New This Period</th><th class="num-cell">Existing Open</th></tr></thead>
+        <tbody id="support-body"><tr><td colspan="3"><div class="loading-state"><span class="loading-spinner">↻</span>Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 7: DEMOS -->
+  <div class="section">
+    <div class="section-head">④ Demos <span class="section-note">— Target3D UK Demo's board: booked = created in period, delivered = reached Demo/Post Demo phase in period</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Demo Project</th><th>Phase</th><th class="date-cell">Booked</th><th>Status</th></tr></thead>
+        <tbody id="demo-body"><tr><td colspan="4"><div class="loading-state"><span class="loading-spinner">↻</span>Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8: COMPLETED PROJECTS -->
+  <div class="section">
+    <div class="section-head">⑤ Completed Projects <span class="section-note">— marked complete in period, linked to a deal</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Board</th><th class="date-cell">Completed</th><th class="num-cell">Linked Revenue</th></tr></thead>
+        <tbody id="complete-body"><tr><td colspan="4"><div class="loading-state"><span class="loading-spinner">↻</span>Loading…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="methodology">
+    <strong>How this report counts things:</strong> New deals = Pipedrive <code>add_time</code> falls in the selected period, scoped to Tech Sales SI, Tech Sales PS, and Studio Sales pipelines. Won/Lost = <code>won_time</code> / <code>lost_time</code> in period. GP = "Expected GP Value" custom field on the deal. Support = pipeline id 2, separate from the three sales pipelines, counts only (no revenue tracked). Demos = projects on the "Target3D UK Demo's" board (id 32); booked = project <code>add_time</code> in period, delivered = project has reached the "Demo" or "Post Demo" phase as of now. Completed Projects = Pipedrive Projects with <code>status = completed</code> and a linked deal, status changed in period; revenue is the linked deal's value.
+  </div>
+</div>
+
+<script>
+const PD_PROXY = '/api/sales-hub/pipedrive';
+
+const ALLOWED_PIPELINES = {
+  1:  'Tech Sales - SI',
+  24: 'Tech Sales - PS',
+  11: 'Studio Sales',
+  10: 'Iberia Tech Sales'
+};
+const SUPPORT_PIPELINE_ID = 2;
+const IBERIA_PIPELINE_ID = 10;
+const DEMO_BOARD_ID = 32;
+const DEMO_PHASE_NAMES = { 186: 'Planning', 187: 'Technical Setup', 188: 'Demo', 189: 'Post Demo' };
+const DEMO_DELIVERED_PHASES = [188, 189];
+
+const FIELD_LABELS = {
+  expectedGpVal: ['expected gp value', 'expected gp', 'gp value']
+};
+
+let pipelines = [], users = {}, supportStages = {};
+let allDeals = [], allProjects = [];
+let customFieldKeys = {};
+let projectBoards = {};
+let selection = { pipeline: new Set(), owner: new Set() };
+const expandedSections = {};
+
+const fmtGBP = v => v == null || isNaN(v) ? '£0' : '£' + Math.round(Number(v)).toLocaleString();
+const fmtEUR = v => v == null || isNaN(v) ? '€0' : '€' + Math.round(Number(v)).toLocaleString();
+const setSync = (state, label) => {
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = label;
+};
+
+// ── DATE HELPERS (same logic as Sales Report) ──
+function todayMidnight() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function startOfWeek(d) { const x = new Date(d); x.setHours(0,0,0,0); const dow = (x.getDay() + 6) % 7; x.setDate(x.getDate() - dow); return x; }
+function endOfWeek(d) { return addDays(startOfWeek(d), 6); }
+function startOfMonth(d) { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(1); return x; }
+function endOfMonth(d) { const x = startOfMonth(d); x.setMonth(x.getMonth() + 1); x.setDate(0); return x; }
+
+function getRange() {
+  const preset = document.getElementById('f-range').value;
+  const t = todayMidnight();
+  let from, to;
+  switch (preset) {
+    case 'this-week':  from = startOfWeek(t); to = endOfWeek(t); break;
+    case 'last-week':  from = addDays(startOfWeek(t), -7); to = addDays(endOfWeek(t), -7); break;
+    case 'this-month': from = startOfMonth(t); to = endOfMonth(t); break;
+    case 'last-month': { const lm = new Date(t); lm.setMonth(lm.getMonth() - 1); from = startOfMonth(lm); to = endOfMonth(lm); break; }
+    case 'last-7':     from = addDays(t, -6); to = t; break;
+    case 'last-30':    from = addDays(t, -29); to = t; break;
+    case 'custom': {
+      const fV = document.getElementById('f-from').value;
+      const tV = document.getElementById('f-to').value;
+      from = fV ? new Date(fV + 'T00:00:00') : addDays(t, -6);
+      to   = tV ? new Date(tV + 'T23:59:59') : t;
+      break;
+    }
+  }
+  const toEnd = new Date(to); toEnd.setHours(23,59,59,999);
+  return { from, to: toEnd };
+}
+
+function onRangeChange() {
+  const preset = document.getElementById('f-range').value;
+  const show = preset === 'custom';
+  document.getElementById('custom-from-wrap').style.display = show ? 'flex' : 'none';
+  document.getElementById('custom-to-wrap').style.display   = show ? 'flex' : 'none';
+  render();
+}
+
+function inRange(dateVal, from, to) {
+  if (!dateVal) return false;
+  const d = new Date(dateVal);
+  return d >= from && d <= to;
+}
+
+// ── PIPEDRIVE FETCH HELPERS ──
+async function pd(path, extra) {
+  const qs = new URLSearchParams({ path, ...(extra || {}) }).toString();
+  const res = await fetch(PD_PROXY + '?' + qs);
+  const j = await res.json();
+  if (!j.success && j.success !== undefined) throw new Error(j.error || 'API error');
+  return j;
+}
+
+async function fetchAllDeals(params) {
+  let all = [], start = 0;
+  while (true) {
+    const j = await pd('/deals', { ...params, limit: 500, start });
+    const items = j.data || [];
+    all = all.concat(items);
+    const more = j.additional_data?.pagination?.more_items_in_collection;
+    if (!more || items.length === 0) break;
+    start += items.length;
+    if (start > 10000) break;
+  }
+  return all;
+}
+
+async function fetchDealFields() {
+  let all = [], start = 0;
+  while (true) {
+    const j = await pd('/dealFields', { limit: 500, start });
+    const items = j.data || [];
+    all = all.concat(items);
+    if (!j.additional_data?.pagination?.more_items_in_collection || items.length === 0) break;
+    start += items.length;
+    if (start > 5000) break;
+  }
+  return all;
+}
+
+async function fetchAllProjects(boardId) {
+  let all = [], cursor = null;
+  while (true) {
+    const params = { limit: 500 };
+    if (boardId) params.board_id = boardId;
+    if (cursor) params.cursor = cursor;
+    const j = await pd('/projects', params);
+    const items = j.data || [];
+    all = all.concat(items);
+    cursor = j.additional_data?.next_cursor || null;
+    if (!cursor || items.length === 0) break;
+    if (all.length > 5000) break;
+  }
+  return all;
+}
+
+function discoverCustomFields(fields) {
+  const keys = {};
+  for (const [logical, candidates] of Object.entries(FIELD_LABELS)) {
+    for (const f of fields) {
+      const nm = (f.name || '').toLowerCase().trim();
+      if (candidates.includes(nm)) { keys[logical] = f.key; break; }
+    }
+  }
+  return keys;
+}
+
+function dealGp(d) {
+  const k = customFieldKeys.expectedGpVal;
+  if (!k) return null;
+  const v = d[k];
+  return (v === undefined || v === null || v === '') ? null : Number(v);
+}
+
+// ── LOAD ──
+async function loadData() {
+  setSync('loading', 'Loading pipelines, users, fields…');
+  try {
+    const [plRes, usrRes, fieldsRaw, stagesRes, boardsRes] = await Promise.all([
+      pd('/pipelines'),
+      pd('/users'),
+      fetchDealFields(),
+      pd('/stages', { pipeline_id: SUPPORT_PIPELINE_ID }),
+      pd('/projects/boards')
+    ]);
+    pipelines = (plRes.data || []).filter(p => ALLOWED_PIPELINES[p.id]);
+    (usrRes.data || []).forEach(u => { users[u.id] = u.name; });
+    customFieldKeys = discoverCustomFields(fieldsRaw);
+    (stagesRes.data || []).forEach(s => { supportStages[s.id] = s.name; });
+    (boardsRes.data || []).forEach(b => { projectBoards[b.id] = b.name; });
+
+    setSync('loading', 'Loading deals (all statuses)…');
+    // status: all_not_deleted pulls open + won + lost so won/lost figures are correct
+    allDeals = await fetchAllDeals({ status: 'all_not_deleted' });
+
+    setSync('loading', 'Loading demo & project data…');
+    allProjects = await fetchAllProjects(DEMO_BOARD_ID);
+    const completedProjects = await fetchAllProjects(); // all boards, filtered client-side below
+
+    allProjects._completedAll = completedProjects;
+
+    const warnings = [];
+    if (!customFieldKeys.expectedGpVal) warnings.push('Expected GP Value field not found — GP totals will show as £0');
+    document.getElementById('missing-banner').classList.toggle('hidden', warnings.length === 0);
+    if (warnings.length) document.getElementById('missing-text').textContent = warnings.join(' · ');
+
+    setSync('live', 'Live · updated ' + new Date().toLocaleTimeString('en-GB'));
+    renderFilters();
+    render();
+  } catch (err) {
+    console.error(err);
+    setSync('error', 'Error: ' + err.message);
+  }
+}
+
+function renderFilters() {
+  const ownerIds = [...new Set(allDeals.map(d => d.user_id?.id || d.user_id).filter(Boolean))];
+  buildMulti('pipeline', Object.entries(ALLOWED_PIPELINES).map(([id, name]) => ({ value: id, label: name })));
+  buildMulti('owner', ownerIds.map(id => ({ value: id, label: users[id] || ('User ' + id) })));
+}
+
+function buildMulti(key, items) {
+  const dd = document.getElementById(key + '-dropdown');
+  dd.innerHTML = `<div class="multi-controls"><a onclick="selectAllMulti('${key}', ${JSON.stringify(items.map(i=>i.value)).replace(/"/g,'&quot;')})">All</a><a onclick="clearMulti('${key}')">None</a></div>` +
+    items.map(i => `<label class="multi-item"><input type="checkbox" value="${i.value}" onchange="toggleMultiItem('${key}','${i.value}')"> ${i.label}</label>`).join('');
+}
+function toggleDropdown(key) {
+  document.querySelectorAll('.multi-dropdown').forEach(el => { if (el.id !== key + '-dropdown') el.classList.remove('open'); });
+  document.getElementById(key + '-dropdown').classList.toggle('open');
+}
+function toggleMultiItem(key, val) {
+  if (selection[key].has(val)) selection[key].delete(val); else selection[key].add(val);
+  updateMultiLabel(key); render();
+}
+function selectAllMulti(key, vals) { vals.forEach(v => selection[key].add(String(v))); updateMultiLabel(key); render();
+  document.querySelectorAll('#' + key + '-dropdown input').forEach(cb => cb.checked = true); }
+function clearMulti(key) { selection[key].clear(); updateMultiLabel(key); render();
+  document.querySelectorAll('#' + key + '-dropdown input').forEach(cb => cb.checked = false); }
+function updateMultiLabel(key) {
+  const n = selection[key].size;
+  document.getElementById(key + '-label').textContent = n === 0 ? 'All ' + (key === 'pipeline' ? 'pipelines' : 'owners') : n + ' selected';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.filter-multi')) document.querySelectorAll('.multi-dropdown').forEach(el => el.classList.remove('open'));
+});
+
+function passesFilters(d) {
+  if (selection.pipeline.size && !selection.pipeline.has(String(d.pipeline_id))) return false;
+  const ownerId = d.user_id?.id || d.user_id;
+  if (selection.owner.size && !selection.owner.has(String(ownerId))) return false;
+  return true;
+}
+
+// ── RENDER ──
+function render() {
+  if (!allDeals.length && !allProjects.length) return;
+  const { from, to } = getRange();
+  const salesDeals = allDeals.filter(d => ALLOWED_PIPELINES[d.pipeline_id] && passesFilters(d));
+
+  renderNewByPipeline(salesDeals, from, to);
+  renderWonLost(salesDeals, from, to);
+  renderSupport(from, to);
+  renderDemos(from, to);
+  renderCompletedProjects(from, to);
+}
+
+function renderNewByPipeline(deals, from, to) {
+  const body = document.getElementById('new-by-pipeline-body');
+  const rows = Object.entries(ALLOWED_PIPELINES).map(([id, name]) => {
+    const newDeals = deals.filter(d => d.pipeline_id == id && inRange(d.add_time, from, to));
+    const rev = newDeals.reduce((s, d) => s + (Number(d.value) || 0), 0);
+    const gp = newDeals.reduce((s, d) => s + (dealGp(d) || 0), 0);
+    const isEur = Number(id) === IBERIA_PIPELINE_ID;
+    return { id: Number(id), name, count: newDeals.length, rev, gp, isEur };
+  });
+  // GBP-only totals — Iberia (EUR) is shown as its own row above but never
+  // folded into this total, since summing £ and € together would be wrong.
+  const gbpRows = rows.filter(r => !r.isEur);
+  const totalCount = gbpRows.reduce((s, r) => s + r.count, 0);
+  const totalRev = gbpRows.reduce((s, r) => s + r.rev, 0);
+  const totalGp = gbpRows.reduce((s, r) => s + r.gp, 0);
+
+  if (rows.every(r => r.count === 0)) {
+    body.innerHTML = '<tr><td colspan="4"><div class="empty-state">No new deals in this period.</div></td></tr>';
+  } else {
+    body.innerHTML = rows.map(r => {
+      const fmt = r.isEur ? fmtEUR : fmtGBP;
+      return `<tr><td>${r.name}${r.isEur ? ' <span style="color:var(--muted);font-size:11px">(€)</span>' : ''}</td><td class="num-cell">${r.count}</td><td class="num-cell">${fmt(r.rev)}</td><td class="num-cell">${fmt(r.gp)}</td></tr>`;
+    }).join('') +
+      `<tr class="total-row"><td>Total (£ only)</td><td class="num-cell">${totalCount}</td><td class="num-cell">${fmtGBP(totalRev)}</td><td class="num-cell">${fmtGBP(totalGp)}</td></tr>`;
+  }
+
+  renderNewDealsDetail(deals, from, to);
+}
+
+function renderNewDealsDetail(deals, from, to) {
+  const container = document.getElementById('new-deals-detail');
+  const newDeals = deals.filter(d => inRange(d.add_time, from, to))
+    .sort((a, b) => new Date(b.add_time) - new Date(a.add_time));
+
+  if (!newDeals.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const expanded = expandedSections['newDealsDetail'];
+  const shown = expanded ? newDeals : newDeals.slice(0, 10);
+  const esc = s => String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  const rowsHtml = shown.map(d => {
+    const pname = ALLOWED_PIPELINES[d.pipeline_id] || '';
+    const isEur = Number(d.pipeline_id) === IBERIA_PIPELINE_ID;
+    const fmt = isEur ? fmtEUR : fmtGBP;
+    return `<tr>
+      <td class="date-cell">${d.add_time ? d.add_time.split(' ')[0] : '—'}</td>
+      <td class="title-cell"><a href="https://target3d.pipedrive.com/deal/${d.id}" target="_blank">${esc(d.title)}</a></td>
+      <td>${esc(pname)}</td>
+      <td>${esc(d.owner_name || (d.user_id && d.user_id.name) || '—')}</td>
+      <td class="num-cell">${fmt(Number(d.value) || 0)}</td>
+      <td class="num-cell">${fmt(dealGp(d) || 0)}</td>
+    </tr>`;
+  }).join('');
+
+  let html = '<div class="detail-label">New deals this period</div>'
+    + '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Deal</th><th>Pipeline</th><th>Owner</th><th class="num-cell">Revenue</th><th class="num-cell">GP</th></tr></thead>'
+    + '<tbody>' + rowsHtml + '</tbody></table></div>';
+
+  if (newDeals.length > 10) {
+    html += '<span class="toggle-rows" onclick="toggleNewDealsDetail()">' + (expanded ? 'Show fewer' : 'Show all ' + newDeals.length) + '</span>';
+  }
+
+  container.innerHTML = html;
+}
+
+function toggleNewDealsDetail() {
+  expandedSections['newDealsDetail'] = !expandedSections['newDealsDetail'];
+  render();
+}
+
+function renderWonLost(deals, from, to) {
+  const won = deals.filter(d => inRange(d.won_time, from, to));
+  const lost = deals.filter(d => inRange(d.lost_time, from, to));
+
+  // £ and € kept separate, never summed together — Iberia trades in EUR.
+  const isEurDeal = d => Number(d.pipeline_id) === IBERIA_PIPELINE_ID;
+  const wonGbp = won.filter(d => !isEurDeal(d));
+  const wonEur = won.filter(isEurDeal);
+  const lostGbp = lost.filter(d => !isEurDeal(d));
+  const lostEur = lost.filter(isEurDeal);
+
+  const wonRev = wonGbp.reduce((s, d) => s + (Number(d.value) || 0), 0);
+  const wonGp = wonGbp.reduce((s, d) => s + (dealGp(d) || 0), 0);
+  const lostRev = lostGbp.reduce((s, d) => s + (Number(d.value) || 0), 0);
+  const wonEurRev = wonEur.reduce((s, d) => s + (Number(d.value) || 0), 0);
+  const wonEurGp = wonEur.reduce((s, d) => s + (dealGp(d) || 0), 0);
+  const lostEurRev = lostEur.reduce((s, d) => s + (Number(d.value) || 0), 0);
+
+  document.getElementById('sum-won').textContent = won.length;
+  document.getElementById('sum-won-meta').textContent = fmtGBP(wonRev) + ' · ' + fmtGBP(wonGp) + ' GP'
+    + (wonEur.length ? ' · ' + fmtEUR(wonEurRev) + ' / ' + fmtEUR(wonEurGp) + ' GP (Iberia, €)' : '');
+  document.getElementById('sum-lost').textContent = lost.length;
+  document.getElementById('sum-lost-meta').textContent = fmtGBP(lostRev) + ' lost'
+    + (lostEur.length ? ' · ' + fmtEUR(lostEurRev) + ' lost (Iberia, €)' : '');
+
+  const body = document.getElementById('won-lost-body');
+  const statusFilter = document.getElementById('f-status')?.value || 'all';
+  let combined = [
+    ...won.map(d => ({ d, status: 'won', date: d.won_time })),
+    ...lost.map(d => ({ d, status: 'lost', date: d.lost_time }))
+  ];
+  if (statusFilter === 'won') combined = combined.filter(r => r.status === 'won');
+  else if (statusFilter === 'lost') combined = combined.filter(r => r.status === 'lost');
+  combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (!combined.length) {
+    const label = statusFilter === 'won' ? 'won' : statusFilter === 'lost' ? 'lost' : 'won or lost';
+    body.innerHTML = '<tr><td colspan="6"><div class="empty-state">No ' + label + ' deals in this period.</div></td></tr>';
+  } else {
+    body.innerHTML = combined.map(({ d, status, date }) => {
+      const fmt = isEurDeal(d) ? fmtEUR : fmtGBP;
+      return `
+      <tr>
+        <td class="title-cell"><a href="https://target3d.pipedrive.com/deal/${d.id}" target="_blank">${escapeHtml(d.title || 'Untitled')}</a></td>
+        <td>${ALLOWED_PIPELINES[d.pipeline_id] || ''}</td>
+        <td><span class="status-chip ${status}">${status === 'won' ? 'Won' : 'Lost'}</span></td>
+        <td class="date-cell">${formatDate(date)}</td>
+        <td class="num-cell">${fmt(d.value)}</td>
+        <td class="num-cell">${status === 'won' ? fmt(dealGp(d)) : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function renderSupport(from, to) {
+  const supportDeals = allDeals.filter(d => d.pipeline_id == SUPPORT_PIPELINE_ID);
+  const newCount = supportDeals.filter(d => inRange(d.add_time, from, to)).length;
+  const existingOpen = supportDeals.filter(d => !d.won_time && !d.lost_time && new Date(d.add_time) < from).length;
+
+  document.getElementById('sum-support').textContent = newCount;
+  document.getElementById('sum-support-meta').textContent = newCount + ' new · ' + existingOpen + ' existing open';
+
+  const stageGroups = {};
+  Object.values(supportStages).forEach(name => { stageGroups[name] = { new: 0, existing: 0 }; });
+  supportDeals.forEach(d => {
+    const stageName = supportStages[d.stage_id] || 'Unknown Stage';
+    if (!stageGroups[stageName]) stageGroups[stageName] = { new: 0, existing: 0 };
+    if (inRange(d.add_time, from, to)) stageGroups[stageName].new++;
+    else if (!d.won_time && !d.lost_time && new Date(d.add_time) < from) stageGroups[stageName].existing++;
+  });
+
+  const body = document.getElementById('support-body');
+  const rows = Object.entries(stageGroups);
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="3"><div class="empty-state">No support data.</div></td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(([name, c]) => `<tr><td>${name}</td><td class="num-cell">${c.new}</td><td class="num-cell">${c.existing}</td></tr>`).join('');
+}
+
+function renderDemos(from, to) {
+  const demos = allProjects.filter(p => p.board_id === DEMO_BOARD_ID);
+  const booked = demos.filter(p => inRange(p.add_time, from, to));
+  const delivered = demos.filter(p => DEMO_DELIVERED_PHASES.includes(p.phase_id) && inRange(p.status_change_time, from, to));
+
+  document.getElementById('sum-demo').textContent = booked.length;
+  document.getElementById('sum-demo-meta').textContent = booked.length + ' booked · ' + delivered.length + ' delivered';
+
+  const body = document.getElementById('demo-body');
+  // Show anything booked in period, or that reached delivery in period (dedup by id)
+  const relevant = new Map();
+  booked.forEach(p => relevant.set(p.id, p));
+  delivered.forEach(p => relevant.set(p.id, p));
+
+  if (!relevant.size) {
+    body.innerHTML = '<tr><td colspan="4"><div class="empty-state">No demos booked or delivered in this period.</div></td></tr>';
+    return;
+  }
+  body.innerHTML = [...relevant.values()].sort((a, b) => new Date(b.add_time) - new Date(a.add_time)).map(p => {
+    const phaseName = DEMO_PHASE_NAMES[p.phase_id] || 'Unknown';
+    const isDelivered = DEMO_DELIVERED_PHASES.includes(p.phase_id);
+    return `<tr>
+      <td class="title-cell">${escapeHtml(p.title || 'Untitled')}</td>
+      <td>${phaseName}</td>
+      <td class="date-cell">${formatDate(p.add_time)}</td>
+      <td><span class="status-chip ${isDelivered ? 'delivered' : 'booked'}">${isDelivered ? 'Delivered' : 'Booked'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCompletedProjects(from, to) {
+  const all = allProjects._completedAll || [];
+  const completed = all.filter(p => p.status === 'completed' && p.deal_ids && p.deal_ids.length && inRange(p.status_change_time, from, to));
+
+  const dealById = {};
+  allDeals.forEach(d => { dealById[d.id] = d; });
+
+  let totalRev = 0;
+  const rows = completed.map(p => {
+    const linkedDeal = dealById[p.deal_ids[0]];
+    const rev = linkedDeal ? Number(linkedDeal.value) || 0 : 0;
+    totalRev += rev;
+    return { p, rev };
+  });
+
+  document.getElementById('sum-complete') && (document.getElementById('sum-complete').textContent = rows.length);
+
+  const body = document.getElementById('complete-body');
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="4"><div class="empty-state">No completed projects with linked deals in this period.</div></td></tr>';
+    return;
+  }
+  body.innerHTML = rows.sort((a, b) => new Date(b.p.status_change_time) - new Date(a.p.status_change_time)).map(({ p, rev }) => `
+    <tr>
+      <td class="title-cell">${escapeHtml(p.title || 'Untitled')}</td>
+      <td>${escapeHtml(projectBoards[p.board_id] || 'Board ' + p.board_id)}</td>
+      <td class="date-cell">${formatDate(p.status_change_time)}</td>
+      <td class="num-cell">${fmtGBP(rev)}</td>
+    </tr>`).join('');
+}
+
+function formatDate(v) {
+  if (!v) return '—';
+  return new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+// ── EXPORT ──
+function exportToExcel() {
+  const { from, to } = getRange();
+  const wb = XLSX.utils.book_new();
+  const wsData = [
+    ['Weekly Pulse Report'],
+    ['Period', formatDate(from) + ' to ' + formatDate(to)],
+    []
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+  const fromStr = from.toISOString().split('T')[0];
+  const toStr = to.toISOString().split('T')[0];
+  XLSX.writeFile(wb, `Weekly-Pulse_${fromStr}_to_${toStr}.xlsx`);
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -57,6 +57,12 @@ PAGES = {
     "tools/team-dashboards/performance-hub.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/individual.html": dict(skin="team-dashboards"),
     "tools/team-dashboards/milestones.html": dict(skin="team-dashboards"),
+    "tools/sales-hub/revenue-scoreboard.html": dict(skin="sales-hub", sync=None),
+    "tools/sales-hub/pipeline-triage.html": dict(skin="sales-hub", sync=None),
+    "tools/sales-hub/sales-report.html": dict(skin="sales-hub", sync=None),
+    "tools/sales-hub/weekly-pulse.html": dict(skin="sales-hub", sync=None),
+    "tools/sales-hub/weekly-deals-report.html": dict(skin="sales-hub", sync=None),
+    "tools/sales-hub/supplier-forecast.html": dict(skin="sales-hub", sync=None),
     "tools/system-designer/index.html": dict(skin="system-designer", sync='data-keys="t3d-theme,t3d-sv-theme" data-attr="data-ui-theme"', skip=True),
 }
 

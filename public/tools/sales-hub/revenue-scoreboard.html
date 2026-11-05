@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Scoreboard | Sales Hub · Nucleus</title>
+<script src="/nucleus/vendor/xlsx-0.18.5.full.min.js"></script>
+<style>
+:root {
+  --bg: #f8f8f6; --surface: #fff; --border: #e4e4e0;
+  --text: #1a1a18; --muted: #6b6b66;
+  --red: #c0392b; --red-bg: #fdf0ee;
+  --amber: #d97706; --amber-bg: #fef9ee; --amber-border: #fcd9a3;
+  --green: #166534; --green-bg: #f0fdf4;
+  --blue: #1e40af; --blue-bg: #eff6ff;
+  --slate: #475569; --slate-bg: #f1f5f9;
+  --gold: #b8860b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13.5px; }
+
+/* NAV */
+.topnav { background: white; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 200; }
+.topnav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.topnav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.topnav-links { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.topnav-links a { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: #6b7280; text-decoration: none; transition: all 0.12s; white-space: nowrap; }
+.topnav-links a:hover { background: #f3f4f6; color: #111; }
+.topnav-links a.active { background: var(--red); color: white; }
+
+.main { max-width: 1500px; margin: 0 auto; padding: 20px; }
+
+/* STATUS */
+.status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.status-left { display: flex; align-items: center; gap: 10px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sync-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+.sync-dot.live { background: #22c55e; }
+.sync-dot.error { background: #ef4444; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-label { font-size: 12px; color: var(--muted); }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 24px; }
+.page-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.btn { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all 0.12s; font-weight: 500; }
+.btn:hover { background: var(--bg); }
+.btn-primary { background: var(--red); color: white; border-color: var(--red); }
+.btn-primary:hover { background: #a33324; }
+.btn-export { background: var(--green); color: white; border-color: var(--green); }
+.btn-export:hover { background: #0f4d27; }
+
+/* TODAY HERO */
+.today-hero { background: var(--text); color: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.today-hero .th-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #9ca3af; }
+.today-hero .th-actual { font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; margin-top: 4px; }
+.today-hero .th-targets { display: flex; gap: 28px; }
+.today-hero .th-t { text-align: right; }
+.today-hero .th-t .v { font-family: 'DM Serif Display', serif; font-size: 22px; }
+.today-hero .th-t .l { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: #9ca3af; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.pill.ahead { background: var(--green-bg); color: var(--green); }
+.pill.behind { background: var(--red-bg); color: var(--red); }
+.pill.close { background: var(--amber-bg); color: var(--amber); }
+
+/* PERIOD CARDS */
+.period-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+@media (max-width: 1100px) { .period-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .period-grid { grid-template-columns: 1fr; } }
+.pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; position: relative; overflow: hidden; }
+.pcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--slate); }
+.pcard.ahead::before { background: var(--green); }
+.pcard.behind::before { background: var(--red); }
+.pcard.close::before { background: var(--amber); }
+.pcard-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.pcard-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+.pcard-actual { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1; margin-bottom: 2px; }
+.pcard-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 12px; }
+.pcard-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-top: 1px dashed #ededea; }
+.pcard-row .lab { color: var(--muted); }
+.pcard-row .val { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pcard-gap { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
+.pcard-gap .gl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.progress { height: 6px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 10px; position: relative; }
+.progress-fill { height: 100%; border-radius: 4px; }
+.progress-fill.g { background: var(--green); }
+.progress-fill.a { background: var(--amber); }
+.progress-fill.r { background: var(--red); }
+
+/* CHART */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+.panel-title { font-family: 'DM Serif Display', serif; font-size: 19px; margin-bottom: 4px; }
+.panel-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.chart-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; font-size: 11.5px; color: var(--muted); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.lg-swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.lg-line { width: 16px; height: 0; border-top: 2px dashed; display: inline-block; }
+.chart-scroll { overflow-x: auto; }
+.chart { position: relative; height: 240px; display: flex; align-items: flex-end; gap: 6px; padding: 10px 0 0; min-width: 640px; border-bottom: 1px solid var(--border); }
+.bar-col { flex: 1; min-width: 26px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
+.bar { width: 68%; border-radius: 4px 4px 0 0; transition: height 0.3s; position: relative; cursor: default; }
+.bar.g { background: var(--green); }
+.bar.a { background: var(--amber); }
+.bar.r { background: var(--red); }
+.bar.z { background: #d4d4d0; }
+.bar-label { font-size: 9.5px; color: var(--muted); margin-top: 5px; white-space: nowrap; transform: rotate(-38deg); transform-origin: center; height: 22px; }
+.target-line { position: absolute; left: 0; right: 0; border-top: 2px dashed; pointer-events: none; z-index: 3; }
+.target-line.base { border-color: var(--blue); }
+.target-line.stretch { border-color: var(--gold); }
+.bar-tip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 6px 9px; border-radius: 6px; font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; margin-bottom: 4px; z-index: 20; }
+.bar-col:hover .bar-tip { opacity: 1; }
+
+/* TABLES */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; max-height: 460px; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: var(--text); color: white; padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
+tbody tr { border-bottom: 1px solid #f0f0ee; }
+tbody tr:hover { background: var(--bg); }
+td { padding: 8px 10px; vertical-align: middle; }
+.num-cell { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.date-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.title-cell { max-width: 300px; line-height: 1.35; font-weight: 500; }
+.title-cell a { color: var(--text); text-decoration: none; }
+.title-cell a:hover { color: var(--red); text-decoration: underline; }
+.pipe-chip { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 600; background: var(--slate-bg); color: var(--slate); white-space: nowrap; }
+.loading-state { padding: 40px; text-align: center; color: var(--muted); }
+.err-banner { background: var(--red-bg); border: 1px solid var(--red); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 12.5px; color: var(--red); }
+.err-banner.hidden { display: none; }
+.note { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* BREAKDOWN TABLES */
+.bd-table td, .bd-table th { padding: 8px 10px; }
+.bd-table td.num-cell { font-variant-numeric: tabular-nums; }
+.bd-period { font-weight: 600; white-space: nowrap; }
+.bd-wd { font-size: 10.5px; color: var(--muted); }
+.bd-gap.pos { color: var(--green); font-weight: 600; }
+.bd-gap.neg { color: var(--red); font-weight: 600; }
+.inline-bar { position: relative; height: 16px; background: #eee; border-radius: 4px; overflow: visible; min-width: 120px; }
+.inline-bar-fill { height: 100%; border-radius: 4px; }
+.inline-bar-fill.g { background: var(--green); }
+.inline-bar-fill.a { background: var(--amber); }
+.inline-bar-fill.r { background: var(--red); }
+.inline-bar-tick { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--slate); z-index: 2; }
+.inline-pct { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+.bd-total-row { font-weight: 700; background: var(--bg); }
+</style>
+<script src="hub.js"></script>
+<!-- ao-skin -->
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/base.css">
+<link rel="stylesheet" href="/nucleus/ao-skin/sales-hub.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">Sales Hub</div>
+    <div class="topnav-links">
+      <a href="pipeline-triage.html">🔍 Pipeline Triage</a>
+      <a href="sales-report.html">📈 Sales Report</a>
+      <a href="supplier-forecast.html">📦 Suppliers</a>
+      <a href="weekly-pulse.html">🩺 Weekly Pulse</a>
+      <a href="weekly-deals-report.html">📑 Deals Report</a>
+      <a href="revenue-scoreboard.html" class="active">💰 Scoreboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="status-bar">
+    <div class="status-left">
+      <span class="sync-dot loading" id="syncDot"></span>
+      <span class="sync-label" id="syncLabel">Connecting…</span>
+    </div>
+    <div>
+      <div class="page-title">Revenue Scoreboard</div>
+      <div class="page-sub" id="fyLabel">FY2026 · from 1 April 2026 · Won revenue, GBP</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" id="refreshBtn">↻ Refresh</button>
+      <button class="btn btn-export" id="exportBtn">Export</button>
+    </div>
+  </div>
+
+  <div class="err-banner hidden" id="errBanner"></div>
+
+  <!-- TODAY -->
+  <div class="today-hero">
+    <div>
+      <div class="th-label">Won Today</div>
+      <div class="th-actual" id="todayActual">—</div>
+      <div style="margin-top:8px;" id="todayPill"></div>
+    </div>
+    <div class="th-targets">
+      <div class="th-t"><div class="v" id="dayBaseline">—</div><div class="l">Min / day</div></div>
+      <div class="th-t"><div class="v" id="dayStretch">—</div><div class="l">Stretch / day</div></div>
+    </div>
+  </div>
+
+  <!-- PERIOD CARDS -->
+  <div class="period-grid" id="periodGrid">
+    <div class="loading-state" style="grid-column:1/-1;">Loading won deals from Pipedrive…</div>
+  </div>
+
+  <!-- WEEKLY CHART -->
+  <div class="panel">
+    <div class="panel-title">Weekly Progress</div>
+    <div class="panel-sub">Won revenue per week since 1 April, against weekly targets. Green = met stretch · Amber = met minimum · Red = below minimum.</div>
+    <div class="chart-legend">
+      <span><span class="lg-swatch" style="background:var(--green)"></span>≥ Stretch</span>
+      <span><span class="lg-swatch" style="background:var(--amber)"></span>≥ Minimum</span>
+      <span><span class="lg-swatch" style="background:var(--red)"></span>Below minimum</span>
+      <span><span class="lg-line" style="border-color:var(--gold)"></span>Stretch target</span>
+      <span><span class="lg-line" style="border-color:var(--blue)"></span>Minimum target</span>
+    </div>
+    <div class="chart-scroll">
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="note" id="chartNote"></div>
+  </div>
+
+  <!-- BREAKDOWN + WON DEALS -->
+  <div class="split">
+    <div class="panel" style="margin-bottom:0;">
+      <div class="panel-title">By Pipeline · FY-to-date</div>
+      <div class="panel-sub">Where the won revenue came from.</div>
+      <div class="table-wrap" style="max-height:none;">
+        <table>
+          <thead><tr><th>Pipeline</th><th class="num-cell">Deals</th><th class="num-cell">Won Revenue</th></tr></thead>
+          <tbody id="pipeBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:0;">
+      <div class="panel-title">Recent Wins</div>
+      <div class="panel-sub">Latest deals feeding the scoreboard.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Won</th><th>Deal</th><th>Pipeline</th><th class="num-cell">Value</th></tr></thead>
+          <tbody id="wonBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN TABLES -->
+  <div class="panel">
+    <div class="panel-title">Months to Date</div>
+    <div class="panel-sub">Each FY month against its working-day target. Current month is pace-adjusted to today.</div>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="bd-table">
+        <thead><tr><th>Month</th><th class="num-cell">Actual</th><th class="num-cell">Min</th><th class="num-cell">Stretch</th><th class="num-cell">vs Min</th><th style="min-width:150px;">Progress</th></tr></thead>
+        <tbody id="monthBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Quarters to Date</div>
+    <div class="panel-sub">FY quarters: Q1 Apr–Jun · Q2 Jul–Sep · Q3 Oct–Dec · Q4 Jan–Mar.</div>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="bd-table">
+        <thead><tr><th>Quarter</th><th class="num-cell">Actual</th><th class="num-cell">Min</th><th class="num-cell">Stretch</th><th class="num-cell">vs Min</th><th style="min-width:150px;">Progress</th></tr></thead>
+        <tbody id="quarterBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Year to Date</div>
+    <div class="panel-sub">Full FY2026 position against the £3.8m minimum / £4.56m stretch.</div>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="bd-table">
+        <thead><tr><th>Period</th><th class="num-cell">Actual</th><th class="num-cell">Min</th><th class="num-cell">Stretch</th><th class="num-cell">vs Min</th><th style="min-width:150px;">Progress</th></tr></thead>
+        <tbody id="yearBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MONTHLY CHART (full year) -->
+  <div class="panel">
+    <div class="panel-title">The Year in Full</div>
+    <div class="panel-sub">Won revenue by month across FY2026. Green = met stretch · Amber = met minimum · Red = below. Past months show the full month; the current month is to date.</div>
+    <div class="chart-legend">
+      <span><span class="lg-swatch" style="background:var(--green)"></span>≥ Stretch</span>
+      <span><span class="lg-swatch" style="background:var(--amber)"></span>≥ Minimum</span>
+      <span><span class="lg-swatch" style="background:var(--red)"></span>Below minimum</span>
+      <span><span class="lg-swatch" style="background:#d4d4d0"></span>To come</span>
+      <span><span class="lg-line" style="border-color:var(--gold)"></span>Avg month stretch</span>
+      <span><span class="lg-line" style="border-color:var(--blue)"></span>Avg month min</span>
+    </div>
+    <div class="chart-scroll">
+      <div class="chart" id="monthlyChart" style="height:260px;"></div>
+    </div>
+    <div class="note" id="monthlyNote"></div>
+  </div>
+
+  <div class="note">
+    Counts deals marked <strong>Won</strong> (by won date) in <strong>UK Tech Sales SI, PS and Studio Sales</strong> only — GBP.
+    Iberia (EUR) and Support are excluded by design. Targets: £3.8m minimum / £4.56m stretch. Daily rate is the annual
+    target ÷ 252 (£15,079 / £18,095 per day — your ~£18k/day). "Target to date" is pace-adjusted by actual working days
+    elapsed (Mon–Fri less England bank holidays), which total 253 this FY — so a completed full year lands marginally above
+    the round headline. Revenue = deal value at the point it was won.
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const PD_PROXY = '/api/sales-hub/pipedrive';
+const FY_START = '2026-04-01';                 // FY2026 start
+const SCOREBOARD_PIPELINE_IDS = new Set([1, 24, 11]); // SI, PS, Studio Sales — GBP only (Iberia/Support excluded)
+const ANNUAL_MIN = 3800000, ANNUAL_STRETCH = 4560000, WORKING_DAYS = 252;
+const DAILY_MIN = ANNUAL_MIN / WORKING_DAYS;        // 15,079.37
+const DAILY_STRETCH = ANNUAL_STRETCH / WORKING_DAYS; // 18,095.24
+
+// England & Wales bank holidays covering the FY window
+const BANK_HOLIDAYS = new Set([
+  '2026-01-01','2026-04-03','2026-04-06','2026-05-04','2026-05-25','2026-08-31','2026-12-25','2026-12-28',
+  '2027-01-01','2027-04-02','2027-04-05','2027-05-03','2027-05-31','2027-08-30','2027-12-27','2027-12-28'
+]);
+
+// ── STATE ───────────────────────────────────────────────────────
+let pipelines = {};        // id -> name
+let wonRows = [];          // { id, title, value, currency, wonDate(Date), pipelineId, pipelineName, url }
+
+// ── HELPERS ─────────────────────────────────────────────────────
+const fmtGBP = v => v == null || isNaN(v) ? '—' : '£' + Math.round(Number(v)).toLocaleString();
+const fmtGBPk = v => Math.abs(v) >= 1000 ? '£' + (Math.round(v/100)/10).toLocaleString() + 'k' : fmtGBP(v);
+const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().split('T')[0]; };
+const parsePDDate = s => { if (!s) return null; const d = new Date(s.replace(' ', 'T') + (s.includes('Z')||s.includes('+')?'':'Z')); return isNaN(d) ? null : d; };
+
+function setSync(state, label) {
+  document.getElementById('syncDot').className = 'sync-dot ' + state;
+  document.getElementById('syncLabel').textContent = label;
+}
+function showErr(msg) {
+  const b = document.getElementById('errBanner');
+  b.textContent = msg; b.classList.remove('hidden');
+}
+
+async function pd(path, extra) {
+  const qs = new URLSearchParams({ path, ...(extra || {}) }).toString();
+  const res = await fetch(PD_PROXY + '?' + qs);
+  const j = await res.json();
+  if (!j.success && j.success !== undefined) throw new Error(j.error || 'API error');
+  return j;
+}
+async function fetchAllDeals(params) {
+  let all = [], start = 0;
+  while (true) {
+    const j = await pd('/deals', { ...params, limit: 500, start });
+    const items = j.data || [];
+    all = all.concat(items);
+    const more = j.additional_data?.pagination?.more_items_in_collection;
+    if (!more || items.length === 0) break;
+    start += items.length;
+    if (start > 20000) break;
+  }
+  return all;
+}
+
+// Working-day logic
+function isWorkingDay(d) {
+  const day = d.getDay();
+  if (day === 0 || day === 6) return false;
+  return !BANK_HOLIDAYS.has(iso(d));
+}
+// working days between two dates inclusive
+function workingDaysBetween(start, end) {
+  if (end < start) return 0;
+  let n = 0; const cur = new Date(start);
+  cur.setHours(0,0,0,0); const stop = new Date(end); stop.setHours(0,0,0,0);
+  while (cur <= stop) { if (isWorkingDay(cur)) n++; cur.setDate(cur.getDate()+1); }
+  return n;
+}
+
+// Period boundaries (all clamped to FY start)
+function periodBounds(now) {
+  const fy = new Date(FY_START + 'T00:00:00');
+  // week: Monday of current week
+  const wk = new Date(now); const dow = (wk.getDay() + 6) % 7; wk.setDate(wk.getDate() - dow); wk.setHours(0,0,0,0);
+  // month
+  const mo = new Date(now.getFullYear(), now.getMonth(), 1);
+  // FY quarter: Apr-Jun, Jul-Sep, Oct-Dec, Jan-Mar
+  const m = now.getMonth(); // 0=Jan
+  let qStartMonth, qYear = now.getFullYear();
+  if (m >= 3 && m <= 5) qStartMonth = 3;
+  else if (m >= 6 && m <= 8) qStartMonth = 6;
+  else if (m >= 9 && m <= 11) qStartMonth = 9;
+  else { qStartMonth = 0; } // Jan-Mar
+  const qtr = new Date(qYear, qStartMonth, 1);
+  return {
+    week:    { start: wk < fy ? fy : wk, end: now, label: 'This Week' },
+    month:   { start: mo < fy ? fy : mo, end: now, label: 'This Month' },
+    quarter: { start: qtr < fy ? fy : qtr, end: now, label: 'This Quarter' },
+    year:    { start: fy, end: now, label: 'FY-to-date' }
+  };
+}
+
+function sumWon(start, end) {
+  const s = new Date(start); s.setHours(0,0,0,0);
+  const e = new Date(end); e.setHours(23,59,59,999);
+  return wonRows.filter(r => r.wonDate >= s && r.wonDate <= e).reduce((a, r) => a + r.value, 0);
+}
+
+// ── RENDER ──────────────────────────────────────────────────────
+function statusClass(actual, minT, stretchT) {
+  if (actual >= stretchT) return 'ahead';
+  if (actual >= minT) return 'close';
+  return 'behind';
+}
+
+function renderToday(now) {
+  const todayWon = sumWon(new Date(now.getFullYear(), now.getMonth(), now.getDate()), now);
+  document.getElementById('todayActual').textContent = fmtGBP(todayWon);
+  document.getElementById('dayBaseline').textContent = fmtGBP(DAILY_MIN);
+  document.getElementById('dayStretch').textContent = fmtGBP(DAILY_STRETCH);
+  const pill = document.getElementById('todayPill');
+  if (!isWorkingDay(now)) { pill.innerHTML = '<span class="pill close">Non-working day</span>'; return; }
+  if (todayWon >= DAILY_STRETCH) pill.innerHTML = '<span class="pill ahead">Stretch hit ✓</span>';
+  else if (todayWon >= DAILY_MIN) pill.innerHTML = '<span class="pill close">Minimum hit</span>';
+  else pill.innerHTML = '<span class="pill behind">' + fmtGBP(DAILY_MIN - todayWon) + ' to minimum</span>';
+}
+
+function renderPeriods(now) {
+  const b = periodBounds(now);
+  const grid = document.getElementById('periodGrid');
+  grid.innerHTML = '';
+  ['week','month','quarter','year'].forEach(key => {
+    const p = b[key];
+    const actual = sumWon(p.start, p.end);
+    const wd = workingDaysBetween(p.start, p.end);
+    const minToDate = wd * DAILY_MIN;
+    const stretchToDate = wd * DAILY_STRETCH;
+    // full-period budget (all working days in the whole period, not just elapsed)
+    let fullEnd;
+    if (key === 'week') { fullEnd = new Date(p.start); fullEnd.setDate(fullEnd.getDate()+6); }
+    else if (key === 'month') { fullEnd = new Date(now.getFullYear(), now.getMonth()+1, 0); }
+    else if (key === 'quarter') { fullEnd = new Date(p.start.getFullYear(), p.start.getMonth()+3, 0); }
+    else { fullEnd = new Date('2027-03-31T00:00:00'); }
+    const fullWd = workingDaysBetween(p.start, fullEnd);
+    const fullMin = fullWd * DAILY_MIN, fullStretch = fullWd * DAILY_STRETCH;
+    const gapMin = actual - minToDate;
+    const cls = statusClass(actual, minToDate, stretchToDate);
+    const pctMin = fullMin > 0 ? Math.min(100, (actual/fullMin)*100) : 0;
+    const fillCls = actual >= stretchToDate ? 'g' : actual >= minToDate ? 'a' : 'r';
+    const gapPill = gapMin >= 0
+      ? `<span class="pill ahead">▲ ${fmtGBP(Math.abs(gapMin))} ahead</span>`
+      : `<span class="pill behind">▼ ${fmtGBP(Math.abs(gapMin))} behind</span>`;
+    const card = document.createElement('div');
+    card.className = 'pcard ' + cls;
+    card.innerHTML = `
+      <div class="pcard-head"><span class="pcard-title">${p.label}</span><span class="pcard-title">${wd} wd</span></div>
+      <div class="pcard-actual">${fmtGBP(actual)}</div>
+      <div class="pcard-sub">won so far</div>
+      <div class="pcard-row"><span class="lab">Min to date</span><span class="val">${fmtGBP(minToDate)}</span></div>
+      <div class="pcard-row"><span class="lab">Stretch to date</span><span class="val">${fmtGBP(stretchToDate)}</span></div>
+      <div class="pcard-row"><span class="lab">Full-period budget</span><span class="val">${fmtGBPk(fullMin)} / ${fmtGBPk(fullStretch)}</span></div>
+      <div class="pcard-gap"><span class="gl">vs minimum pace</span>${gapPill}</div>
+      <div class="progress"><div class="progress-fill ${fillCls}" style="width:${pctMin}%"></div></div>
+      <div class="note" style="margin-top:6px;">${Math.round(pctMin)}% of full-period minimum</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderChart(now) {
+  const chart = document.getElementById('chart');
+  chart.innerHTML = '';
+  // Build weeks from Monday on/before FY start to current week
+  const fy = new Date(FY_START + 'T00:00:00');
+  let cursor = new Date(fy); const dow = (cursor.getDay() + 6) % 7; cursor.setDate(cursor.getDate() - dow);
+  const weeks = [];
+  while (cursor <= now) {
+    const wStart = new Date(cursor);
+    const wEnd = new Date(cursor); wEnd.setDate(wEnd.getDate()+6);
+    const effStart = wStart < fy ? fy : wStart;
+    const actual = sumWon(effStart, wEnd > now ? now : wEnd);
+    const wd = workingDaysBetween(effStart, wEnd);
+    weeks.push({ start: effStart, actual, minT: wd*DAILY_MIN, stretchT: wd*DAILY_STRETCH, wd });
+    cursor.setDate(cursor.getDate()+7);
+  }
+  const stdStretch = 5 * DAILY_STRETCH, stdMin = 5 * DAILY_MIN;
+  const maxV = Math.max(stdStretch, ...weeks.map(w => w.actual)) * 1.12 || stdStretch;
+  const H = 200;
+  // target lines (based on standard 5-day week)
+  const baseY = H - (stdMin/maxV)*H;
+  const stretchY = H - (stdStretch/maxV)*H;
+  const baseLine = document.createElement('div'); baseLine.className = 'target-line base'; baseLine.style.bottom = (H - baseY + 32) + 'px';
+  const stretchLine = document.createElement('div'); stretchLine.className = 'target-line stretch'; stretchLine.style.bottom = (H - stretchY + 32) + 'px';
+
+  weeks.forEach(w => {
+    const h = Math.max(2, (w.actual/maxV)*H);
+    const cls = w.actual >= w.stretchT ? 'g' : w.actual >= w.minT ? 'a' : (w.actual === 0 ? 'z' : 'r');
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const lab = w.start.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    col.innerHTML = `
+      <div class="bar-tip">${lab}: <b>${fmtGBP(w.actual)}</b><br>min ${fmtGBPk(w.minT)} · stretch ${fmtGBPk(w.stretchT)}</div>
+      <div class="bar ${cls}" style="height:${h}px"></div>
+      <div class="bar-label">${lab}</div>`;
+    chart.appendChild(col);
+  });
+  chart.appendChild(baseLine);
+  chart.appendChild(stretchLine);
+  document.getElementById('chartNote').textContent =
+    `Dashed lines mark a standard 5-day week: minimum ${fmtGBP(stdMin)}, stretch ${fmtGBP(stdStretch)}. Weeks with bank holidays have a slightly lower target (reflected in bar colour).`;
+}
+
+function renderTables() {
+  // by pipeline
+  const byPipe = {};
+  wonRows.forEach(r => {
+    if (!byPipe[r.pipelineId]) byPipe[r.pipelineId] = { name: r.pipelineName, count: 0, total: 0 };
+    byPipe[r.pipelineId].count++; byPipe[r.pipelineId].total += r.value;
+  });
+  const pipeBody = document.getElementById('pipeBody');
+  pipeBody.innerHTML = '';
+  const rowsP = Object.values(byPipe).sort((a,b) => b.total - a.total);
+  rowsP.forEach(p => {
+    pipeBody.innerHTML += `<tr><td><span class="pipe-chip">${p.name}</span></td><td class="num-cell">${p.count}</td><td class="num-cell">${fmtGBP(p.total)}</td></tr>`;
+  });
+  const totalAll = rowsP.reduce((a,p)=>a+p.total,0), countAll = rowsP.reduce((a,p)=>a+p.count,0);
+  pipeBody.innerHTML += `<tr style="font-weight:700; background:var(--bg);"><td>Total</td><td class="num-cell">${countAll}</td><td class="num-cell">${fmtGBP(totalAll)}</td></tr>`;
+
+  // recent wins
+  const wonBody = document.getElementById('wonBody');
+  wonBody.innerHTML = '';
+  [...wonRows].sort((a,b) => b.wonDate - a.wonDate).slice(0, 60).forEach(r => {
+    const dstr = r.wonDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+    const title = r.url ? `<a href="${r.url}" target="_blank">${r.title}</a>` : r.title;
+    wonBody.innerHTML += `<tr><td class="date-cell">${dstr}</td><td class="title-cell">${title}</td><td><span class="pipe-chip">${r.pipelineName}</span></td><td class="num-cell">${fmtGBP(r.value)}</td></tr>`;
+  });
+}
+
+// FY month i: 0 = Apr 2026 … 11 = Mar 2027
+function fyMonth(i) {
+  const s = new Date(2026, 3 + i, 1);
+  const e = new Date(2026, 3 + i + 1, 0); e.setHours(23,59,59,999);
+  return { start: s, end: e, label: s.toLocaleDateString('en-GB', { month:'short', year:'2-digit' }) };
+}
+function computeStats(start, end, now) {
+  const effEnd = end > now ? now : end;
+  if (effEnd < start) return { future: true, actual: 0, wd: 0, min: 0, stretch: 0, gapMin: 0 };
+  const actual = sumWon(start, effEnd);
+  const wd = workingDaysBetween(start, effEnd);
+  return { future: false, actual, wd, min: wd*DAILY_MIN, stretch: wd*DAILY_STRETCH, gapMin: actual - wd*DAILY_MIN };
+}
+function inlineBar(actual, min, stretch) {
+  const pctStretch = stretch > 0 ? Math.min(100, (actual/stretch)*100) : 0;
+  const minPos = stretch > 0 ? Math.min(100, (min/stretch)*100) : 0;
+  const cls = actual >= stretch ? 'g' : actual >= min ? 'a' : 'r';
+  const pctLabel = stretch > 0 ? Math.round((actual/stretch)*100) + '% of stretch' : '—';
+  return `<div class="inline-bar"><div class="inline-bar-fill ${cls}" style="width:${pctStretch}%"></div>`
+    + `<div class="inline-bar-tick" style="left:${minPos}%"></div></div><div class="inline-pct">${pctLabel}</div>`;
+}
+function bdRow(label, st, isTotal) {
+  const gapCls = st.gapMin >= 0 ? 'pos' : 'neg';
+  const gapTxt = (st.gapMin >= 0 ? '+' : '−') + fmtGBP(Math.abs(st.gapMin));
+  return `<tr class="${isTotal ? 'bd-total-row' : ''}">
+    <td class="bd-period">${label}${st.wd ? ` <span class="bd-wd">${st.wd} wd</span>` : ''}</td>
+    <td class="num-cell">${fmtGBP(st.actual)}</td>
+    <td class="num-cell">${fmtGBP(st.min)}</td>
+    <td class="num-cell">${fmtGBP(st.stretch)}</td>
+    <td class="num-cell bd-gap ${gapCls}">${gapTxt}</td>
+    <td>${inlineBar(st.actual, st.min, st.stretch)}</td>
+  </tr>`;
+}
+
+function renderBreakdownTables(now) {
+  // Months
+  const mBody = document.getElementById('monthBody');
+  let mHtml = '';
+  for (let i = 0; i < 12; i++) {
+    const m = fyMonth(i);
+    if (m.start > now) continue;                    // skip future months
+    const st = computeStats(m.start, m.end, now);
+    mHtml += bdRow(m.label, st, false);
+  }
+  mBody.innerHTML = mHtml;
+
+  // Quarters
+  const qBody = document.getElementById('quarterBody');
+  const qLabels = ['Q1 · Apr–Jun','Q2 · Jul–Sep','Q3 · Oct–Dec','Q4 · Jan–Mar'];
+  let qHtml = '';
+  for (let q = 0; q < 4; q++) {
+    const qs = fyMonth(q*3).start, qe = fyMonth(q*3+2).end;
+    if (qs > now) continue;
+    const st = computeStats(qs, qe, now);
+    qHtml += bdRow(qLabels[q], st, false);
+  }
+  qBody.innerHTML = qHtml;
+
+  // Year
+  const yBody = document.getElementById('yearBody');
+  const yStart = new Date(FY_START + 'T00:00:00'), yEnd = new Date('2027-03-31T23:59:59');
+  const yst = computeStats(yStart, yEnd, now);
+  yBody.innerHTML = bdRow('FY2026 to date', yst, true);
+}
+
+function renderMonthlyChart(now) {
+  const chart = document.getElementById('monthlyChart');
+  chart.innerHTML = '';
+  const months = [];
+  for (let i = 0; i < 12; i++) {
+    const m = fyMonth(i);
+    const st = computeStats(m.start, m.end, now);
+    months.push({ label: m.label, ...st });
+  }
+  const avgMin = ANNUAL_MIN/12, avgStretch = ANNUAL_STRETCH/12;
+  const maxV = Math.max(avgStretch, ...months.map(m => m.actual)) * 1.12 || avgStretch;
+  const H = 200;
+  months.forEach(m => {
+    let cls;
+    if (m.future) cls = 'z';
+    else if (m.actual >= m.stretch) cls = 'g';
+    else if (m.actual >= m.min) cls = 'a';
+    else cls = (m.actual === 0 ? 'z' : 'r');
+    const h = m.future ? 2 : Math.max(2, (m.actual/maxV)*H);
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const tip = m.future
+      ? `${m.label}: to come`
+      : `${m.label}: <b>${fmtGBP(m.actual)}</b><br>min ${fmtGBPk(m.min)} · stretch ${fmtGBPk(m.stretch)}`;
+    col.innerHTML = `<div class="bar-tip">${tip}</div>`
+      + `<div class="bar ${cls}" style="height:${h}px"></div>`
+      + `<div class="bar-label">${m.label}</div>`;
+    chart.appendChild(col);
+  });
+  const baseLine = document.createElement('div');
+  baseLine.className = 'target-line base';
+  baseLine.style.bottom = ((avgMin/maxV)*H + 32) + 'px';
+  const stretchLine = document.createElement('div');
+  stretchLine.className = 'target-line stretch';
+  stretchLine.style.bottom = ((avgStretch/maxV)*H + 32) + 'px';
+  chart.appendChild(baseLine);
+  chart.appendChild(stretchLine);
+  document.getElementById('monthlyNote').textContent =
+    `Dashed lines show the average monthly budget: minimum ${fmtGBP(avgMin)}, stretch ${fmtGBP(avgStretch)} (annual ÷ 12). Each bar's colour reflects that month's own working-day target.`;
+}
+
+function renderAll() {
+  const now = new Date();
+  renderToday(now);
+  renderPeriods(now);
+  renderChart(now);
+  renderTables();
+  renderBreakdownTables(now);
+  renderMonthlyChart(now);
+}
+
+// ── LOAD ────────────────────────────────────────────────────────
+async function load() {
+  try {
+    setSync('loading', 'Loading pipelines…');
+    document.getElementById('errBanner').classList.add('hidden');
+    const plRes = await pd('/pipelines');
+    (plRes.data || []).forEach(p => { pipelines[p.id] = p.name; });
+
+    setSync('loading', 'Loading won deals…');
+    // status=won pulls only won deals; still filter by pipeline, currency, and FY window client-side
+    const raw = await fetchAllDeals({ status: 'won', sort: 'won_time DESC' });
+    const fyStart = new Date(FY_START + 'T00:00:00');
+    wonRows = [];
+    raw.forEach(d => {
+      const pid = d.pipeline_id?.value ?? d.pipeline_id?.id ?? d.pipeline_id;
+      if (!SCOREBOARD_PIPELINE_IDS.has(pid)) return;
+      const currency = d.currency || 'GBP';
+      if (currency === 'EUR') return;              // GBP-only scoreboard
+      const wonDate = parsePDDate(d.won_time);
+      if (!wonDate || wonDate < fyStart) return;
+      const value = Number(d.value) || 0;
+      wonRows.push({
+        id: d.id, title: d.title || `Deal ${d.id}`, value, currency,
+        wonDate, pipelineId: pid, pipelineName: pipelines[pid] || ('Pipeline ' + pid),
+        url: `https://target3d.pipedrive.com/deal/${d.id}`
+      });
+    });
+
+    renderAll();
+    setSync('live', `Live · ${wonRows.length} won deals since 1 Apr · updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
+  } catch (e) {
+    setSync('error', 'Error');
+    showErr('Could not load from Pipedrive: ' + e.message + '. Check the PIPEDRIVE_TOKEN environment variable and that the proxy is deployed.');
+  }
+}
+
+function exportXlsx() {
+  if (!wonRows.length) return;
+  const data = [...wonRows].sort((a,b)=>b.wonDate-a.wonDate).map(r => ({
+    'Won Date': r.wonDate.toLocaleDateString('en-GB'),
+    'Deal': r.title,
+    'Pipeline': r.pipelineName,
+    'Currency': r.currency,
+    'Value': Math.round(r.value)
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Won Deals');
+  XLSX.writeFile(wb, `revenue-scoreboard-${iso(new Date())}.xlsx`);
+}
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+document.getElementById('exportBtn').addEventListener('click', exportXlsx);
+load();
+</script>
+</body>
+</html>

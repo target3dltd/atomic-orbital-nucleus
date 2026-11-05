@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.6.0)
+# Atomic Orbital Nucleus (v1.7.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -8,7 +8,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 
 | Orbit | What's in it |
 |---|---|
-| **Tools** (inner ring) | Operations processes, System Designer, SOW Builder, Pipedrive Duplicate Eraser, Motive licence renewals, Support dashboard, Mocap Toolkit. Sales dashboard is reserved and waiting for its code. |
+| **Tools** (inner ring) | Operations processes, Checklists & templates, System Designer, SOW Builder, Pipedrive Duplicate Eraser, Motive licence renewals, Sales dashboard, Sales Hub, Team performance, Support dashboard, Mocap Toolkit. |
 | **Marketing** (shares the inner ring) | Assets & Press Kit: logos, colours, fonts, letterheads, the Brand Style Guide 2026 and press copy. |
 | **Project sites** (middle ring) | Clays, Drift and Little Lion (LLE). |
 | **Connected systems** (outer ring) | Pipedrive, QuickBooks, Google Drive, Gmail, the Operations Google Site, Netlify, Claude. These open in a new tab. |
@@ -31,7 +31,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (46 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (75 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 
@@ -74,9 +74,10 @@ Do this once, in a browser, after the site's address is final (`https://atomic-o
    | `NUCLEUS_PUBLIC_URL` | With Google | The site's address, `https://atomic-orbital.netlify.app`. Used to build the Google callback URL. |
    | `NUCLEUS_GOOGLE_DOMAINS` | Optional | Google domains allowed in. Defaults to `target3d.co.uk,atomicorbital.co.uk`. |
    | `NUCLEUS_ADMINS` | Recommended | Admin emails, comma-separated (Google email with Google on; Pipedrive email otherwise). Suggested: `ashley.k@target3d.co.uk,allan@…`. Admins get the Performance Hub and can edit company KPIs and plan progress. |
+   | `NUCLEUS_SALES_HUB_USERS` | Optional | Who can open the Sales Hub, comma-separated emails (administrators always can). Defaults to Allan, Ashley, Jack, Charlie, Sheryl and Ruslana at target3d.co.uk. |
    | `NUCLEUS_SESSION_DAYS` | Optional | How long a Google sign-in lasts on a device. Default 7. |
    | `NUCLEUS_ALLOWED_COMPANIES` | Recommended | Your Pipedrive company subdomain(s), comma-separated. Defaults to `target3d2`. If sign-in says a token belongs to a company that isn't allowed, the message names the company. Put that name here. |
-   | `PIPEDRIVE_API_TOKEN` | For team company-wide figures | A read-only Pipedrive token used by the team dashboards so the company totals see every deal. Also used by Motive's Monday summary. Without it, each person's dashboards show only the deals their own token can see. |
+   | `PIPEDRIVE_API_TOKEN` | For team company-wide figures | A read-only Pipedrive token used by the team dashboards and the Sales Hub so the company totals see every deal. Also used by Motive's Monday summary. Without it, each person's dashboards show only the deals their own token can see. |
    | `SHEET_APPS_SCRIPT_URL`, `SHEET_APPS_SCRIPT_TOKEN` | For Motive | The live serials sheet. The Apps Script is in `netlify/lib/motive/google-apps-script.gs`. Without these variables, Motive uses the snapshot from 2 Nov 2026. `GOOGLE_SERVICE_ACCOUNT_JSON` or `SHEET_CSV_URL` also work. |
    | `GOOGLE_CHAT_WEBHOOK_URL` and/or `RESEND_API_KEY`, `SUMMARY_EMAIL_TO`, `SUMMARY_EMAIL_FROM` | Optional | Motive's Monday summary |
    | `SUPPORT_GMAIL_APPS_SCRIPT_URL`, `SUPPORT_GMAIL_APPS_SCRIPT_TOKEN` | For the Support dashboard's inbox section | See "Support dashboard" below. |
@@ -149,6 +150,17 @@ What changed when they moved into the Nucleus:
 - **Admin-only:** the Performance Hub (hidden in the nav and blocked by `gate.js`). "My dashboard" shows the signed-in person their own page; admins get a people picker.
 - The plan data (`plan-data.js`) and the team list (`PEOPLE` in `core.js`) are the files to edit when roles or KPIs change. The KPIs there were re-based to August 2026.
 
+## Sales Hub (Allan's reports)
+
+`public/tools/sales-hub/` — Revenue Scoreboard, Pipeline Triage, Sales Report, Weekly Pulse, Weekly Deals Report and Supplier Forecast, from Allan's Target3D Sales Hub, plus a Nucleus landing page and Help (`hub.js`, v1.0.0).
+
+What changed when it moved in:
+- **Sign-in.** Firebase is gone (no Firebase project or `FIREBASE_WEB_API_KEY` needed). The edge gate lets in the people in `NUCLEUS_SALES_HUB_USERS` and every administrator; anyone else gets a "Sales Hub" notice, and the tool doesn't appear in their hub.
+- **Pipedrive** goes through `/api/sales-hub/pipedrive` (`netlify/functions/sales-hub-pipedrive.mjs`). Reads (pipelines, stages, deals, deal fields, users, projects) use the shared read-only `PIPEDRIVE_API_TOKEN`. The one write, Pipeline Triage's probability change, is limited to `PUT /deals/<id>` with `probability` only, and is made with the signed-in person's own token so Pipedrive records who changed it. (Allan's proxy allowed any PUT/POST on those paths.)
+- **Bucket overrides** in Pipeline Triage moved from Firestore to the Nucleus store (`sales-hub` namespace, Sales Hub people only).
+- SheetJS (Excel export) is served from `/nucleus/vendor/` rather than a CDN; fonts are self-hosted; Atomic Orbital light theme.
+- When Allan sends a newer version: unzip it, then `python3 build/port_sales_hub.py <folder>` and `python3 build/apply_ao_skin.py sales-hub`. Targets and pipeline names live in each report's own code.
+
 ## Checklists & templates (Operations)
 
 `public/tools/checklists/` — the 19 operations checklists, reports and templates, rebranded to Atomic Orbital and grouped by process phase (enquiry, prove, deliver, support). Each has a Word download and a PDF preview; there's a download-all zip. Linked from the Operations process map.
@@ -197,6 +209,7 @@ Without `MOCK_PD=1`, the local server talks to real Pipedrive with whatever toke
 
 ## Still open
 
+- Ruslana's address in the Sales Hub list (`ruslana.b@target3d.co.uk`) was marked unconfirmed in Allan's notes.
 - Whether client-facing documents should move to Atomic Orbital branding (see "Atomic Orbital styling").
 - Connecting the support@ inbox (see "Support dashboard").
 - The role KPI documents, org chart and 100-day plan in the "KPIs and Operating Principles" pack are from Feb 2026 and largely superseded (the dashboards' KPIs are re-based to Aug 2026). Decide the current mission/values/strapline wording before adding a Company section.
