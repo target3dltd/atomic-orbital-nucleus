@@ -52,6 +52,8 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 
 ## Setting up Google sign-in
 
+> **Live setup (5 Nov 2026):** Google Cloud project "My First Project" (`ancient-cortex-501112-e0`) under ashley.k@target3d.co.uk → Google Auth Platform: app "Atomic Orbital Nucleus", audience **Internal**, OAuth client "Nucleus (atomic-orbital.netlify.app)". Netlify has `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NUCLEUS_PUBLIC_URL`, `NUCLEUS_ADMINS` (Ashley, Allan), `NUCLEUS_SECRET`, `PIPEDRIVE_API_TOKEN` (Ashley's token for now). Internal means only accounts in the target3d.co.uk Google Workspace can sign in; switch the audience to External if people with separate atomicorbital.co.uk accounts need in.
+
 Do this once, in a browser, after the site's address is final (`https://atomic-orbital.netlify.app`).
 
 1. Go to **Google Cloud Console → APIs & Services → Credentials** (create a project first if needed, e.g. "Atomic Orbital Nucleus").
