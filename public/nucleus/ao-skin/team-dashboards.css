@@ -1,5 +1,5 @@
 /*! © 2026 Ashley Keeler. All rights reserved. Unauthorised copying, redistribution or reuse of this code is prohibited. */
-/* Atomic Orbital skin for the Team Dashboards v1.0.0 (sales, company, Performance Hub, my dashboard, plan). */
+/* Atomic Orbital skin for the Team Dashboards v1.1.0 (sales, company, Performance Hub, my dashboard, plan). */
 html:not(#ao-skin){
   --navy:var(--ao-teal-text); --navy-2:var(--ao-teal); --accent:var(--ao-orange); --accent-2:var(--ao-orange);
   --bg:var(--ao-bg); --card:var(--ao-surface); --ink:var(--ao-text); --muted:var(--ao-muted); --line:var(--ao-line);
@@ -34,3 +34,12 @@ html:not(#ao-skin) .chip.info{background:var(--ao-teal-soft)}
 html:not(#ao-skin) .chip.grey{background:var(--ao-sunk)}
 html:not(#ao-skin) input, html:not(#ao-skin) textarea, html:not(#ao-skin) select{background:var(--ao-surface);color:var(--ao-text)}
 html:not(#ao-skin) input[type=range]{accent-color:var(--ao-teal)}
+
+/* v1.1.0: dark-mode readability (panels and headers the dashboards drew in fixed light colours) */
+html:not(#ao-skin) .banner{background:var(--ao-surface);color:var(--ao-text);border:1px solid var(--ao-line);border-left:4px solid var(--ao-orange)}
+html:not(#ao-skin) .banner b{color:var(--ao-text)}
+html:not(#ao-skin) th{background:var(--ao-sunk);color:var(--ao-muted)}
+html:not(#ao-skin) .chip.info{color:var(--ao-teal-text)}
+html:not(#ao-skin) .chip.grey{color:var(--ao-muted)}
+html:not(#ao-skin) tr.total{background:var(--ao-sunk)}
+html:not(#ao-skin) .card{background:var(--ao-surface);color:var(--ao-text)}

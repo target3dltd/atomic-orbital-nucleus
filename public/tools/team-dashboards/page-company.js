@@ -59,7 +59,7 @@ T3D.chrome('company.html','Company performance','Sales and project delivery acro
       return `<tr><td><b>${k}</b></td><td class="num">${v.n}</td><td class="num">${T3D.gbp(v.rev)}</td>
       <td class="num">${T3D.gbp(v.gp)}</td><td class="num"><span class="chip ${m>=50?'ok':m>=32?'info':m>=25?'warn':'bad'}">${T3D.pct(m)}</span></td>
       <td class="num">${T3D.pct(gp?v.gp/gp*100:0,0)}</td></tr>`;}).join('')}
-    <tr style="background:#f4f6f9"><td><b>Total</b></td><td class="num"><b>${won.length}</b></td>
+    <tr class="total"><td><b>Total</b></td><td class="num"><b>${won.length}</b></td>
     <td class="num"><b>${T3D.gbp(rev)}</b></td><td class="num"><b>${T3D.gbp(gp)}</b></td>
     <td class="num"><b>${T3D.pct(rev?gp/rev*100:0)}</b></td><td class="num">100%</td></tr>
     </tbody></table></div>
@@ -112,8 +112,8 @@ T3D.chrome('company.html','Company performance','Sales and project delivery acro
     new Chart(document.getElementById('mChart'),{
       data:{labels:mm.map(m=>m.toLocaleDateString('en-GB',{month:'short'})),
         datasets:[
-          {type:'bar',label:'Revenue',data:mrev,backgroundColor:'#1F3355',borderRadius:4,yAxisID:'y'},
-          {type:'line',label:'GP %',data:mgp,borderColor:'#B4472A',tension:.3,pointRadius:3,yAxisID:'y1'},
+          {type:'bar',label:'Revenue',data:mrev,backgroundColor:T3D.color('--ao-teal','#04959B'),borderRadius:4,yAxisID:'y'},
+          {type:'line',label:'GP %',data:mgp,borderColor:T3D.color('--ao-orange','#F2531A'),tension:.3,pointRadius:3,yAxisID:'y1'},
         ]},
       options:{responsive:true,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
         scales:{y:{ticks:{callback:v=>T3D.gbpK(v),font:{size:11}}},

@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.10.0)
+# Atomic Orbital Nucleus (v1.10.1)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 

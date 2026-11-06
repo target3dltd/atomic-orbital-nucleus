@@ -88,9 +88,9 @@ T3D.chrome('index.html','Overview','Where the company stands against the plan, t
   new Chart(document.getElementById('revChart'),{type:'line',
     data:{labels:months.map(m=>m.toLocaleDateString('en-GB',{month:'short'})),
       datasets:[
-        {label:'Actual (cumulative)',data:cum,borderColor:'#1F3355',backgroundColor:'rgba(31,51,85,.08)',fill:true,tension:.3,spanGaps:false,pointRadius:3},
-        {label:'£3.8m baseline pace',data:months.map((_,i)=>3800000/12*(i+1)),borderColor:'#B4472A',borderDash:[5,4],pointRadius:0,tension:0},
-        {label:'£4.6m stretch pace',data:months.map((_,i)=>4600000/12*(i+1)),borderColor:'#9aa7b8',borderDash:[2,4],pointRadius:0,tension:0},
+        {label:'Actual (cumulative)',data:cum,borderColor:T3D.color('--ao-teal','#04959B'),backgroundColor:T3D.color('--ao-teal-soft','rgba(4,149,155,.12)'),fill:true,tension:.3,spanGaps:false,pointRadius:3},
+        {label:'£3.8m baseline pace',data:months.map((_,i)=>3800000/12*(i+1)),borderColor:T3D.color('--ao-orange','#F2531A'),borderDash:[5,4],pointRadius:0,tension:0},
+        {label:'£4.6m stretch pace',data:months.map((_,i)=>4600000/12*(i+1)),borderColor:T3D.color('--ao-meridian','#9AA9B8'),borderDash:[2,4],pointRadius:0,tension:0},
       ]},
     options:{responsive:true,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
       scales:{y:{ticks:{callback:v=>T3D.gbpK(v),font:{size:11}}},x:{ticks:{font:{size:11}}}}}});

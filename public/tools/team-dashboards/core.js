@@ -233,6 +233,12 @@ const T3D = (() => {
     },
   };
 
+  // ---- theme colours for charts (read from the Atomic Orbital skin, so charts suit light and dark) ----
+  const color = (name, fallback) => { try { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; } catch (e) { return fallback; } };
+  if (window.Chart) { Chart.defaults.color = color('--ao-muted', '#4A5A6B'); Chart.defaults.borderColor = color('--ao-line', '#D5DCE4'); }
+  // charts take their colours when drawn, so redraw the page if the theme changes
+  let themeNow = document.documentElement.dataset.theme;
+  new MutationObserver(() => { const t = document.documentElement.dataset.theme; if (t !== themeNow) { themeNow = t; location.reload(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   // ---- chrome ----
   const NAV = [
     ['index.html','Overview'],
@@ -275,5 +281,5 @@ const T3D = (() => {
   }
 
   return { PLAN, PEOPLE, gbp, gbpK, pct, dt, dtShort, daysBetween, rag, ragLabel,
-           periodRange, inRange, pd, pdAll, getDeals, isLive, chrome, setSource, FY_START, FY_END, who, shared, toast };
+           periodRange, inRange, pd, pdAll, getDeals, isLive, chrome, setSource, FY_START, FY_END, who, shared, toast, color };
 })();

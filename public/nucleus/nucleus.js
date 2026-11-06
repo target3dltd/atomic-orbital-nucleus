@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.10.0";
+  N.VERSION = "1.10.1";
   N.CHANGELOG = [
+    ["v1.10.1", "2026-11-06", "Team performance is readable in dark mode: the banners, table headers, total rows and charts now follow the theme (charts redraw when you switch)."],
     ["v1.10.0", "2026-11-06", "Faster. Pages and tools are now kept by your browser and only re-downloaded when they change (before, every visit downloaded every tool in full, up to 2.5 MB each). Scripts and styles are stamped with a version so updates still arrive straight away. Switching tools with the menu in the top bar keeps your last four tools loaded, so going back is instant and keeps your place, and Back/Forward work. Tools start loading as soon as you point at them on the home page."],
     ["v1.9.0", "2026-11-06", "New home page built for getting things done. Search everything (tools, Sales reports, projects, systems) from the bar under the greeting or with / or Ctrl K / ⌘K, with arrow keys and Enter. Jump back in shows what you opened last. Tools are grouped by area (Sales & CRM, Operations & delivery, Company, Studio & motion capture, Marketing) as compact tiles, with project sites and connected systems alongside. The atom moves to Orbit view, opened from the mark beside the greeting. Works on phones too. Google sign-in is now open to atomicorbital.co.uk accounts as well as target3d.co.uk."],
     ["v1.8.0", "2026-11-05", "One Sales tool: the team Sales dashboard and the Sales Hub are merged. A new Sales overview opens first, showing FY to date against the minimum pace, what is still to find per working day, gross profit, this week, a league table by owner, and deals closing in 30 days or past their close date, using the same deals and targets as the Revenue Scoreboard so the figures agree. The six reports are one click away, and the Sales tab in Team performance now goes there."],
