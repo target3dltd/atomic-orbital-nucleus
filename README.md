@@ -133,10 +133,11 @@ The Pipedrive half works as soon as the Nucleus is deployed: it reads the Suppor
 The support@ half needs connecting once. Until then it shows a note saying it isn't connected. In claude.ai each viewer's own Gmail was read; in the Nucleus people sign in with Pipedrive only, so the server reads the support@ mail instead. The Gmail search is fixed on the server (`SUPPORT_GMAIL_QUERY`, default: the dashboard's original search), so the page can't be used to read any other mail. Only subject, date, sender address and read state are sent, never message bodies.
 
 **Easiest: Apps Script (about 5 minutes).**
-1. Sign in to Google as someone who receives support@ mail, and open https://script.google.com → New project.
-2. Paste in `netlify/lib/support/support-gmail-apps-script.gs`, change `TOKEN` to a long random string, and save.
-3. Click Deploy → New deployment → Web app. Set Execute as: **Me** and Who has access: **Anyone**. Deploy and approve the permissions.
-4. In Netlify, set `SUPPORT_GMAIL_APPS_SCRIPT_URL` (the web app URL) and `SUPPORT_GMAIL_APPS_SCRIPT_TOKEN` (the same string), then redeploy.
+1. Sign in to Google as an account that actually receives support@ mail (ideally the support@ mailbox itself), and open https://script.google.com → New project.
+2. Paste in `netlify/lib/support/support-gmail-apps-script.gs` (v1.1.0) and save. No editing needed.
+3. Choose the function **setup** and press Run; approve the permissions. The execution log shows a token (kept in the project's Script Properties).
+4. Click Deploy → New deployment → Web app. Set Execute as: **Me** and Who has access: **Anyone**. Deploy.
+5. In Netlify, set `SUPPORT_GMAIL_APPS_SCRIPT_URL` (the web app URL) and `SUPPORT_GMAIL_APPS_SCRIPT_TOKEN` (the token from step 3), then redeploy.
 
 "Unread" then reflects that account's mailbox.
 
