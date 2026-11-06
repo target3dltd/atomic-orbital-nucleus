@@ -3,7 +3,7 @@
 // Some pages are for administrators only (NUCLEUS_ADMINS).
 import { sessionFrom, isAdmin, canUseSalesHub } from "../lib/session.mjs";
 
-export const ADMIN_ONLY = ["/tools/team-dashboards/performance-hub.html"];
+export const ADMIN_ONLY = ["/tools/team-dashboards/performance-hub.html", "/tools/motive/move.html"];
 // The Sales Hub is open to its own list of people (NUCLEUS_SALES_HUB_USERS) and to administrators.
 export const SALES_HUB = "/tools/sales-hub/";
 

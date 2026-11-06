@@ -211,6 +211,49 @@ await t("state saves and reads", async () => {
 });
 await t("motive pipedrive runs with the person's token", async () => { calls.length = 0; const { status } = await jbody(await mPd(req("/api/motive/pipedrive", { method: "POST", cookie, body: { tool: "getUsers" } }))); eq(status, 200); eq(calls[0].token, GOOD); });
 
+await t("moving the Motive tracker: admins only, newer record wins, safe to repeat", async () => {
+  const mT = (await imp("netlify/functions/motive-transfer.mjs")).default;
+  const prevAdmins = process.env.NUCLEUS_ADMINS;
+  process.env.NUCLEUS_ADMINS = "someone@else.co.uk";
+  eq((await mT(req("/api/motive/import", { method: "POST", cookie, body: { collections: { campaign: {} } } }))).status, 403);
+  process.env.NUCLEUS_ADMINS = "ashley.k@target3d.co.uk";
+  await mState(req("/api/motive/state", { method: "POST", cookie, body: { collection: "campaign", id: "org-12", op: "set", data: { stage: "Won", updatedAt: "2026-11-05T10:00:00Z" } } }));
+  const old = { campaign: { "org-11": { stage: "Quoted", updatedAt: "2026-11-06T09:00:00Z" }, "org-12": { stage: "Contacted", updatedAt: "2026-11-01T09:00:00Z" }, "org-99": { stage: "New", updatedAt: "2026-10-01T09:00:00Z" } }, templates: { t1: { subject: "Hi" } } };
+  const dry = (await jbody(await mT(req("/api/motive/import", { method: "POST", cookie, body: { collections: old, dryRun: true } })))).j;
+  eq(dry.report.campaign, { added: 1, updated: 1, keptNewer: 1, same: 0 });
+  eq((await jbody(await mState(req("/api/motive/state?collections=campaign", { cookie })))).j.collections.campaign["org-99"], undefined, "dry run changes nothing");
+  await mT(req("/api/motive/import", { method: "POST", cookie, body: { collections: old } }));
+  const c = (await jbody(await mState(req("/api/motive/state?collections=campaign,templates", { cookie })))).j.collections;
+  eq([c.campaign["org-11"].stage, c.campaign["org-12"].stage, c.campaign["org-99"].stage, c.templates.t1.subject], ["Quoted", "Won", "New", "Hi"]);
+  eq((await jbody(await mT(req("/api/motive/import", { method: "POST", cookie, body: { collections: old } })))).j.report.campaign.added, 0, "second run adds nothing");
+  const ex = await mT(req("/api/motive/export", { cookie })); ok(ex.headers.get("content-disposition").includes("motive-tracker-"));
+  eq(Object.keys((await ex.json()).collections.campaign).sort(), ["org-11", "org-12", "org-99"]);
+  process.env.NUCLEUS_ADMINS = prevAdmins || ""; if (!prevAdmins) delete process.env.NUCLEUS_ADMINS;
+  ok(gate.ADMIN_ONLY.includes("/tools/motive/move.html"));
+});
+
+console.log("Saved work follows you");
+await t("prefs: per person, per tool, newest change wins", async () => {
+  const pf = (await imp("netlify/functions/nucleus-prefs.mjs")).default;
+  const a = "nucleus_s=" + await session.seal({ t: GOOD, uid: 7, e: "ashley.k@target3d.co.uk", gs: "1001", exp: Date.now() + 1e9 });
+  const b = "nucleus_s=" + await session.seal({ t: GOOD, uid: 9, e: "lana@target3d.co.uk", gs: "1009", exp: Date.now() + 1e9 });
+  eq((await pf(req("/api/nucleus/prefs?tool=sow-builder"))).status, 401);
+  await pf(req("/api/nucleus/prefs", { method: "POST", cookie: a, body: { tool: "sow-builder", keys: { sowDrafts: { v: "[1]", at: 100 } } } }));
+  await pf(req("/api/nucleus/prefs", { method: "POST", cookie: a, body: { tool: "sow-builder", keys: { sowDrafts: { v: "[old]", at: 50 }, sowBuilderSettings: { v: "{}", at: 60 } } } }));
+  const mine = (await jbody(await pf(req("/api/nucleus/prefs?tool=sow-builder", { cookie: a })))).j.keys;
+  eq([mine.sowDrafts.v, mine.sowBuilderSettings.v], ["[1]", "{}"]);
+  eq((await jbody(await pf(req("/api/nucleus/prefs?tool=sow-builder", { cookie: b })))).j.keys, {}, "someone else can't see it");
+  await pf(req("/api/nucleus/prefs", { method: "POST", cookie: a, body: { tool: "sow-builder", keys: { sowDrafts: { del: true, at: 200 } } } }));
+  eq((await jbody(await pf(req("/api/nucleus/prefs?tool=*", { cookie: a })))).j.tools["sow-builder"].sowDrafts.del, true);
+  eq((await pf(req("/api/nucleus/prefs", { method: "POST", cookie: a, body: { tool: "../x", keys: {} } }))).status, 400);
+});
+await t("sync and dock go on every tool page; sync first in <head>", async () => {
+  const prot = fs.readFileSync(path.join(root, "build/protect.mjs"), "utf8"); ok(prot.includes("SYNC + html.slice(end)") && prot.includes("extractImages()"));
+  const rd = (f) => fs.readFileSync(path.join(root, "public", f), "utf8");
+  ok(rd("index.html").indexOf("/nucleus/sync.js") < rd("index.html").indexOf("/nucleus/nucleus.js"));
+  const sy = rd("nucleus/sync.js"); for (const k of ["sowDrafts", "t3d_quote_", "mup", "ot-(pins"]) ok(sy.includes(k), k);
+});
+
 console.log("Support dashboard sources");
 const gm = (body, c = cookie) => gmail(req("/api/nucleus/gmail", { method: "POST", cookie: c, body }));
 await t("support tickets: pipeline 2 deals with include_fields", async () => { calls.length = 0; const { j } = await jbody(await call("getDeals", { pipeline_id: 2, include_fields: ["last_incoming_mail_time", "email_messages_count"], custom_fields: ["d496e5747c93a62edf3c7240eff53c8a4bf2a232"], limit: 500 })); eq(j.payload.data.length, 4); ok(calls[0].search.includes("include_fields=last_incoming_mail_time%2Cemail_messages_count")); });
@@ -288,7 +331,8 @@ console.log("Your day");
   await t("Pipedrive activities: overdue and today, with links", async () => {
     const { j } = await jbody(await day(req("/api/nucleus/day", { cookie: me })));
     eq([j.pipedrive.overdue.length, j.pipedrive.today.length], [1, 2]);
-    eq(j.pipedrive.overdue[0].title, "Send proposal"); ok(j.pipedrive.today.some((x) => x.url === "https://target3d2.pipedrive.com/deal/901"));
+    eq(j.pipedrive.overdue[0].title, "Send proposal"); ok(j.pipedrive.today.some((x) => x.url === "https://target3d2.pipedrive.com/deal/901" && x.context === "Leeds MechEng mocap · University of Leeds"));
+    ok(!JSON.stringify(j).includes("Future thing") && !JSON.stringify(j).includes("Ancient"), "future and >1 year old left out");
     eq([j.google.available, j.google.connected], [true, false]);
   });
   await t("connect Google asks for offline Calendar + Tasks access for the signed-in account", async () => {
@@ -309,7 +353,7 @@ console.log("Your day");
   await t("tick off a Pipedrive activity and a Google task", async () => {
     calls.length = 0;
     eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "pipedrive", id: 2 } }))).status, 200);
-    ok(calls.some((c) => c.method === "PUT" && c.path === "/v1/activities/2" && c.token === GOOD));
+    ok(calls.some((c) => c.method === "PATCH" && c.path === "/api/v2/activities/2" && c.token === GOOD));
     eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "task", id: "T2", list: "L1" } }))).status, 200);
     ok(calls.some((c) => c.method === "PATCH" && c.path === "tasks/tasks/v1/lists/L1/tasks/T2"));
     eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "task", id: "../x", list: "L1" } }))).status, 400);

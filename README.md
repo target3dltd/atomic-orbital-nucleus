@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.12.0)
+# Atomic Orbital Nucleus (v1.13.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -18,6 +18,24 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 The hub is a launcher: greeting and your Pipedrive figures, a search bar (also `/` or Ctrl K / ⌘K) that finds any tool, project, system or Sales report, **Jump back in** (the last tools opened on that device, kept in the browser), tools grouped by **area**, and project sites and connected systems in the side column. The atom is still there as **Orbit view**, opened from the mark beside the greeting.
 
 In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one-line `short` for its tile, and optionally `featured: true` to lead its area and `links` (sub-pages that search can open directly, as the Sales reports do).
+
+## Saved work follows you (v1.13.0)
+
+Several tools keep work in the browser (localStorage). `public/nucleus/sync.js` (v1.0.0, added first in `<head>` of every tool and project page by the build, and on the hub) copies the keys listed in its `SPEC` to `/api/nucleus/prefs` (`netlify/functions/nucleus-prefs.mjs`): one record per person (Google account) per tool, readable only by them, newest change per key wins (deletions too). On a page load it pulls that tool's record; if the account copy is newer, it applies it and reloads once. The hub pre-loads every tool's record so tools usually open with the latest already in place.
+
+Synced today: SOW Builder drafts and settings; System Designer saved quotes (`t3d_quote_*`), site visits, presets, hotkeys, custom actions, SKU map, language, hints; Mocap Toolkit layout slots, session history, theme; Motive "You are", "mine only", GBP and sort; Duplicate Eraser scope; Team performance "me"; pinned/open OptiTrack docs on Clays, Drift and Little Lion; the Nucleus theme and recent tools. To sync another key, add its pattern to `SPEC`.
+
+Shared data was already server-side: Sales Hub triage overrides, team dashboards, Duplicate Eraser decisions, Motive tracker, Support, Your day.
+
+### Moving the Motive tracker from the old site
+
+`/tools/motive/move.html` (administrators only) takes the old Motive Upgrade Planner's `/api/state` data, shows what would change (dry run), and imports it via `/api/motive/import` (`netlify/functions/motive-transfer.mjs`): per record, the newer `updatedAt` wins and records only in the Nucleus are kept, so it can be run again just before switching the old site off. `/api/motive/export` downloads a backup.
+
+## Speed (v1.13.0 additions)
+
+- The hub shows instantly from what it remembered last time (`nucleus:hub` in the browser: who you are, your figures, your day), then refreshes; cleared on sign out.
+- Drift and Clays: the build moves their embedded photos into `_img/` files (Drift 2.4 MB → 0.12 MB, Clays 1.4 MB → 0.29 MB), cached and loaded as needed. SOW Builder, System Designer and Mocap Toolkit keep theirs embedded because they use them in exports.
+- Your day and the hub pulse use Pipedrive's v2 activities API (`netlify/lib/activities.mjs`); v1 stopped returning activities.
 
 ## Claude in Chrome (v1.12.0)
 
@@ -60,7 +78,7 @@ Connecting asks Google for `calendar.readonly` and `tasks` (offline access, so i
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (85 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (88 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 

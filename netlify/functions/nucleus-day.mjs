@@ -1,4 +1,4 @@
-// "Your day" on the Nucleus home page (v1.0.0): the signed-in person's own
+// "Your day" on the Nucleus home page (v1.1.0: Pipedrive activities via the v2 API): the signed-in person's own
 //   - Pipedrive activities: overdue and due today (read and ticked off with their own Pipedrive token)
 //   - Google Calendar events today and Google Tasks due today or overdue, once they've connected Google
 //     (a one-off extra permission; the refresh token is stored encrypted against their Google account)
@@ -9,6 +9,7 @@
 // Days follow UK time (Europe/London).
 import { sessionFrom, unseal, seal, googleConfig, pipedriveBase, jsonResponse as json } from "../lib/session.mjs";
 import { kv } from "../lib/kv.mjs";
+import { myDay, completeActivity } from "../lib/activities.mjs";
 
 const TZ = "Europe/London";
 const userKey = (sub) => "users/" + String(sub).replace(/[^0-9A-Za-z_-]/g, "");
@@ -56,8 +57,8 @@ export default async (req) => {
     if (req.method !== "POST") return json({ ok: false }, 405);
     let b; try { b = await req.json(); } catch (e) { return json({ ok: false, message: "Body must be JSON" }, 400); }
     if (b && b.kind === "pipedrive" && /^\d+$/.test(String(b.id))) {
-      const r = await fetch(`${pipedriveBase()}/v1/activities/${b.id}`, { method: "PUT", headers: { "x-api-token": s.t, "content-type": "application/json" }, body: JSON.stringify({ done: 1 }) });
-      return json({ ok: r.ok }, r.ok ? 200 : r.status);
+      const ok = await completeActivity(s.t, b.id);
+      return json({ ok }, ok ? 200 : 502);
     }
     if (b && b.kind === "task" && /^[\w-]+$/.test(String(b.id)) && /^[\w-]+$/.test(String(b.list))) {
       try {
@@ -74,24 +75,8 @@ export default async (req) => {
   const out = { ok: true, today, pipedrive: { overdue: [], today: [] }, google: { available: !!googleConfig() && !!s.gs, connected: !!(rec && rec.gtok), events: [], tasks: [] } };
   const company = s.c || "app";
 
-  const pdJob = (async () => {
-    const r = await fetch(`${pipedriveBase()}/v1/activities?user_id=${s.uid}&done=0&start_date=${addDays(today, -365)}&end_date=${today}&limit=500`, { headers: { "x-api-token": s.t, accept: "application/json" } });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || "Pipedrive " + r.status);
-    for (const a of j.data || []) {
-      if (!a || !a.due_date) continue;
-      // due_time is UTC in Pipedrive; show it in UK time
-      let time = null, at = null;
-      if (a.due_time) { at = new Date(a.due_date + "T" + a.due_time + ":00Z"); time = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(at); }
-      const localDate = at ? ukDate(at) : a.due_date;
-      const item = { kind: "pipedrive", id: a.id, title: a.subject || a.type || "Activity", type: a.type || null, date: localDate, time, at: at ? at.toISOString() : null,
-        context: [a.deal_title, a.org_name, a.person_name].filter(Boolean).join(" · ") || null,
-        url: a.deal_id ? `https://${company}.pipedrive.com/deal/${a.deal_id}` : a.org_id ? `https://${company}.pipedrive.com/organization/${a.org_id}` : `https://${company}.pipedrive.com/activities/list` };
-      if (localDate < today) out.pipedrive.overdue.push(item); else if (localDate === today) out.pipedrive.today.push(item);
-    }
-    out.pipedrive.overdue.sort((x, y) => (x.date + (x.time || "")).localeCompare(y.date + (y.time || "")));
-    out.pipedrive.today.sort((x, y) => (x.time || "").localeCompare(y.time || ""));
-  })().catch((e) => { out.pipedrive.error = String(e.message || e); });
+  const pdJob = myDay(s.t, s.uid, company).then((d) => { out.pipedrive.overdue = d.overdue; out.pipedrive.today = d.today; })
+    .catch((e) => { out.pipedrive.error = String(e.message || e); });
 
   const gJob = (async () => {
     if (!out.google.connected) return;

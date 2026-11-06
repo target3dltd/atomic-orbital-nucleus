@@ -1,5 +1,6 @@
 // GET /api/nucleus/pulse → a few live Pipedrive figures for the signed-in person, shown on the Nucleus hub.
 import { sessionFrom, pipedriveBase, jsonResponse as json } from "../lib/session.mjs";
+import { myOpenActivities, ukDate } from "../lib/activities.mjs";
 
 export default async (req) => {
   let s;
@@ -11,7 +12,7 @@ export default async (req) => {
     if (!r.ok) throw new Error(j.error || r.statusText);
     return j;
   };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ukDate();
   const out = { ok: true, at: new Date().toISOString() };
   const jobs = [
     get(`/v1/deals/summary?status=open&user_id=${s.uid}`).then((j) => {
@@ -24,8 +25,8 @@ export default async (req) => {
       out.teamOpenDeals = d.total_count || 0;
       out.teamOpenValue = d.total_currency_converted_value_formatted || null;
     }),
-    get(`/v1/activities?user_id=${s.uid}&done=0&start_date=2000-01-01&end_date=${today}&limit=500`).then((j) => {
-      out.myActivitiesDue = (j.data || []).length;
+    myOpenActivities(s.t, s.uid).then((acts) => {
+      out.myActivitiesDue = acts.filter((x) => x.due_date <= today).length; // overdue or due today
     }),
   ];
   const res = await Promise.allSettled(jobs);

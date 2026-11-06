@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.12.0";
+  N.VERSION = "1.13.0";
   N.CHANGELOG = [
+    ["v1.13.0", "2026-11-06", "Your work follows you: SOW drafts, System Designer quotes, site visits and presets, Mocap layouts, pinned docs on project sites, your Motive name and more are now saved with your account and appear on any device you sign in on. Your day now finds your Pipedrive activities reliably (it uses Pipedrive's current API). The home page appears instantly from your last visit and then refreshes. Drift and Clays are much lighter (photos load as you scroll). Administrators can move the Motive tracker across from the old site without losing anything."],
     ["v1.12.0", "2026-11-06", "Claude in Chrome works with the Nucleus. Tools and project sites now open as their own pages (not inside a frame), so Claude in Chrome can read and use them on your Claude Team seat. Every page has a small Nucleus dock in the bottom corner: back home, jump to another tool, and Ask Claude, with suggested questions for that page and how to open Claude in Chrome."],
     ["v1.11.0", "2026-11-06", "Your day, on the home page: your Pipedrive activities overdue and due today, with a tick box to mark each done. Connect Google once to add today's calendar (with Join for Meet calls) and your Google Tasks due today or overdue, which you can tick off too. The Nucleus only reads your calendar and tasks, never your email, and Disconnect removes the access."],
     ["v1.10.1", "2026-11-06", "Team performance is readable in dark mode: the banners, table headers, total rows and charts now follow the theme (charts redraw when you switch)."],
@@ -81,7 +82,12 @@
     });
   };
   N.me = function () { return N.api("/api/nucleus/me").then(function (j) { return j.signedIn ? j.user : null; }).catch(function () { return null; }); };
-  N.signOut = function () { return N.api("/api/nucleus/logout", { method: "POST" }).then(function () { location.href = "/"; }); };
+  N.signOut = function () { N.clearHubCache(); return N.api("/api/nucleus/logout", { method: "POST" }).then(function () { location.href = "/"; }); };
+  // The hub keeps your last view (who you are, your figures, your day) in this browser so it appears instantly,
+  // then refreshes it. Cleared when you sign out.
+  N.hubCache = function () { try { return JSON.parse(localStorage.getItem("nucleus:hub") || "null") || {}; } catch (e) { return {}; } };
+  N.saveHubCache = function (patch) { try { var c = N.hubCache(); Object.keys(patch).forEach(function (k) { c[k] = patch[k]; }); c.at = Date.now(); localStorage.setItem("nucleus:hub", JSON.stringify(c)); } catch (e) {} };
+  N.clearHubCache = function () { try { localStorage.removeItem("nucleus:hub"); } catch (e) {} };
   // Recently opened tools, newest first, kept per browser for "Jump back in" and search.
   N.recent = function () { try { var r = JSON.parse(localStorage.getItem("nucleus:recent") || "[]"); return Array.isArray(r) ? r.filter(function (x) { return typeof x === "string"; }) : []; } catch (e) { return []; } };
   N.addRecent = function (id) { if (!id) return; try { var r = N.recent().filter(function (x) { return x !== id; }); r.unshift(id); localStorage.setItem("nucleus:recent", JSON.stringify(r.slice(0, 8))); } catch (e) {} };

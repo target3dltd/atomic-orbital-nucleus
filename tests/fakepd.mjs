@@ -105,9 +105,22 @@ export function installFakePipedrive() {
     }
     if (p === "/api/v2/persons") return ok(persons.filter((x) => !url.searchParams.get("org_id") || x.org_id === +url.searchParams.get("org_id")), { additional_data: { next_cursor: null } });
     if ((m = p.match(/^\/api\/v2\/persons\/(\d+)$/)) && method === "PATCH") { const x = persons.find((y) => y.id === +m[1]); Object.assign(x, body); return ok(x); }
+    if (p === "/api/v2/deals" && url.searchParams.get("ids")) return ok([{ id: 901, title: "Leeds MechEng mocap" }]);
+    if (p === "/api/v2/organizations" && url.searchParams.get("ids")) return ok([{ id: 11, name: "University of Leeds" }, { id: 21, name: "UCL" }]);
     if (p === "/api/v2/deals") return ok(deals.filter((x) => (!url.searchParams.get("org_id") || x.org_id === +url.searchParams.get("org_id")) && (!url.searchParams.get("pipeline_id") || x.pipeline_id === +url.searchParams.get("pipeline_id"))), { additional_data: { next_cursor: null } });
     if ((m = p.match(/^\/api\/v2\/deals\/(\d+)$/)) && method === "PATCH") { const x = deals.find((y) => y.id === +m[1]); Object.assign(x, body); return ok(x); }
-    if (p === "/api/v2/activities") return ok([], { additional_data: { next_cursor: null } });
+    if ((m0 = p.match(/^\/api\/v2\/activities\/(\d+)$/)) && method === "PATCH") return ok({ id: +m0[1], done: true });
+    if (p === "/api/v2/activities") {
+      if (!url.searchParams.get("owner_id")) return ok([], { additional_data: { next_cursor: null } });
+      const d = (n) => { const x = new Date(); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+      return ok([
+        { id: 4, subject: "Future thing", type: "call", due_date: d(5), due_time: null, owner_id: 7 },
+        { id: 1, subject: "Call Dr Bloggs", type: "call", due_date: d(0), due_time: "10:30", deal_id: 901, org_id: 11, owner_id: 7 },
+        { id: 3, subject: "Follow up demo", type: "email", due_date: d(0), due_time: null, owner_id: 7 },
+        { id: 2, subject: "Send proposal", type: "task", due_date: d(-2), due_time: null, org_id: 21, owner_id: 7 },
+        { id: 5, subject: "Ancient", type: "task", due_date: d(-400), due_time: null, owner_id: 7 },
+      ], { additional_data: { next_cursor: null } });
+    }
     if (p === "/v1/deals") {
       const owners = [["Allan Rankin", 1], ["Ashley Keeler", 7], ["Jack Weston", 3], ["Ryan Mercier", 4]];
       const v1 = Array.from({ length: 40 }, (_, i) => { const o = owners[i % 4], won = i % 3 === 0, d = iso(i * 6); return { id: 5000 + i, title: "Deal " + (i + 1), value: 2000 + i * 1750, currency: "GBP", status: won ? "won" : i % 7 === 0 ? "lost" : "open", user_id: { id: o[1], name: o[0] }, owner_name: o[0], stage_id: 1, pipeline_id: 1, add_time: d.replace("T", " ").slice(0, 19), update_time: d.replace("T", " ").slice(0, 19), won_time: won ? d.replace("T", " ").slice(0, 19) : null, activities_count: i % 4 }; });

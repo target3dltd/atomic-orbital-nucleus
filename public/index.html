@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/brand/css/atomic-orbital.css">
 <link rel="stylesheet" href="/nucleus/nucleus.css">
 <script>try{var s=localStorage.getItem('theme');document.documentElement.dataset.theme=s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
+<script src="/nucleus/sync.js"></script>
 <script src="/nucleus/nucleus.js"></script>
 <script src="/nucleus/registry.js"></script>
 </head>
@@ -202,7 +203,8 @@
     <ul>
       <li><b>Search</b> (the bar under the greeting, or press <kbd>/</kbd> or <kbd>Ctrl K</kbd> / <kbd>⌘K</kbd>) finds any tool, project, system or Sales report by name, description or tag. Use the arrow keys and Enter, or click.</li>
       <li><b>Your day</b> lists your Pipedrive activities that are overdue or due today, with a tick box to mark each done in Pipedrive. Connect Google once (the button in the Calendar panel) to add today's Google Calendar events, with a <i>Join</i> button for Meet calls, and your Google Tasks due today or overdue, which you can tick off too. The Nucleus only reads your calendar and tasks; it never reads your email or changes events. <i>Disconnect</i> removes that access.</li>
-      <li><b>Jump back in</b> shows the last few things you opened on this device.</li>
+      <li><b>Jump back in</b> shows the last few things you opened.</li>
+      <li><b>Your work follows you.</b> What tools save as you work (SOW drafts, System Designer quotes and site visits, Mocap layouts, pinned docs on project sites, your name in Motive, your theme and more) is kept with your account, so it's there on any device you sign in on. If two devices change the same thing, the most recent change wins.</li>
       <li><b>Tools</b> are grouped by area: Sales &amp; CRM, Operations &amp; delivery, Company, Studio &amp; motion capture, and Marketing. <b>Project sites</b> and <b>Connected systems</b> (which open in a new tab) are listed alongside.</li>
       <li><b>Orbit view</b> (the spinning mark by the greeting) shows everything as an atom: tools and marketing on the inner ring, project sites in the middle, connected systems on the dotted outer ring. Hover or press <i>Pause orbits</i> to stop it; it stands still if your device is set to reduce motion.</li>
       <li>Tools open as their own pages. The <b>Nucleus dock</b> in the bottom-right corner of every tool takes you home, jumps to another tool, and has <b>Ask Claude</b>: questions that suit that page, to paste into <b>Claude in Chrome</b> (Anthropic's browser extension, on your Claude Team seat). Claude reads the page you're on, so open the tool first.</li>
@@ -368,14 +370,16 @@
     $("greetH").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "");
     renderHome(); loadPulse(); loadDay();
     if (!window.__nucleusDock) { var ds = document.createElement("script"); ds.src = "/nucleus/dock.js"; document.body.appendChild(ds); }
+    if (window.NucleusSync) window.NucleusSync.warmAll(); // bring your saved work for every tool into this browser
   }
 
+  function showPulse(j) {
+    var set = function (id, v) { var el = $(id); el.textContent = v == null ? "—" : v; el.classList.toggle("wait", v == null); };
+    set("pMyDeals", j.myOpenDeals); set("pMyValue", j.myOpenValue); set("pActs", j.myActivitiesDue); set("pTeam", j.teamOpenValue);
+  }
   function loadPulse() {
-    N.api("/api/nucleus/pulse").then(function (j) {
-      if (!j.ok) return;
-      var set = function (id, v) { var el = $(id); el.textContent = v == null ? "—" : v; el.classList.toggle("wait", v == null); };
-      set("pMyDeals", j.myOpenDeals); set("pMyValue", j.myOpenValue); set("pActs", j.myActivitiesDue); set("pTeam", j.teamOpenValue);
-    }).catch(function () {});
+    var c = N.hubCache(); if (c.pulse) showPulse(c.pulse); // last known figures straight away, then fresh ones
+    N.api("/api/nucleus/pulse").then(function (j) { if (!j.ok) return; showPulse(j); N.saveHubCache({ pulse: j }); }).catch(function () {});
   }
 
   // Tools open as their own pages (not in a frame) so Claude in Chrome can read and use them; the dock on each page leads back here.
@@ -435,8 +439,9 @@
   var DAY = null, showAllOverdue = false;
   function loadDay() {
     $("dayNote").textContent = "";
-    N.api("/api/nucleus/day").then(function (j) { if (!j.ok) throw new Error(j.message || "unavailable"); DAY = j; renderDay(); })
-      .catch(function () { $("todo").innerHTML = '<p class="n-day__empty">Couldn\'t load your day just now. <button type="button" class="n-linkbtn" data-day-retry>Try again</button></p>'; $("cal").innerHTML = ""; });
+    var c = N.hubCache(); if (c.day && c.day.today === new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" })) { DAY = c.day; renderDay(); $("dayNote").textContent = "Updating…"; }
+    N.api("/api/nucleus/day").then(function (j) { if (!j.ok) throw new Error(j.message || "unavailable"); DAY = j; renderDay(); $("dayNote").textContent = ""; N.saveHubCache({ day: j }); })
+      .catch(function () { if (DAY) { $("dayNote").textContent = "Couldn't refresh just now; showing your day as last loaded."; return; } $("todo").innerHTML = '<p class="n-day__empty">Couldn\'t load your day just now. <button type="button" class="n-linkbtn" data-day-retry>Try again</button></p>'; $("cal").innerHTML = ""; });
   }
   $("dayRefresh").onclick = loadDay;
   $("day").addEventListener("click", function (e) {
@@ -452,7 +457,7 @@
         if (!j.ok) throw new Error();
         var drop = function (arr) { return arr.filter(function (x) { return String(x.id) !== cb.dataset.done; }); };
         DAY.pipedrive.overdue = drop(DAY.pipedrive.overdue); DAY.pipedrive.today = drop(DAY.pipedrive.today); DAY.google.tasks = drop(DAY.google.tasks);
-        setTimeout(renderDay, 450); loadPulse();
+        setTimeout(renderDay, 450); N.saveHubCache({ day: DAY }); loadPulse();
       })
       .catch(function () { li.classList.remove("is-done"); cb.checked = false; cb.disabled = false; $("dayNote").textContent = "Couldn't mark that done. Try again, or open it in " + (cb.dataset.kind === "task" ? "Google Tasks." : "Pipedrive."); });
   });
@@ -642,9 +647,17 @@
   ro.observe($("atom"));
 
   /* ---------------- boot ---------------- */
+  // Fast start: if this browser was signed in last time, show the hub from what it remembers straight away,
+  // then check with the server. If the session has ended, the remembered view is cleared and sign-in is shown.
+  var cached = N.hubCache(), fast = !next && cached.user && cached.at && Date.now() - cached.at < 7 * 864e5;
+  if (fast) start(cached.user);
   Promise.all([N.api("/api/nucleus/me").catch(function () { return {}; }), N.api("/api/nucleus/config").catch(function () { return {}; })]).then(function (res) {
     var m = res[0] || {}, cfg = res[1] || {};
-    if (m.signedIn) { if (next) { location.replace(next); return; } start(m.user); return; }
+    if (fast) {
+      if (m.signedIn && m.user && m.user.id === cached.user.id && m.user.isAdmin === cached.user.isAdmin && m.user.salesHub === cached.user.salesHub) { N.saveHubCache({ user: m.user }); return; }
+      N.clearHubCache(); if (m.__status || m.signedIn === false) location.reload(); return;
+    }
+    if (m.signedIn) { N.saveHubCache({ user: m.user }); if (next) { location.replace(next); return; } start(m.user); return; }
     if (m.pending) { tokenScreen(m.user, m.reason); return; }
     if (cfg.google) googleScreen(); else tokenScreen(null);
   });

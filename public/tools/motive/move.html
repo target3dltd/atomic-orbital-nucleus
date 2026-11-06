@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Move the Motive tracker · Nucleus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/brand/css/plex.css">
+<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
+<script src="/nucleus/ao-skin/theme-sync.js"></script>
+<style>
+body{margin:0;background:var(--ao-bg);color:var(--ao-text)}
+main{max-width:780px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:clamp(28px,4vw,38px);margin:0 0 6px}
+.lede{color:var(--ao-muted);font-size:16px;margin:0 0 28px}
+section{background:var(--ao-surface);border:1px solid var(--ao-line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+h2{font-size:18px;margin:0 0 8px;display:flex;gap:10px;align-items:baseline}
+h2 b{font:600 13px var(--ao-font-mono);color:var(--ao-teal-text)}
+p,li{line-height:1.55}
+textarea{width:100%;min-height:120px;font:12.5px var(--ao-font-mono);padding:10px;border:1px solid var(--ao-line);border-radius:8px;background:var(--ao-bg);color:var(--ao-text)}
+input[type=url]{width:100%;padding:9px 10px;border:1px solid var(--ao-line);border-radius:8px;background:var(--ao-bg);color:var(--ao-text);font:inherit}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+table{border-collapse:collapse;width:100%;margin-top:10px;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--ao-line)} th{color:var(--ao-muted);font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.msg{margin-top:10px;font-weight:600} .msg.bad{color:#C2362B} .msg.ok{color:var(--ao-green)}
+.fine{font-size:13px;color:var(--ao-muted)}
+code{font:13px var(--ao-font-mono);background:var(--ao-sunk);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<main>
+  <p class="fine"><a href="/tools/motive/">← Motive licence renewals</a></p>
+  <h1>Move the Motive tracker into the Nucleus</h1>
+  <p class="lede">Brings everyone's sales owners, stages, notes, system names and email templates across from the old Motive Upgrade Planner site, without losing anything. Administrators only. Help · v1.0.0</p>
+
+  <section>
+    <h2><b>1</b> Get the latest data from the old site</h2>
+    <p>Enter the old site's address, then open its data. Your browser will ask for the old site's password if it doesn't remember it.</p>
+    <input type="url" id="old" placeholder="https://your-old-motive-site.netlify.app" autocomplete="off">
+    <div class="row"><a class="ao-btn ao-btn--secondary" id="openOld" href="#" target="_blank" rel="noopener">Open the old site's data</a></div>
+    <p class="fine">It opens as a page of text starting <code>{"ok":true,"collections":</code>. Select it all (Ctrl+A / ⌘A), copy, and paste it below. Or save it as a file and choose it below.</p>
+  </section>
+
+  <section>
+    <h2><b>2</b> Check what will change</h2>
+    <textarea id="data" placeholder="Paste the old site's data here"></textarea>
+    <div class="row"><input type="file" id="file" accept="application/json,.json"><button class="ao-btn ao-btn--secondary" id="check" type="button">Check</button></div>
+    <div id="report"></div>
+  </section>
+
+  <section>
+    <h2><b>3</b> Import</h2>
+    <p>For each record, the newer version wins (by when it was last changed); anything already only in the Nucleus is kept. You can run this as many times as you like: import now, then again just before you switch the old site off, to pick up last-minute changes.</p>
+    <div class="row"><button class="ao-btn" id="go" type="button" disabled>Import into the Nucleus</button></div>
+    <div id="result"></div>
+  </section>
+
+  <section>
+    <h2><b>✓</b> Keep a backup</h2>
+    <p>Download everything the Nucleus holds for the Motive tracker, before and after importing.</p>
+    <a class="ao-btn ao-btn--secondary" href="/api/motive/export">Download a backup</a>
+  </section>
+
+  <details class="fine"><summary>Help · v1.0.0</summary>
+    <ul>
+      <li>Who can use this page: Nucleus administrators (the <code>NUCLEUS_ADMINS</code> list in Netlify).</li>
+      <li>What moves: the campaign (sales owner, stage, notes), system names and assignments, email templates and settings. Licence data itself comes from the sheet and Pipedrive, so it doesn't need moving.</li>
+      <li>Each person picks their name in the Motive tool's “You are” menu once; the Nucleus then remembers it with their account on every device.</li>
+      <li>v1.0.0 (6 Nov 2026): first release.</li>
+    </ul>
+  </details>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); }, parsed = null;
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  try { $("old").value = localStorage.getItem("nucleus:motive-old") || ""; } catch (e) {}
+  function oldUrl() { var v = $("old").value.trim().replace(/\/+$/, ""); return /^https:\/\/[^/]+$/.test(v) ? v : ""; }
+  $("old").addEventListener("input", function () { try { localStorage.setItem("nucleus:motive-old", $("old").value.trim()); } catch (e) {} });
+  $("openOld").onclick = function (e) { var u = oldUrl(); if (!u) { e.preventDefault(); $("old").focus(); return; } this.href = u + "/api/state"; };
+  $("file").onchange = function () { var f = this.files[0]; if (!f) return; f.text().then(function (t) { $("data").value = t; check(); }); };
+  function table(rep) {
+    var names = { campaign: "Campaign (owner, stage, notes)", systems: "Systems", templates: "Email templates", meta: "Settings" };
+    return "<table><thead><tr><th>What</th><th class=n>New</th><th class=n>Newer in old site</th><th class=n>Newer here (kept)</th><th class=n>Same</th></tr></thead><tbody>" +
+      Object.keys(rep).map(function (k) { var r = rep[k]; return "<tr><td>" + esc(names[k] || k) + "</td><td class=n>" + r.added + "</td><td class=n>" + r.updated + "</td><td class=n>" + r.keptNewer + "</td><td class=n>" + r.same + "</td></tr>"; }).join("") + "</tbody></table>";
+  }
+  function send(dryRun) {
+    return fetch("/api/motive/import", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ collections: parsed.collections, dryRun: dryRun }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || !j.ok) throw new Error(j.message || j.error || "Import failed (" + r.status + ")"); return j; }); });
+  }
+  function check() {
+    $("go").disabled = true; $("result").innerHTML = "";
+    try { parsed = JSON.parse($("data").value); } catch (e) { $("report").innerHTML = '<p class="msg bad">That isn\'t the old site\'s data: it should start with {"ok":true,"collections":</p>'; return; }
+    if (!parsed || !parsed.collections) { $("report").innerHTML = '<p class="msg bad">No “collections” in that data. Copy the whole page from the old site\'s /api/state.</p>'; return; }
+    $("report").innerHTML = '<p class="fine">Checking…</p>';
+    send(true).then(function (j) { $("report").innerHTML = table(j.report); $("go").disabled = false; })
+      .catch(function (e) { $("report").innerHTML = '<p class="msg bad">' + esc(e.message) + "</p>"; });
+  }
+  $("check").onclick = check;
+  $("go").onclick = function () {
+    $("go").disabled = true; $("result").innerHTML = '<p class="fine">Importing…</p>';
+    send(false).then(function (j) { $("result").innerHTML = '<p class="msg ok">Imported.</p>' + table(j.report) + '<p class="fine">Open the Motive tool and press Refresh to see it.</p>'; })
+      .catch(function (e) { $("result").innerHTML = '<p class="msg bad">' + esc(e.message) + "</p>"; $("go").disabled = false; });
+  };
+})();
+</script>
+</body>
+</html>
