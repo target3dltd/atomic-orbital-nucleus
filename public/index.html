@@ -205,7 +205,7 @@
       <li><b>Jump back in</b> shows the last few things you opened on this device.</li>
       <li><b>Tools</b> are grouped by area: Sales &amp; CRM, Operations &amp; delivery, Company, Studio &amp; motion capture, and Marketing. <b>Project sites</b> and <b>Connected systems</b> (which open in a new tab) are listed alongside.</li>
       <li><b>Orbit view</b> (the spinning mark by the greeting) shows everything as an atom: tools and marketing on the inner ring, project sites in the middle, connected systems on the dotted outer ring. Hover or press <i>Pause orbits</i> to stop it; it stands still if your device is set to reduce motion.</li>
-      <li>Tools open inside the Nucleus with a bar at the top: <i>Nucleus</i> takes you home, the menu jumps to another tool, and <i>Open on its own</i> opens the tool full-screen in a new tab. The last four tools you switched between stay loaded, so going back to one is instant and keeps your place; Back and Forward work too.</li>
+      <li>Tools open as their own pages. The <b>Nucleus dock</b> in the bottom-right corner of every tool takes you home, jumps to another tool, and has <b>Ask Claude</b>: questions that suit that page, to paste into <b>Claude in Chrome</b> (Anthropic's browser extension, on your Claude Team seat). Claude reads the page you're on, so open the tool first.</li>
       <li>The figures under the greeting come live from Pipedrive for you: your open deals and their value, your overdue and due-today activities, and the whole team's open pipeline.</li>
     </ul>
 
@@ -367,6 +367,7 @@
     var h = new Date().getHours(), first = String(user.name || "").split(" ")[0];
     $("greetH").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "");
     renderHome(); loadPulse(); loadDay();
+    if (!window.__nucleusDock) { var ds = document.createElement("script"); ds.src = "/nucleus/dock.js"; document.body.appendChild(ds); }
   }
 
   function loadPulse() {
@@ -377,7 +378,8 @@
     }).catch(function () {});
   }
 
-  function hrefFor(it) { return it.status === "external" ? it.href : "/launch.html?t=" + encodeURIComponent(it.id); }
+  // Tools open as their own pages (not in a frame) so Claude in Chrome can read and use them; the dock on each page leads back here.
+  function hrefFor(it) { return it.href; }
   function activate(it, ev) {
     if (it.status === "awaiting") { if (ev) ev.preventDefault(); showItem(it); }
   }
@@ -417,7 +419,7 @@
   var warmed = {};
   function warm(it) {
     if (!it || it.status !== "live" || warmed[it.id]) return; warmed[it.id] = 1;
-    [it.href, "/launch.html"].forEach(function (h) { var l = document.createElement("link"); l.rel = "prefetch"; l.href = h; document.head.appendChild(l); });
+    [it.href].forEach(function (h) { var l = document.createElement("link"); l.rel = "prefetch"; l.href = h; document.head.appendChild(l); });
   }
   var warmT = 0;
   $("hub").addEventListener("pointerover", function (e) { var a = e.target.closest("a[data-id]"); clearTimeout(warmT); if (a) warmT = setTimeout(function () { warm(N.item(a.dataset.id)); }, 80); });

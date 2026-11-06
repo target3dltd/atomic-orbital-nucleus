@@ -369,7 +369,15 @@ await t("caching: tool pages revalidate, assets keep a day, links are versioned 
   const toml = fs.readFileSync(path.join(root, "netlify.toml"), "utf8"); ok(!/no-store/.test(toml));
   ok(fs.readFileSync(path.join(root, "build/protect.mjs"), "utf8").includes("stampVersions"));
 });
-await t("tool shell keeps recently used tools loaded", async () => { const h = pub("launch.html"); ok(h.includes("var KEEP = 4") && h.includes("popstate")); });
+await t("tools open as their own pages with the dock; old launch links redirect", async () => {
+  ok(pub("launch.html").includes("location.replace(it ? it.href"));
+  ok(pub("index.html").includes("function hrefFor(it) { return it.href; }"));
+  const w = {}; new Function("window", pub("nucleus/registry.js"))(w);
+  for (const it of w.NUCLEUS_REGISTRY.items.filter((i) => i.status === "live")) ok(w.NUCLEUS_ASK[it.id] && w.NUCLEUS_ASK[it.id].length >= 3, "questions for " + it.id);
+  ok(w.NUCLEUS_ASK.hub.length >= 3);
+  const prot = fs.readFileSync(path.join(root, "build/protect.mjs"), "utf8"); ok(prot.includes("addDock()") && prot.includes("viewer.html"));
+  ok(pub("nucleus/dock.js").includes("window.top !== window"));
+});
 await t("every live registry entry has an index.html", async () => {
   const src = pub("nucleus/registry.js"); const w = {}; new Function("window", src)(w);
   for (const i of w.NUCLEUS_REGISTRY.items) if (i.status === "live") ok(fs.existsSync(path.join(root, "public", i.href, i.href.endsWith(".html") ? "" : "index.html")), i.href);

@@ -4,83 +4,17 @@
 <meta charset="utf-8">
 <title>Nucleus</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/brand/logos/favicon/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/brand/fonts/SpaceGrotesk-SemiBold-Latin.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="/brand/css/plex.css">
-<link rel="stylesheet" href="/brand/css/atomic-orbital.css">
-<link rel="stylesheet" href="/nucleus/nucleus.css">
-<script>try{var s=localStorage.getItem('theme');document.documentElement.dataset.theme=s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
-<script src="/nucleus/nucleus.js"></script>
 <script src="/nucleus/registry.js"></script>
-</head>
-<body class="n-shell">
-  <div class="n-shellbar">
-    <a class="home" href="/" title="Back to the Nucleus"><span id="mk"></span><span class="hide-sm">Nucleus</span></a>
-    <div class="title" id="title"></div>
-    <label class="n-sr" for="jump">Go to another tool</label>
-    <select id="jump" class="hide-sm"></select>
-    <a class="n-iconbtn" id="solo" target="_blank" rel="noopener" title="Open on its own in a new tab"><span id="extIcon"></span><span class="hide-sm">Open on its own</span></a>
-    <button class="n-iconbtn" id="themeBtn" type="button"></button>
-  </div>
-  <div class="n-frames" id="frames"></div>
-  <div class="n-await" id="missing" hidden><div class="ao-card" style="max-width:520px"><h3 id="mH">Not found</h3><p id="mP" style="margin-top:8px"></p><p style="margin-top:16px"><a class="ao-btn ao-btn--secondary" href="/">Back to the Nucleus</a></p></div></div>
 <script>
-(function () {
-  var N = window.Nucleus, R = window.NUCLEUS_REGISTRY, $ = function (id) { return document.getElementById(id); }, esc = N.esc;
-  $("mk").innerHTML = N.mark(28); $("extIcon").innerHTML = N.ICONS.ext;
-  N.bindThemeButton($("themeBtn"));
-  var id = new URLSearchParams(location.search).get("t");
-
-  var opts = R.items.filter(function (i) { return i.status === "live"; });
-  $("jump").innerHTML = '<option value="">Go to…</option>' + R.orbits.map(function (o) {
-    var g = opts.filter(function (i) { return i.orbit === o.id; });
-    return g.length ? '<optgroup label="' + esc(o.name) + '">' + g.map(function (i) { return '<option value="' + esc(i.id) + '">' + esc(i.name) + "</option>"; }).join("") + "</optgroup>" : "";
-  }).join("");
-
-  // Tools you switch between stay loaded (up to KEEP of them), so going back to one is instant and keeps its state.
-  var KEEP = 4, frames = {}, order = [];
-  function frameFor(it) {
-    if (frames[it.id]) { order = order.filter(function (x) { return x !== it.id; }); order.push(it.id); return frames[it.id]; }
-    var f = document.createElement("iframe");
-    f.className = "n-frame"; f.title = it.name; f.allow = "clipboard-read; clipboard-write; fullscreen; camera; microphone"; f.allowFullscreen = true;
-    f.src = it.href;
-    $("frames").appendChild(f); frames[it.id] = f; order.push(it.id);
-    while (order.length > KEEP) { var old = order.shift(); frames[old].remove(); delete frames[old]; }
-    return f;
-  }
-  function show(newId, push) {
-    var it = N.item(newId);
-    $("jump").value = it && it.status === "live" ? newId : "";
-    Object.keys(frames).forEach(function (k) { frames[k].hidden = true; });
-    $("missing").hidden = true; $("solo").hidden = false;
-    if (!it || it.status === "external") {
-      document.title = "Not found · Nucleus"; $("title").textContent = "Not found"; $("missing").hidden = false; $("solo").hidden = true;
-      $("mH").textContent = "Not found"; $("mP").textContent = "There's no tool called “" + (newId || "") + "” in the Nucleus.";
-      return;
-    }
-    document.title = it.name + " · Nucleus";
-    $("title").innerHTML = esc(it.name) + "<small>" + esc((R.orbits.filter(function (o) { return o.id === it.orbit; })[0] || {}).name || "") + "</small>";
-    $("solo").href = it.href;
-    if (it.status !== "live") {
-      $("solo").hidden = true; $("mH").textContent = it.name; $("missing").hidden = false;
-      $("mP").textContent = "This slot is reserved, but the tool's code hasn't been added to the Nucleus yet.";
-      return;
-    }
-    N.addRecent(it.id);
-    frameFor(it).hidden = false;
-    if (push) history.pushState({ t: it.id }, "", "/launch.html?t=" + encodeURIComponent(it.id));
-  }
-  $("jump").onchange = function () { if (this.value) show(this.value, true); };
-  window.addEventListener("popstate", function () { show(new URLSearchParams(location.search).get("t"), false); });
-  show(id, false);
-
-  // A tool can tell the shell its session has ended
-  window.addEventListener("message", function (e) {
-    if (e.origin === location.origin && e.data && e.data.nucleus === "signed-out") location.href = "/?next=" + encodeURIComponent(location.pathname + location.search);
-  });
-})();
+  // Old links (/launch.html?t=<tool>) now go straight to the tool's own page. Since v1.12.0 tools open as their own
+  // pages rather than inside a frame, so Claude in Chrome can read and use them; each page has the Nucleus dock.
+  (function () {
+    var id = new URLSearchParams(location.search).get("t"), R = window.NUCLEUS_REGISTRY || { items: [] };
+    var it = R.items.filter(function (i) { return i.id === id && i.status === "live"; })[0];
+    location.replace(it ? it.href : "/");
+  })();
 </script>
-</body>
+</head>
+<body><p><a href="/">Back to the Nucleus</a></p></body>
 </html>

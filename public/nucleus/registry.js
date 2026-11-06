@@ -23,7 +23,7 @@ window.NUCLEUS_REGISTRY = {
     { id: "process-map", area: "operations", short: "The deal-to-project map: phases, rules, naming and tools", orbit: "tools", icon: "flow", status: "live", name: "Operations processes",
       href: "/tools/process-map/", tags: ["Operations", "Process"],
       desc: "The deal-to-project process map: five phases, the rules, naming and IDs, and which tools are used at each step.",
-      links: [{ label: "Checklists & templates", href: "/launch.html?t=checklists", internal: true }, { label: "Operations site (Google)", href: "https://sites.google.com/target3d.co.uk/operations" }] },
+      links: [{ label: "Checklists & templates", href: "/tools/checklists/", internal: true }, { label: "Operations site (Google)", href: "https://sites.google.com/target3d.co.uk/operations" }] },
     { id: "checklists", area: "operations", short: "19 checklists, reports and templates by phase", orbit: "tools", icon: "check", status: "live", name: "Checklists & templates",
       href: "/tools/checklists/", tags: ["Operations", "Templates"],
       desc: "The 19 operations checklists, reports and templates, from enquiry qualification to install sign-off and support, grouped by process phase." },
@@ -79,5 +79,85 @@ window.NUCLEUS_REGISTRY = {
       href: "https://app.netlify.com/", tags: ["Hosting"], desc: "Where the Nucleus and its tools are hosted." },
     { id: "claude", short: "AI", orbit: "systems", icon: "spark", status: "external", name: "Claude",
       href: "https://claude.ai/", tags: ["AI"], desc: "Where new tools for the Nucleus are drafted." }
+  ]
+};
+
+// Suggested questions for Claude in Chrome, by page (shown in the Nucleus dock's "Ask Claude" panel).
+// Keep them about what's on screen: Claude in Chrome reads the page you're looking at.
+window.NUCLEUS_ASK = {
+  hub: [
+    "What's overdue in my day, and what should I tackle first?",
+    "Summarise my Pipedrive figures at the top of this page in two sentences.",
+    "Which Nucleus tool should I use to price a mocap system for a university?"
+  ],
+  "process-map": [
+    "Walk me through what has to happen between a deal being won and the project kicking off.",
+    "Which steps on this page are the account manager's responsibility?",
+    "What's the naming convention for a new project, with an example?"
+  ],
+  checklists: [
+    "Which checklists apply before an installation visit? List them with what each covers.",
+    "Find the template I need for a project handover and open it.",
+    "What's on the commissioning checklist that people most often miss?"
+  ],
+  "system-designer": [
+    "Explain the camera layout on screen: coverage, camera count and any blind spots.",
+    "Turn the current kit list into a short summary I can paste into an email to the client.",
+    "What would change if the volume were 2 metres longer? Adjust it and show me."
+  ],
+  "sow-builder": [
+    "Fill in the scope section from what's already entered, in our usual tone.",
+    "Check this SOW for missing information or anything inconsistent before I send it.",
+    "Summarise the deliverables and timeline on this page as five bullet points."
+  ],
+  "duplicate-eraser": [
+    "Which of the suggested duplicate groups look safest to merge, and why?",
+    "Explain what will happen to people and deals if I merge the selected organisations.",
+    "List the groups that need a human check because the names differ a lot."
+  ],
+  motive: [
+    "Which Motive licences expire in the next 60 days, and who are the customers?",
+    "Draft a friendly renewal reminder for the first customer in the list.",
+    "Summarise the campaign tracker: how many renewals are won, pending and lost?"
+  ],
+  "mocap-toolkit": [
+    "What does this page tell me about the quality of the loaded take?",
+    "Explain the gap-filling options here and which suits a dropped marker.",
+    "Summarise the analysis results as notes for the client."
+  ],
+  "sales-hub": [
+    "Which deals on this page are past their close date, who owns them, and what's the total value?",
+    "Are we ahead of or behind the minimum pace this year, and by how much?",
+    "In Pipeline Triage, list the Hot deals with their next action."
+  ],
+  "team-performance": [
+    "Summarise where the company stands against plan from this page.",
+    "Which commitments are overdue and who owns them?",
+    "What does the revenue chart say about the second half of the year?"
+  ],
+  "support-dashboard": [
+    "Which support threads are waiting on us, oldest first?",
+    "Which open tickets have been idle longest, and who should pick them up?",
+    "Draft a short holding reply for the oldest unanswered support@ thread."
+  ],
+  "press-kit": [
+    "Which logo file should I use on a dark slide, and where do I download it?",
+    "Give me our company boilerplate in under 60 words.",
+    "What are our brand colours with their hex codes?"
+  ],
+  clays: [
+    "Summarise the systems installed at Clays and where they are.",
+    "Find the support contact and documents for the Clays installation.",
+    "What's still open or outstanding on this project page?"
+  ],
+  drift: [
+    "Explain the Drift tracking setup on this page in plain English.",
+    "List the hardware on this project with quantities.",
+    "What are the key contacts and dates for Drift?"
+  ],
+  lle: [
+    "Summarise the three OptiTrack systems at Little Lion and what each is for.",
+    "List the open support items or RMAs for Little Lion on this page.",
+    "What's the R&D rig and how is it set up?"
   ]
 };

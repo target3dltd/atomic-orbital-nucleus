@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.11.0";
+  N.VERSION = "1.12.0";
   N.CHANGELOG = [
+    ["v1.12.0", "2026-11-06", "Claude in Chrome works with the Nucleus. Tools and project sites now open as their own pages (not inside a frame), so Claude in Chrome can read and use them on your Claude Team seat. Every page has a small Nucleus dock in the bottom corner: back home, jump to another tool, and Ask Claude, with suggested questions for that page and how to open Claude in Chrome."],
     ["v1.11.0", "2026-11-06", "Your day, on the home page: your Pipedrive activities overdue and due today, with a tick box to mark each done. Connect Google once to add today's calendar (with Join for Meet calls) and your Google Tasks due today or overdue, which you can tick off too. The Nucleus only reads your calendar and tasks, never your email, and Disconnect removes the access."],
     ["v1.10.1", "2026-11-06", "Team performance is readable in dark mode: the banners, table headers, total rows and charts now follow the theme (charts redraw when you switch)."],
     ["v1.10.0", "2026-11-06", "Faster. Pages and tools are now kept by your browser and only re-downloaded when they change (before, every visit downloaded every tool in full, up to 2.5 MB each). Scripts and styles are stamped with a version so updates still arrive straight away. Switching tools with the menu in the top bar keeps your last four tools loaded, so going back is instant and keeps your place, and Back/Forward work. Tools start loading as soon as you point at them on the home page."],

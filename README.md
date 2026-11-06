@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.11.0)
+# Atomic Orbital Nucleus (v1.12.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -19,6 +19,14 @@ The hub is a launcher: greeting and your Pipedrive figures, a search bar (also `
 
 In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one-line `short` for its tile, and optionally `featured: true` to lead its area and `links` (sub-pages that search can open directly, as the Sales reports do).
 
+## Claude in Chrome (v1.12.0)
+
+Claude runs on the Nucleus through **Claude in Chrome** (Anthropic's extension, included in the Claude Team plan), so usage is on each person's Team seat; Nucleus never handles Claude accounts or API keys. Building a chat into the site that uses Team/Pro logins isn't allowed by Anthropic's terms.
+
+- Tools and project sites open as **their own pages** (Claude in Chrome can't read inside a frame); `/launch.html?t=<id>` now just redirects.
+- The build (`addDock` in `build/protect.mjs`) adds **`/nucleus/dock.js`** to every page under `tools/` and `projects/` (not the public System Designer viewer). The dock (v1.0.0) has Nucleus home, a tool switcher, and **Ask Claude**: suggested questions per page from `window.NUCLEUS_ASK` in `registry.js`, with copy buttons and install steps.
+- Admin: in Claude's Organisation settings → Claude in Chrome, keep it enabled and add `atomic-orbital.netlify.app` to the allowlist if you use one.
+
 ## Your day (v1.11.0)
 
 The home page's **Your day** panel (`netlify/functions/nucleus-day.mjs`, `/api/nucleus/day`) shows each person's own:
@@ -31,7 +39,6 @@ Connecting asks Google for `calendar.readonly` and `tasks` (offline access, so i
 
 - **Caching.** Tool and project pages are `private, no-cache` (the browser keeps them and gets a quick 304 when unchanged); their images, fonts, documents, scripts and styles are `private, max-age=86400`. These are set by the gate (`cacheFor` in `gate.js`), so caching never bypasses sign-in. `/nucleus/*` is cached a day and `/brand/*` a week (`netlify.toml`). Nothing is `no-store` any more.
 - **Versioned links.** The build (`stampVersions` in `build/protect.mjs`) adds `?v=<content hash>` to every local `.js`/`.css` link in every page, so a deploy that changes a script is picked up immediately despite the caching.
-- **Tool shell.** `launch.html` keeps the last four tools as hidden iframes; switching with the menu shows the kept one instantly and updates the address (Back/Forward work).
 - **Prefetch.** Pointing at a tool on the home page prefetches its page.
 - Still heavy on first visit: Drift (2.4 MB), System Designer (2.1 MB), Mocap Toolkit (1.6 MB) and Clays (1.5 MB) are single files with images embedded. Moving their images out to separate files would make first loads much quicker.
 

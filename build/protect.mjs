@@ -59,8 +59,25 @@ async function build() {
     }
   }
   console.log(`Nucleus build → dist/ : ${min} minified, ${copied} copied${failed ? ", " + failed + " kept as-is" : ""}.`);
+  addDock();
   stampVersions();
 }
+// The Nucleus dock (home, switch tool, Ask Claude) goes on every tool and project page, just before </body>.
+// Pages that are public on purpose (the System Designer share viewer) don't get it.
+function addDock() {
+  const TAG = '<script src="/nucleus/dock.js" defer></script>';
+  let n = 0;
+  for (const abs of walk(OUT)) {
+    const rel = relative(OUT, abs).split("\\").join("/");
+    if (!/^(tools|projects)\/.+\.html$/.test(rel) || rel === "tools/system-designer/viewer.html") continue;
+    const html = readFileSync(abs, "utf8");
+    if (html.includes("/nucleus/dock.js")) continue;
+    const i = html.toLowerCase().lastIndexOf("</body>");
+    writeFileSync(abs, i >= 0 ? html.slice(0, i) + TAG + html.slice(i) : html + TAG); n++;
+  }
+  console.log(`  added the Nucleus dock to ${n} pages`);
+}
+
 // Cache-busting: every local .js/.css link in a page gets ?v=<hash of that file>, so browsers can keep
 // scripts and styles for a day yet always fetch the new one after a deploy that changed it.
 function stampVersions() {
