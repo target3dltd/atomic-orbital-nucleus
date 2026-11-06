@@ -19,20 +19,25 @@
     Referrer-Policy = "same-origin"
     X-Robots-Tag = "noindex, nofollow"
 
+# Caching (no two rules below match the same file, so values never combine).
+# Tools and project sites get their cache headers from the gate (netlify/edge-functions/gate.js).
+# Pages: kept by the browser but re-checked every time (a fast 304 when unchanged).
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "no-store"
+    Cache-Control = "no-cache"
 
+# Nucleus scripts and styles: links carry ?v=<content hash> from the build, so a day is safe.
 [[headers]]
-  for = "/tools/*"
+  for = "/nucleus/*"
   [headers.values]
-    Cache-Control = "no-store"
+    Cache-Control = "public, max-age=86400"
 
+# Brand fonts, logos and style sheet rarely change.
 [[headers]]
-  for = "/projects/*"
+  for = "/brand/*"
   [headers.values]
-    Cache-Control = "no-store"
+    Cache-Control = "public, max-age=604800"
 
 [[redirects]]
   from = "/help"

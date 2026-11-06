@@ -319,6 +319,14 @@ await t("home page: every tool has a known area and a short summary; privacy pag
   ok(fs.existsSync(path.join(root, "public/privacy.html")));
   ok(!gate.config.path.some((g) => new RegExp("^" + g.replace(/\*/g, ".*") + "$").test("/privacy.html")), "privacy page must not be behind the gate");
 });
+await t("caching: tool pages revalidate, assets keep a day, links are versioned by the build", async () => {
+  eq(gate.cacheFor("/tools/system-designer/"), "private, no-cache");
+  eq(gate.cacheFor("/tools/team-dashboards/core.js"), "private, max-age=86400");
+  eq(gate.cacheFor("/projects/drift/img/a.webp"), "private, max-age=86400");
+  const toml = fs.readFileSync(path.join(root, "netlify.toml"), "utf8"); ok(!/no-store/.test(toml));
+  ok(fs.readFileSync(path.join(root, "build/protect.mjs"), "utf8").includes("stampVersions"));
+});
+await t("tool shell keeps recently used tools loaded", async () => { const h = pub("launch.html"); ok(h.includes("var KEEP = 4") && h.includes("popstate")); });
 await t("every live registry entry has an index.html", async () => {
   const src = pub("nucleus/registry.js"); const w = {}; new Function("window", src)(w);
   for (const i of w.NUCLEUS_REGISTRY.items) if (i.status === "live") ok(fs.existsSync(path.join(root, "public", i.href, i.href.endsWith(".html") ? "" : "index.html")), i.href);

@@ -186,7 +186,7 @@
       <li><b>Jump back in</b> shows the last few things you opened on this device.</li>
       <li><b>Tools</b> are grouped by area: Sales &amp; CRM, Operations &amp; delivery, Company, Studio &amp; motion capture, and Marketing. <b>Project sites</b> and <b>Connected systems</b> (which open in a new tab) are listed alongside.</li>
       <li><b>Orbit view</b> (the spinning mark by the greeting) shows everything as an atom: tools and marketing on the inner ring, project sites in the middle, connected systems on the dotted outer ring. Hover or press <i>Pause orbits</i> to stop it; it stands still if your device is set to reduce motion.</li>
-      <li>Tools open inside the Nucleus with a bar at the top: <i>Nucleus</i> takes you home, the menu jumps to another tool, and <i>Open on its own</i> opens the tool full-screen in a new tab.</li>
+      <li>Tools open inside the Nucleus with a bar at the top: <i>Nucleus</i> takes you home, the menu jumps to another tool, and <i>Open on its own</i> opens the tool full-screen in a new tab. The last four tools you switched between stay loaded, so going back to one is instant and keeps your place; Back and Forward work too.</li>
       <li>The figures under the greeting come live from Pipedrive for you: your open deals and their value, your overdue and due-today activities, and the whole team's open pipeline.</li>
     </ul>
 
@@ -391,6 +391,15 @@
     $("recentWrap").hidden = !list.length;
     $("recent").innerHTML = list.map(function (it) { return '<a class="n-chip" ' + linkAttrs(it) + ">" + icon(it) + "<span>" + esc(it.name) + "</span></a>"; }).join("");
   }
+  // Warm the browser cache for a tool when the pointer rests on it, so it opens faster.
+  var warmed = {};
+  function warm(it) {
+    if (!it || it.status !== "live" || warmed[it.id]) return; warmed[it.id] = 1;
+    [it.href, "/launch.html"].forEach(function (h) { var l = document.createElement("link"); l.rel = "prefetch"; l.href = h; document.head.appendChild(l); });
+  }
+  var warmT = 0;
+  $("hub").addEventListener("pointerover", function (e) { var a = e.target.closest("a[data-id]"); clearTimeout(warmT); if (a) warmT = setTimeout(function () { warm(N.item(a.dataset.id)); }, 80); });
+  $("hub").addEventListener("focusin", function (e) { var a = e.target.closest("a[data-id]"); if (a) warm(N.item(a.dataset.id)); });
   $("hub").addEventListener("click", function (e) {
     var a = e.target.closest("a[data-id]"); if (!a) return;
     var it = N.item(a.dataset.id); if (!it) return;

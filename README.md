@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.9.0)
+# Atomic Orbital Nucleus (v1.10.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -19,6 +19,14 @@ The hub is a launcher: greeting and your Pipedrive figures, a search bar (also `
 
 In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one-line `short` for its tile, and optionally `featured: true` to lead its area and `links` (sub-pages that search can open directly, as the Sales reports do).
 
+## Speed (v1.10.0)
+
+- **Caching.** Tool and project pages are `private, no-cache` (the browser keeps them and gets a quick 304 when unchanged); their images, fonts, documents, scripts and styles are `private, max-age=86400`. These are set by the gate (`cacheFor` in `gate.js`), so caching never bypasses sign-in. `/nucleus/*` is cached a day and `/brand/*` a week (`netlify.toml`). Nothing is `no-store` any more.
+- **Versioned links.** The build (`stampVersions` in `build/protect.mjs`) adds `?v=<content hash>` to every local `.js`/`.css` link in every page, so a deploy that changes a script is picked up immediately despite the caching.
+- **Tool shell.** `launch.html` keeps the last four tools as hidden iframes; switching with the menu shows the kept one instantly and updates the address (Back/Forward work).
+- **Prefetch.** Pointing at a tool on the home page prefetches its page.
+- Still heavy on first visit: Drift (2.4 MB), System Designer (2.1 MB), Mocap Toolkit (1.6 MB) and Clays (1.5 MB) are single files with images embedded. Moving their images out to separate files would make first loads much quicker.
+
 ## What's in this folder
 
 | Path | What it is |
@@ -37,7 +45,7 @@ In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (78 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (80 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 

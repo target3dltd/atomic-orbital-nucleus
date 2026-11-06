@@ -6,7 +6,8 @@
 //   - everything else (fonts, images, PDFs, docx, zips, vendor libs): copied unchanged
 // Each file is handled on its own; if a minify ever fails, the original is copied so nothing breaks.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync } from "node:fs";
-import { join, dirname, extname, relative } from "node:path";
+import { join, dirname, extname, relative, resolve } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { minify as terser } from "terser";
 import { minify as htmlmin } from "html-minifier-terser";
@@ -58,5 +59,27 @@ async function build() {
     }
   }
   console.log(`Nucleus build → dist/ : ${min} minified, ${copied} copied${failed ? ", " + failed + " kept as-is" : ""}.`);
+  stampVersions();
 }
+// Cache-busting: every local .js/.css link in a page gets ?v=<hash of that file>, so browsers can keep
+// scripts and styles for a day yet always fetch the new one after a deploy that changed it.
+function stampVersions() {
+  const hashes = new Map();
+  const hashOf = (abs) => { if (!hashes.has(abs)) hashes.set(abs, createHash("sha1").update(readFileSync(abs)).digest("hex").slice(0, 10)); return hashes.get(abs); };
+  let n = 0;
+  for (const abs of walk(OUT)) {
+    if (extname(abs).toLowerCase() !== ".html") continue;
+    const html = readFileSync(abs, "utf8");
+    const out = html.replace(/\b(src|href)=(["']?)([^"'\s>]+\.(?:js|css))(\2)/gi, (m, attr, q, url, q2) => {
+      if (/^(?:[a-z]+:)?\/\//i.test(url) || url.startsWith("data:")) return m;
+      const file = url.startsWith("/") ? join(OUT, url) : resolve(dirname(abs), url);
+      if (!file.startsWith(OUT)) return m;
+      try { statSync(file); } catch (e) { return m; }
+      n++; return `${attr}=${q}${url}?v=${hashOf(file)}${q2}`;
+    });
+    if (out !== html) writeFileSync(abs, out);
+  }
+  console.log(`  versioned ${n} script and style links`);
+}
+
 build();

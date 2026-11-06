@@ -24,36 +24,57 @@
     <a class="n-iconbtn" id="solo" target="_blank" rel="noopener" title="Open on its own in a new tab"><span id="extIcon"></span><span class="hide-sm">Open on its own</span></a>
     <button class="n-iconbtn" id="themeBtn" type="button"></button>
   </div>
-  <iframe class="n-frame" id="frame" title="Tool" allow="clipboard-read; clipboard-write; fullscreen; camera; microphone" allowfullscreen hidden></iframe>
+  <div class="n-frames" id="frames"></div>
   <div class="n-await" id="missing" hidden><div class="ao-card" style="max-width:520px"><h3 id="mH">Not found</h3><p id="mP" style="margin-top:8px"></p><p style="margin-top:16px"><a class="ao-btn ao-btn--secondary" href="/">Back to the Nucleus</a></p></div></div>
 <script>
 (function () {
   var N = window.Nucleus, R = window.NUCLEUS_REGISTRY, $ = function (id) { return document.getElementById(id); }, esc = N.esc;
   $("mk").innerHTML = N.mark(28); $("extIcon").innerHTML = N.ICONS.ext;
   N.bindThemeButton($("themeBtn"));
-  var id = new URLSearchParams(location.search).get("t"), it = N.item(id); if (it && it.status !== "awaiting") N.addRecent(it.id);
+  var id = new URLSearchParams(location.search).get("t");
 
   var opts = R.items.filter(function (i) { return i.status === "live"; });
   $("jump").innerHTML = '<option value="">Go to…</option>' + R.orbits.map(function (o) {
     var g = opts.filter(function (i) { return i.orbit === o.id; });
-    return g.length ? '<optgroup label="' + esc(o.name) + '">' + g.map(function (i) { return '<option value="' + esc(i.id) + '"' + (i.id === id ? " selected" : "") + ">" + esc(i.name) + "</option>"; }).join("") + "</optgroup>" : "";
+    return g.length ? '<optgroup label="' + esc(o.name) + '">' + g.map(function (i) { return '<option value="' + esc(i.id) + '">' + esc(i.name) + "</option>"; }).join("") + "</optgroup>" : "";
   }).join("");
-  $("jump").onchange = function () { if (this.value) location.href = "/launch.html?t=" + encodeURIComponent(this.value); };
 
-  if (!it || it.status === "external") {
-    $("title").textContent = "Not found"; $("missing").hidden = false; $("solo").hidden = true;
-    $("mP").textContent = "There's no tool called “" + (id || "") + "” in the Nucleus.";
-    return;
+  // Tools you switch between stay loaded (up to KEEP of them), so going back to one is instant and keeps its state.
+  var KEEP = 4, frames = {}, order = [];
+  function frameFor(it) {
+    if (frames[it.id]) { order = order.filter(function (x) { return x !== it.id; }); order.push(it.id); return frames[it.id]; }
+    var f = document.createElement("iframe");
+    f.className = "n-frame"; f.title = it.name; f.allow = "clipboard-read; clipboard-write; fullscreen; camera; microphone"; f.allowFullscreen = true;
+    f.src = it.href;
+    $("frames").appendChild(f); frames[it.id] = f; order.push(it.id);
+    while (order.length > KEEP) { var old = order.shift(); frames[old].remove(); delete frames[old]; }
+    return f;
   }
-  document.title = it.name + " · Nucleus";
-  $("title").innerHTML = esc(it.name) + "<small>" + esc((R.orbits.filter(function (o) { return o.id === it.orbit; })[0] || {}).name || "") + "</small>";
-  $("solo").href = it.href;
-  if (it.status !== "live") {
-    $("solo").hidden = true; $("mH").textContent = it.name; $("missing").hidden = false;
-    $("mP").textContent = "This slot is reserved, but the tool's code hasn't been added to the Nucleus yet.";
-    return;
+  function show(newId, push) {
+    var it = N.item(newId);
+    $("jump").value = it && it.status === "live" ? newId : "";
+    Object.keys(frames).forEach(function (k) { frames[k].hidden = true; });
+    $("missing").hidden = true; $("solo").hidden = false;
+    if (!it || it.status === "external") {
+      document.title = "Not found · Nucleus"; $("title").textContent = "Not found"; $("missing").hidden = false; $("solo").hidden = true;
+      $("mH").textContent = "Not found"; $("mP").textContent = "There's no tool called “" + (newId || "") + "” in the Nucleus.";
+      return;
+    }
+    document.title = it.name + " · Nucleus";
+    $("title").innerHTML = esc(it.name) + "<small>" + esc((R.orbits.filter(function (o) { return o.id === it.orbit; })[0] || {}).name || "") + "</small>";
+    $("solo").href = it.href;
+    if (it.status !== "live") {
+      $("solo").hidden = true; $("mH").textContent = it.name; $("missing").hidden = false;
+      $("mP").textContent = "This slot is reserved, but the tool's code hasn't been added to the Nucleus yet.";
+      return;
+    }
+    N.addRecent(it.id);
+    frameFor(it).hidden = false;
+    if (push) history.pushState({ t: it.id }, "", "/launch.html?t=" + encodeURIComponent(it.id));
   }
-  var f = $("frame"); f.hidden = false; f.title = it.name; f.src = it.href;
+  $("jump").onchange = function () { if (this.value) show(this.value, true); };
+  window.addEventListener("popstate", function () { show(new URLSearchParams(location.search).get("t"), false); });
+  show(id, false);
 
   // A tool can tell the shell its session has ended
   window.addEventListener("message", function (e) {

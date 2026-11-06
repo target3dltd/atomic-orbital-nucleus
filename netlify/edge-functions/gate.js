@@ -14,6 +14,16 @@ const deny = (title = "Administrators only", text = "This page is only open to N
 <p style="margin-top:20px"><a class="ao-btn ao-btn--secondary" href="${back[0]}">${back[1]}</a></p></main></body></html>`,
   { status: 403, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
 
+// Caching for signed-in visitors. Everything is "private" (kept in the person's own browser, never in a shared cache),
+// so the gate still decides who sees what.
+//   pages: kept, but checked with the server each time (a quick "not modified" when nothing changed)
+//   scripts and styles: the build stamps their links with ?v=<content hash>, so they can be kept for a day
+//   images, fonts, documents: kept for a day
+export function cacheFor(path) {
+  if (/\.(js|css|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|mp4|webm|pdf|docx|xlsx|pptx|zip|glb|gltf|fbx|bvh|c3d)$/i.test(path)) return "private, max-age=86400";
+  return "private, no-cache";
+}
+
 export default async (request, context) => {
   let s = null;
   try { s = await sessionFrom(request); } catch (e) { s = null; }
@@ -21,7 +31,9 @@ export default async (request, context) => {
   if (s) {
     if (ADMIN_ONLY.includes(url.pathname) && !isAdmin(s)) return deny();
     if ((url.pathname + "/").startsWith(SALES_HUB) && !canUseSalesHub(s)) return deny("Sales Hub", "The Sales Hub is open to the sales team and administrators. If you need it, ask an administrator to add your email to the Sales Hub list.", ["/", "Back to the Nucleus"]);
-    return context.next();
+    const res = await context.next();
+    try { res.headers.set("cache-control", cacheFor(url.pathname)); } catch (e) {}
+    return res;
   }
   const next = url.pathname + url.search + url.hash;
   return new Response(null, { status: 302, headers: { location: "/?next=" + encodeURIComponent(next), "cache-control": "no-store" } });
