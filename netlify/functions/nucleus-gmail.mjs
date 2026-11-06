@@ -10,7 +10,7 @@
 import crypto from "node:crypto";
 import { sessionFrom, envGet, jsonResponse as json } from "../lib/session.mjs";
 
-export const DEFAULT_QUERY = '(to:support@target3d.co.uk OR cc:support@target3d.co.uk OR deliveredto:support@target3d.co.uk) newer_than:120d -subject:"Out of Office"';
+export const DEFAULT_QUERY = '(to:support@target3d.co.uk OR cc:support@target3d.co.uk OR deliveredto:support@target3d.co.uk) newer_than:120d -subject:"Out of Office" -from:(noreply OR no-reply OR donotreply OR mailer-daemon OR postmaster)';
 const addr = (from) => { const m = String(from || "").match(/<([^>]+)>/); return (m ? m[1] : String(from || "")).trim().toLowerCase(); };
 
 export default async (req) => {

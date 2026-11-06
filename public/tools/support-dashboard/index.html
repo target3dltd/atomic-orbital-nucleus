@@ -114,7 +114,7 @@ window.DASH_DATASETS = {
       <b class="dash-skeleton" data-source="kpis" data-field="idle_14" data-row="0">—</b> have had no update in 14+ days, and
       <b class="dash-skeleton" data-source="inbox_kpis" data-field="ours" data-row="0">—</b> support@ threads last heard from a customer or vendor.
     </p>
-    <div class="sd-ver">v1.2.0 · <a href="#help" id="sd-helplink">Help</a></div>
+    <div class="sd-ver">v1.2.1 · <a href="#help" id="sd-helplink">Help</a></div>
   </header>
 
   <section class="sd-sec" id="tickets">
@@ -213,7 +213,7 @@ window.DASH_DATASETS = {
 
   <section class="sd-sec" id="help">
     <details class="sd-card sd-help" id="sd-help">
-      <summary>Help · v1.2.0</summary>
+      <summary>Help · v1.2.1</summary>
 
       <h4>What this is</h4>
       <p>A replacement for the Freshdesk overview. It reads two live sources every time it opens: the Pipedrive <b>Support</b> pipeline (tickets) and email threads sent or copied to <b>support@target3d.co.uk</b>. Nothing is typed in by hand. The <b>Sources</b> strip at the top shows where every number comes from, when it loaded, and lets you refresh a source or download it as CSV.</p>
@@ -232,7 +232,7 @@ window.DASH_DATASETS = {
 
       <h4>support@ section</h4>
       <ul>
-        <li>Search used: <code>(to: OR cc: OR deliveredto: support@target3d.co.uk) newer_than:120d</code>, excluding “Out of Office” subjects, up to 50 threads.</li>
+        <li>Search used: <code>(to: OR cc: OR deliveredto: support@target3d.co.uk) newer_than:120d</code>, excluding “Out of Office” subjects and automated senders (no-reply, mailer-daemon and the like), up to 50 threads.</li>
         <li><b>Last word was theirs</b> / <b>Next move: Ours</b>: the latest message in the thread came from an address outside target3d.co.uk.</li>
         <li>In the Nucleus the server reads every message in each thread, so the true latest message is always known. <b>Threads to open</b> only counts threads whose messages couldn't be read.</li>
         <li><b>Unread</b> reflects the read state in the support@ inbox the Nucleus reads (the account the administrator connected), not your own mailbox.</li>
@@ -256,6 +256,7 @@ window.DASH_DATASETS = {
 
       <h4>Version history</h4>
       <ul>
+        <li><b>v1.2.1</b> (6 Nov 2026): the support@ inbox is connected (read by a script in the support@ account). Automated senders such as no-reply and mailer-daemon are left out of the thread list.</li>
         <li><b>v1.2.0</b> (5 Nov 2026): moved into the Atomic Orbital Nucleus. Pipedrive runs with your Nucleus sign-in; the support@ inbox is read by the Nucleus server (every message, not just the first five); Sources strip with refresh and CSV; Atomic Orbital styling.</li>
         <li><b>v1.1.0</b> (27 Oct 2026): added reply tracking from Pipedrive's linked emails: “Customer emailed last” headline, Last email and From columns, and a filter chip on the ticket list.</li>
         <li><b>v1.0.0</b> (27 Oct 2026): first release. Pipedrive Support pipeline KPIs, stage breakdown, monthly opened/closed, ticket table; support@ inbox KPIs and thread table; this Help section.</li>

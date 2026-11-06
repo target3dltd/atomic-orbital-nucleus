@@ -140,6 +140,8 @@ The Pipedrive half works as soon as the Nucleus is deployed: it reads the Suppor
 
 The support@ half needs connecting once. Until then it shows a note saying it isn't connected. In claude.ai each viewer's own Gmail was read; in the Nucleus people sign in with Pipedrive only, so the server reads the support@ mail instead. The Gmail search is fixed on the server (`SUPPORT_GMAIL_QUERY`, default: the dashboard's original search), so the page can't be used to read any other mail. Only subject, date, sender address and read state are sent, never message bodies.
 
+> **Live (6 Nov 2026):** connected via the Apps Script "Nucleus support@ inbox reader" in the **support@target3d.co.uk** account (support@ is a real mailbox, not a group). If Chrome is signed in to several Google accounts, do any Apps Script deploy/authorise step in an Incognito window signed in only as support@, or Google's permission window opens as the wrong account.
+
 **Easiest: Apps Script (about 5 minutes).**
 1. Sign in to Google as an account that actually receives support@ mail (ideally the support@ mailbox itself), and open https://script.google.com → New project.
 2. Paste in `netlify/lib/support/support-gmail-apps-script.gs` (v1.1.0) and save. No editing needed.
