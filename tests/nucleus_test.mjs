@@ -279,6 +279,49 @@ console.log("Sales Hub");
   });
 }
 
+console.log("Your day");
+{
+  process.env.GOOGLE_CLIENT_ID = "cid.apps.googleusercontent.com"; process.env.GOOGLE_CLIENT_SECRET = "csecret";
+  const day = (await imp("netlify/functions/nucleus-day.mjs")).default;
+  const me = "nucleus_s=" + await session.seal({ t: GOOD, uid: 7, e: "ashley.k@target3d.co.uk", c: "target3d2", gs: "1001", ge: "ashley.k@target3d.co.uk", gn: "Ashley Keeler", exp: Date.now() + 1e9 });
+  const cookieOf = (r, name) => { const all = r.headers.getSetCookie ? r.headers.getSetCookie() : [r.headers.get("set-cookie")]; const c = all.find((x) => x && x.startsWith(name + "=")); return c ? c.split(";")[0] : ""; };
+  await t("Pipedrive activities: overdue and today, with links", async () => {
+    const { j } = await jbody(await day(req("/api/nucleus/day", { cookie: me })));
+    eq([j.pipedrive.overdue.length, j.pipedrive.today.length], [1, 2]);
+    eq(j.pipedrive.overdue[0].title, "Send proposal"); ok(j.pipedrive.today.some((x) => x.url === "https://target3d2.pipedrive.com/deal/901"));
+    eq([j.google.available, j.google.connected], [true, false]);
+  });
+  await t("connect Google asks for offline Calendar + Tasks access for the signed-in account", async () => {
+    const r = await auth(req("/api/nucleus/google/connect", { cookie: me })); const loc = new URL(r.headers.get("location"));
+    eq(loc.host, "accounts.google.com"); ok(loc.searchParams.get("scope").includes("calendar.readonly") && loc.searchParams.get("scope").includes("auth/tasks"));
+    eq([loc.searchParams.get("access_type"), loc.searchParams.get("prompt")], ["offline", "consent"]);
+    const st = cookieOf(r, "nucleus_oauth");
+    const back = await auth(req(`/api/nucleus/google/callback?code=code-ashley-connect&state=${loc.searchParams.get("state")}`, { cookie: st + "; " + me }));
+    eq(back.headers.get("location"), "/?google=connected");
+    const rec = JSON.parse(fs.readFileSync(process.env.NUCLEUS_LOCAL_STORE, "utf8"))["users/1001"]; ok(rec.gtok && !JSON.stringify(rec).includes("rt-ashley"), "stored encrypted");
+    eq((await auth(req("/api/nucleus/google/connect"))).headers.get("location"), "/?error=google_connect_signin");
+  });
+  await t("connected: today's calendar (declined skipped) and tasks due or overdue", async () => {
+    const { j } = await jbody(await day(req("/api/nucleus/day", { cookie: me })));
+    eq(j.google.connected, true); eq(j.google.events.map((e) => e.title), ["Stand-up", "Leeds site visit"]); eq(j.google.events[0].meet, "https://meet.google.com/abc");
+    eq(j.google.tasks.map((x) => [x.title, x.overdue]), [["Chase RMA", true], ["Send Leeds quote", false]]);
+  });
+  await t("tick off a Pipedrive activity and a Google task", async () => {
+    calls.length = 0;
+    eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "pipedrive", id: 2 } }))).status, 200);
+    ok(calls.some((c) => c.method === "PUT" && c.path === "/v1/activities/2" && c.token === GOOD));
+    eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "task", id: "T2", list: "L1" } }))).status, 200);
+    ok(calls.some((c) => c.method === "PATCH" && c.path === "tasks/tasks/v1/lists/L1/tasks/T2"));
+    eq((await day(req("/api/nucleus/day/done", { method: "POST", cookie: me, body: { kind: "task", id: "../x", list: "L1" } }))).status, 400);
+    eq((await day(req("/api/nucleus/day"))).status, 401);
+  });
+  await t("disconnect revokes and forgets Google access", async () => {
+    calls.length = 0; eq((await day(req("/api/nucleus/google/disconnect", { method: "POST", cookie: me }))).status, 200);
+    ok(calls.some((c) => c.path === "google-revoke")); eq((await jbody(await day(req("/api/nucleus/day", { cookie: me })))).j.google.connected, false);
+  });
+  delete process.env.GOOGLE_CLIENT_ID; delete process.env.GOOGLE_CLIENT_SECRET;
+}
+
 console.log("Pages");
 const pub =(p) => fs.readFileSync(path.join(root, "public", p), "utf8");
 await t("merge desk loads the shim before its own script", async () => { const s = pub("tools/duplicate-eraser/index.html"); ok(s.indexOf("/nucleus/claude-shim.js") > 0 && s.indexOf("/nucleus/claude-shim.js") < s.indexOf('const VERSION = "1.3.0"')); });

@@ -26,11 +26,36 @@ const bad = (status, error) => new Response(JSON.stringify({ success: false, err
 export function installFakePipedrive() {
   const real = globalThis.fetch;
   globalThis.fetch = async (input, init = {}) => {
+    let m0;
     const url = new URL(input instanceof Request ? input.url : String(input));
+    if (url.hostname === "oauth2.googleapis.com" && url.pathname === "/revoke") { calls.push({ method: "POST", path: "google-revoke" }); return new Response("{}", { status: 200 }); }
+    if (url.hostname === "oauth2.googleapis.com" && new URLSearchParams(init.body || "").get("grant_type") === "refresh_token") {
+      const rt = new URLSearchParams(init.body || "").get("refresh_token");
+      calls.push({ method: "POST", path: "google-refresh", rt });
+      if (rt !== "rt-ashley") return new Response(JSON.stringify({ error: "invalid_grant" }), { status: 400 });
+      return new Response(JSON.stringify({ access_token: "at-ashley" }), { status: 200, headers: { "content-type": "application/json" } });
+    }
+    if (url.hostname === "www.googleapis.com" && url.pathname.startsWith("/calendar/")) {
+      calls.push({ method: "GET", path: "calendar", search: url.search });
+      const at = (h, m) => { const d = new Date(); d.setUTCHours(h, m, 0, 0); return d.toISOString(); };
+      return new Response(JSON.stringify({ items: [
+        { id: "e1", summary: "Stand-up", start: { dateTime: at(9, 0) }, end: { dateTime: at(9, 15) }, htmlLink: "https://calendar.google.com/e1", hangoutLink: "https://meet.google.com/abc" },
+        { id: "e2", summary: "Leeds site visit", location: "Leeds", start: { dateTime: at(13, 0) }, end: { dateTime: at(15, 0) }, htmlLink: "https://calendar.google.com/e2" },
+        { id: "e3", summary: "Declined thing", start: { dateTime: at(16, 0) }, end: { dateTime: at(17, 0) }, attendees: [{ self: true, responseStatus: "declined" }] },
+      ] }), { status: 200, headers: { "content-type": "application/json" } });
+    }
+    if (url.hostname === "tasks.googleapis.com") {
+      calls.push({ method: (init.method || "GET").toUpperCase(), path: "tasks" + url.pathname });
+      if (url.pathname.endsWith("/users/@me/lists")) return new Response(JSON.stringify({ items: [{ id: "L1", title: "My Tasks" }] }), { status: 200 });
+      if ((init.method || "GET").toUpperCase() === "PATCH") return new Response(JSON.stringify({ status: "completed" }), { status: 200 });
+      const day = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10) + "T00:00:00.000Z"; };
+      return new Response(JSON.stringify({ items: [{ id: "T1", title: "Send Leeds quote", due: day(0) }, { id: "T2", title: "Chase RMA", due: day(-3) }] }), { status: 200 });
+    }
     if (url.hostname === "oauth2.googleapis.com") {
       const form = new URLSearchParams(init.body || "");
       calls.push({ method: "POST", path: "google-token", code: form.get("code") });
       const people = {
+        "code-ashley-connect": { sub: "1001", email: "ashley.k@target3d.co.uk", hd: "target3d.co.uk", name: "Ashley Keeler" },
         "code-ashley": { sub: "1001", email: "ashley.k@target3d.co.uk", hd: "target3d.co.uk", name: "Ashley Keeler" },
         "code-sam": { sub: "1002", email: "sam@atomicorbital.co.uk", hd: "atomicorbital.co.uk", name: "Sam Kaighin" },
         "code-gmail": { sub: "1003", email: "someone@gmail.com", name: "Someone" },
@@ -39,7 +64,7 @@ export function installFakePipedrive() {
       if (!p) return new Response(JSON.stringify({ error: "invalid_grant" }), { status: 400 });
       const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
       const id = [b64({ alg: "RS256" }), b64({ iss: "https://accounts.google.com", aud: form.get("client_id"), email_verified: true, ...p }), "sig"].join(".");
-      return new Response(JSON.stringify({ id_token: id, access_token: "x" }), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify({ id_token: id, access_token: "x", ...(form.get("code") === "code-ashley-connect" ? { refresh_token: "rt-ashley", scope: "openid email https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks" } : {}) }), { status: 200, headers: { "content-type": "application/json" } });
     }
     if (url.hostname === "script.google.com") {
       calls.push({ method: "GET", path: "apps-script", search: url.search });
@@ -62,7 +87,15 @@ export function installFakePipedrive() {
       : { id: 8, name: "Someone Else", email: "x@else.com", company_id: 999, company_domain: "elsewhere", company_name: "Elsewhere Ltd", active_flag: true });
     if (p === "/v1/users") return ok([{ id: 7, name: "Ashley Keeler" }, { id: 9, name: "Lana Smith" }]);
     if (p === "/v1/deals/summary") return ok({ total_count: url.searchParams.get("user_id") ? 12 : 87, total_currency_converted_value_formatted: url.searchParams.get("user_id") ? "£148,200" : "£1,204,950" });
-    if (p === "/v1/activities") return ok([{ id: 1 }, { id: 2 }, { id: 3 }]);
+    if ((m0 = p.match(/^\/v1\/activities\/(\d+)$/)) && method === "PUT") return ok({ id: +m0[1], done: true });
+    if (p === "/v1/activities") {
+      const d = (n) => { const x = new Date(); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+      return ok([
+        { id: 1, subject: "Call Dr Bloggs", type: "call", due_date: d(0), due_time: "10:30", deal_id: 901, deal_title: "Leeds MechEng mocap", org_name: "University of Leeds" },
+        { id: 2, subject: "Send proposal", type: "task", due_date: d(-2), due_time: "", org_id: 21, org_name: "UCL" },
+        { id: 3, subject: "Follow up demo", type: "email", due_date: d(0), due_time: "" },
+      ]);
+    }
     if (p === "/api/v2/organizations" && method === "GET") return ok(orgs, { additional_data: { next_cursor: null } });
     let m;
     if ((m = p.match(/^\/api\/v2\/organizations\/(\d+)$/))) {

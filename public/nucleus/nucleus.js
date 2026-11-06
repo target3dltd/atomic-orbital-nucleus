@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.10.1";
+  N.VERSION = "1.11.0";
   N.CHANGELOG = [
+    ["v1.11.0", "2026-11-06", "Your day, on the home page: your Pipedrive activities overdue and due today, with a tick box to mark each done. Connect Google once to add today's calendar (with Join for Meet calls) and your Google Tasks due today or overdue, which you can tick off too. The Nucleus only reads your calendar and tasks, never your email, and Disconnect removes the access."],
     ["v1.10.1", "2026-11-06", "Team performance is readable in dark mode: the banners, table headers, total rows and charts now follow the theme (charts redraw when you switch)."],
     ["v1.10.0", "2026-11-06", "Faster. Pages and tools are now kept by your browser and only re-downloaded when they change (before, every visit downloaded every tool in full, up to 2.5 MB each). Scripts and styles are stamped with a version so updates still arrive straight away. Switching tools with the menu in the top bar keeps your last four tools loaded, so going back is instant and keeps your place, and Back/Forward work. Tools start loading as soon as you point at them on the home page."],
     ["v1.9.0", "2026-11-06", "New home page built for getting things done. Search everything (tools, Sales reports, projects, systems) from the bar under the greeting or with / or Ctrl K / ⌘K, with arrow keys and Enter. Jump back in shows what you opened last. Tools are grouped by area (Sales & CRM, Operations & delivery, Company, Studio & motion capture, Marketing) as compact tiles, with project sites and connected systems alongside. The atom moves to Orbit view, opened from the mark beside the greeting. Works on phones too. Google sign-in is now open to atomicorbital.co.uk accounts as well as target3d.co.uk."],

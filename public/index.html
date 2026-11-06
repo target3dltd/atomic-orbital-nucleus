@@ -95,6 +95,24 @@
       <span class="n-find__icon" id="findIcon"></span><span class="n-find__ph">Search tools, reports, projects and systems</span><kbd class="n-kbd" id="findKbd">Ctrl K</kbd>
     </button>
 
+    <section class="n-day" id="day" aria-labelledby="dayH">
+      <div class="n-day__head">
+        <h2 class="n-h2" id="dayH">Your day</h2>
+        <span class="n-day__note" id="dayNote"></span>
+        <button type="button" class="n-linkbtn" id="dayRefresh">Refresh</button>
+      </div>
+      <div class="n-day__grid">
+        <div class="n-day__col">
+          <h3>To do <small id="todoCount"></small></h3>
+          <div id="todo" class="n-day__list"><p class="n-day__empty">Loading your Pipedrive activities…</p></div>
+        </div>
+        <div class="n-day__col">
+          <h3>Calendar <small id="calNote"></small></h3>
+          <div id="cal" class="n-day__list"><p class="n-day__empty">Loading…</p></div>
+        </div>
+      </div>
+    </section>
+
     <section class="n-recent" id="recentWrap" aria-labelledby="recentH" hidden>
       <h2 class="n-h2" id="recentH">Jump back in</h2>
       <div class="n-recent__row" id="recent"></div>
@@ -183,6 +201,7 @@
     <h3>Getting around</h3>
     <ul>
       <li><b>Search</b> (the bar under the greeting, or press <kbd>/</kbd> or <kbd>Ctrl K</kbd> / <kbd>⌘K</kbd>) finds any tool, project, system or Sales report by name, description or tag. Use the arrow keys and Enter, or click.</li>
+      <li><b>Your day</b> lists your Pipedrive activities that are overdue or due today, with a tick box to mark each done in Pipedrive. Connect Google once (the button in the Calendar panel) to add today's Google Calendar events, with a <i>Join</i> button for Meet calls, and your Google Tasks due today or overdue, which you can tick off too. The Nucleus only reads your calendar and tasks; it never reads your email or changes events. <i>Disconnect</i> removes that access.</li>
       <li><b>Jump back in</b> shows the last few things you opened on this device.</li>
       <li><b>Tools</b> are grouped by area: Sales &amp; CRM, Operations &amp; delivery, Company, Studio &amp; motion capture, and Marketing. <b>Project sites</b> and <b>Connected systems</b> (which open in a new tab) are listed alongside.</li>
       <li><b>Orbit view</b> (the spinning mark by the greeting) shows everything as an atom: tools and marketing on the inner ring, project sites in the middle, connected systems on the dotted outer ring. Hover or press <i>Pause orbits</i> to stop it; it stands still if your device is set to reduce motion.</li>
@@ -285,6 +304,9 @@
     google_client: "Google didn't accept the Nucleus's sign-in settings (client ID or secret). An administrator needs to check GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Netlify.",
     google_redirect: "Google didn't recognise this site's sign-in address. An administrator needs to add it to the OAuth client's redirect URIs.",
     google_not_configured: "Google sign-in isn't set up on this Nucleus yet.",
+    google_connect_signin: "Sign in with Google first, then connect Calendar and Tasks.",
+    google_connect_account: "Connect Calendar and Tasks with the same Google account you signed in with.",
+    google_connect_failed: "Google didn't give the Nucleus ongoing access, so Calendar and Tasks couldn't be connected. Please try again.",
     pipedrive_unavailable: "Pipedrive didn't answer, so your saved token couldn't be checked. Try again in a moment."
   };
   function showErr(msg) { var e = $("signinErr"); e.textContent = msg; e.hidden = !msg; }
@@ -344,7 +366,7 @@
     chip.title = "Your account" + (user.google ? " · " + user.google.email : user.email ? " · " + user.email : "");
     var h = new Date().getHours(), first = String(user.name || "").split(" ")[0];
     $("greetH").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "");
-    renderHome(); loadPulse();
+    renderHome(); loadPulse(); loadDay();
   }
 
   function loadPulse() {
@@ -406,6 +428,79 @@
     activate(it, e);
     if (it.status !== "awaiting") N.addRecent(it.id);
   });
+
+  /* ---------------- your day: Pipedrive activities, Google Calendar and Tasks ---------------- */
+  var DAY = null, showAllOverdue = false;
+  function loadDay() {
+    $("dayNote").textContent = "";
+    N.api("/api/nucleus/day").then(function (j) { if (!j.ok) throw new Error(j.message || "unavailable"); DAY = j; renderDay(); })
+      .catch(function () { $("todo").innerHTML = '<p class="n-day__empty">Couldn\'t load your day just now. <button type="button" class="n-linkbtn" data-day-retry>Try again</button></p>'; $("cal").innerHTML = ""; });
+  }
+  $("dayRefresh").onclick = loadDay;
+  $("day").addEventListener("click", function (e) {
+    if (e.target.closest("[data-day-retry]")) { loadDay(); return; }
+    if (e.target.closest("[data-show-overdue]")) { showAllOverdue = !showAllOverdue; renderDay(); return; }
+    if (e.target.closest("[data-gdisconnect]")) { N.api("/api/nucleus/google/disconnect", { method: "POST" }).then(loadDay); return; }
+  });
+  $("day").addEventListener("change", function (e) {
+    var cb = e.target.closest("input[data-done]"); if (!cb) return;
+    var li = cb.closest("li"); li.classList.add("is-done"); cb.disabled = true;
+    N.api("/api/nucleus/day/done", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: cb.dataset.kind, id: cb.dataset.done, list: cb.dataset.list || "" }) })
+      .then(function (j) {
+        if (!j.ok) throw new Error();
+        var drop = function (arr) { return arr.filter(function (x) { return String(x.id) !== cb.dataset.done; }); };
+        DAY.pipedrive.overdue = drop(DAY.pipedrive.overdue); DAY.pipedrive.today = drop(DAY.pipedrive.today); DAY.google.tasks = drop(DAY.google.tasks);
+        setTimeout(renderDay, 450); loadPulse();
+      })
+      .catch(function () { li.classList.remove("is-done"); cb.checked = false; cb.disabled = false; $("dayNote").textContent = "Couldn't mark that done. Try again, or open it in " + (cb.dataset.kind === "task" ? "Google Tasks." : "Pipedrive."); });
+  });
+  var SRC = { pipedrive: "Pipedrive", task: "Google Tasks", event: "Calendar" };
+  function dayDate(d) { return new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }
+  function todoItem(x, overdue) {
+    var when = overdue ? dayDate(x.date) + (x.time ? " " + x.time : "") : (x.time || "Any time");
+    return '<li class="n-todo' + (overdue ? " is-late" : "") + '"><label class="n-todo__tick"><input type="checkbox" data-done="' + esc(x.id) + '" data-kind="' + x.kind + '"' + (x.list ? ' data-list="' + esc(x.list) + '"' : "") + '><span class="n-sr">Mark “' + esc(x.title) + '” done</span></label>'
+      + '<span class="n-todo__when">' + esc(when) + '</span>'
+      + '<a class="n-todo__txt" href="' + esc(x.url) + '" target="_blank" rel="noopener"><b>' + esc(x.title) + "</b>" + (x.context || x.listName ? "<span>" + esc(x.context || x.listName) + "</span>" : "") + "</a>"
+      + '<span class="n-src n-src--' + x.kind + '">' + SRC[x.kind] + (x.type && x.kind === "pipedrive" ? " · " + esc(x.type) : "") + "</span></li>";
+  }
+  function renderDay() {
+    var d = DAY, pd = d.pipedrive, g = d.google;
+    var tasks = g.tasks || [], late = pd.overdue.concat(tasks.filter(function (t) { return t.overdue; })).sort(function (a, b) { return (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")); });
+    var now = pd.today.concat(tasks.filter(function (t) { return !t.overdue; })).sort(function (a, b) { return (a.time || "00:00").localeCompare(b.time || "00:00"); });
+    $("todoCount").textContent = now.length + " today" + (late.length ? " · " + late.length + " overdue" : "");
+    var html = "";
+    if (pd.error) html += '<p class="n-day__empty">Pipedrive didn\'t answer: ' + esc(pd.error) + "</p>";
+    if (late.length) {
+      var shown = showAllOverdue ? late : late.slice(0, 5);
+      html += '<p class="n-day__sub is-late">Overdue</p><ul>' + shown.map(function (x) { return todoItem(x, true); }).join("") + "</ul>";
+      if (late.length > 5) html += '<button type="button" class="n-linkbtn n-day__more" data-show-overdue>' + (showAllOverdue ? "Show fewer" : "Show all " + late.length + " overdue") + "</button>";
+    }
+    html += '<p class="n-day__sub">Today</p>' + (now.length ? "<ul>" + now.map(function (x) { return todoItem(x, false); }).join("") + "</ul>" : '<p class="n-day__empty">Nothing due today' + (late.length ? "." : ". Clear desk.") + "</p>");
+    $("todo").innerHTML = html;
+
+    // calendar
+    if (!g.available) { $("cal").innerHTML = '<p class="n-day__empty">Sign in with Google to see your calendar here.</p>'; $("calNote").textContent = ""; return; }
+    if (!g.connected) {
+      $("calNote").textContent = "";
+      $("cal").innerHTML = '<div class="n-connect"><p><b>See today\'s calendar and Google Tasks here.</b> Connect once and the Nucleus can read today\'s events and your tasks, and tick tasks off for you. It never changes your calendar or reads your email.</p>'
+        + (g.revoked ? '<p class="n-day__empty">Google access was removed, so connect again to see them.</p>' : "")
+        + '<a class="ao-btn ao-btn--secondary" href="/api/nucleus/google/connect">Connect Google Calendar &amp; Tasks</a>'
+        + '<p class="n-connect__fine">Google may say the app isn\'t verified yet. That\'s expected for our own internal tool: choose <i>Advanced → Go to Atomic Orbital Nucleus</i>.</p></div>';
+      return;
+    }
+    var ev = g.events || [], nowMs = Date.now();
+    $("calNote").innerHTML = ev.length + " event" + (ev.length === 1 ? "" : "s") + ' · <button type="button" class="n-linkbtn" data-gdisconnect>Disconnect</button>';
+    var calHtml = g.error || g.calendarError ? '<p class="n-day__empty">Google didn\'t answer: ' + esc(g.error || g.calendarError) + "</p>" : "";
+    calHtml += ev.length ? "<ul>" + ev.map(function (x) {
+      var past = !!x.endAt && Date.parse(x.endAt) < nowMs;
+      var live = x.at && new Date(x.at).getTime() <= nowMs && !past;
+      return '<li class="n-ev' + (past ? " is-past" : "") + (live ? " is-now" : "") + '"><span class="n-ev__time">' + (x.allDay ? "All day" : esc(x.time) + (x.end ? "<small>–" + esc(x.end) + "</small>" : "")) + "</span>"
+        + '<a class="n-todo__txt" href="' + esc(x.url || "https://calendar.google.com/") + '" target="_blank" rel="noopener"><b>' + esc(x.title) + "</b>" + (x.context ? "<span>" + esc(x.context) + "</span>" : "") + "</a>"
+        + (x.meet && !past ? '<a class="n-ev__join" href="' + esc(x.meet) + '" target="_blank" rel="noopener">Join</a>' : "") + "</li>";
+    }).join("") + "</ul>" : '<p class="n-day__empty">No events today.</p>';
+    $("cal").innerHTML = calHtml;
+  }
+  if (params.get("google") === "connected") { history.replaceState(null, "", "/"); }
 
   /* ---------------- search (command palette) ---------------- */
   var palItems = [], palSel = 0;

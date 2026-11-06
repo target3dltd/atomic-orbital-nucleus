@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.10.1)
+# Atomic Orbital Nucleus (v1.11.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -18,6 +18,14 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 The hub is a launcher: greeting and your Pipedrive figures, a search bar (also `/` or Ctrl K / ⌘K) that finds any tool, project, system or Sales report, **Jump back in** (the last tools opened on that device, kept in the browser), tools grouped by **area**, and project sites and connected systems in the side column. The atom is still there as **Orbit view**, opened from the mark beside the greeting.
 
 In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one-line `short` for its tile, and optionally `featured: true` to lead its area and `links` (sub-pages that search can open directly, as the Sales reports do).
+
+## Your day (v1.11.0)
+
+The home page's **Your day** panel (`netlify/functions/nucleus-day.mjs`, `/api/nucleus/day`) shows each person's own:
+- **Pipedrive activities** overdue (up to a year back) and due today, read with their own token; ticking one sets it done in Pipedrive as them. Days and times are UK time.
+- **Google Calendar** events today (declined ones hidden, with *Join* for Meet) and **Google Tasks** due today or overdue (tickable), after they press *Connect Google Calendar & Tasks* once.
+
+Connecting asks Google for `calendar.readonly` and `tasks` (offline access, so it keeps working). The refresh token is sealed with `NUCLEUS_SECRET` and stored against the Google account in the Nucleus store; *Disconnect* revokes and deletes it. Google Cloud needs the **Google Calendar API** and **Google Tasks API** enabled in the project. Because these are "sensitive" scopes and the app isn't verified by Google, people see an "unverified app" notice when connecting (choose *Advanced → Go to Atomic Orbital Nucleus*), and there's a lifetime cap of 100 people who can grant them, which is fine for us. Verifying the app with Google removes both.
 
 ## Speed (v1.10.0)
 
@@ -45,7 +53,7 @@ In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (80 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (85 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 

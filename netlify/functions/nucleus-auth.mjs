@@ -13,14 +13,19 @@
 //   GET  /api/nucleus/me                   → who is signed in, admin or not (never the token)
 //   POST /api/nucleus/pipedrive/forget     → removes the stored Pipedrive token (to connect a new one)
 //   POST /api/nucleus/logout               → ends the session (the stored token stays for next time)
+//   GET  /api/nucleus/google/connect       → (signed in) asks Google for read access to Calendar and read/tick access
+//                                            to Tasks, for "Your day" on the home page. The refresh token is stored
+//                                            encrypted against the Google account; /api/nucleus/google/disconnect forgets it.
 import {
-  seal, unseal, anySessionFrom, cookieValue, sessionCookie, clearCookie, allowedCompanies, pipedriveBase,
+  seal, unseal, sessionFrom, anySessionFrom, cookieValue, sessionCookie, clearCookie, allowedCompanies, pipedriveBase,
   googleConfig, allowedGoogleDomains, sessionDays, isAdmin, canUseSalesHub, envGet, jsonResponse as json,
 } from "../lib/session.mjs";
 import { kv } from "../lib/kv.mjs";
 
 const HOUR = 3600 * 1000, DAY = 24 * HOUR;
 const STATE_COOKIE = "nucleus_oauth";
+// Extra Google permissions for "Your day": read today's calendar, and read and tick off tasks.
+const DAY_SCOPES = ["https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/tasks"];
 const safeNext = (n) => (typeof n === "string" && n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\") ? n : "/");
 const redirect = (location, cookies = []) => {
   const h = new Headers({ location, "cache-control": "no-store" });
@@ -79,6 +84,19 @@ export default async (req) => {
     }
 
     // ---------- Google ----------
+    if (path === "google/connect") {
+      if (!google) return redirect("/?error=google_not_configured");
+      const cur = await sessionFrom(req);
+      if (!cur || !cur.gs) return redirect("/?error=google_connect_signin");
+      const state = crypto.randomUUID();
+      const sealed = await seal({ st: state, mode: "connect", gs: cur.gs, next: safeNext(url.searchParams.get("next")), exp: Date.now() + 10 * 60 * 1000 });
+      const q = new URLSearchParams({
+        client_id: google.id, redirect_uri: callbackUrl(url), response_type: "code", state,
+        scope: "openid email " + DAY_SCOPES.join(" "), access_type: "offline", prompt: "consent", include_granted_scopes: "true", login_hint: cur.ge,
+      });
+      return redirect("https://accounts.google.com/o/oauth2/v2/auth?" + q, [sessionCookie(sealed, { name: STATE_COOKIE, maxAgeSec: 600, secure, path: "/api/nucleus/google" })]);
+    }
+
     if (path === "google/start") {
       if (!google) return redirect("/?error=google_not_configured");
       const state = crypto.randomUUID();
@@ -118,6 +136,21 @@ export default async (req) => {
       if (!allowedGoogleDomains().includes(domain) || (claims.hd && !allowedGoogleDomains().includes(String(claims.hd).toLowerCase()))) return redirect("/?error=google_domain&email=" + encodeURIComponent(email), [clearState]);
       const g = { gs: claims.sub, ge: email, gn: claims.name || email, gp: claims.picture || null };
       const next = st.next || "/";
+
+      // Connecting Calendar and Tasks for "Your day": must be the same Google account that is signed in.
+      if (st.mode === "connect") {
+        const cur = await sessionFrom(req);
+        if (!cur || cur.gs !== g.gs || st.gs !== g.gs) return redirect("/?error=google_connect_account", [clearState]);
+        if (!tj.refresh_token) return redirect("/?error=google_connect_failed", [clearState]);
+        const granted = String(tj.scope || "").split(/\s+/);
+        const store = await kv();
+        const rec = (await store.get(userKey(g.gs), { type: "json" })) || {};
+        rec.gtok = await seal({ rt: tj.refresh_token, exp: Date.now() + 3650 * DAY });
+        rec.gscopes = DAY_SCOPES.filter((sc) => granted.includes(sc));
+        rec.googleConnectedAt = new Date().toISOString();
+        await store.setJSON(userKey(g.gs), rec);
+        return redirect(next === "/" ? "/?google=connected" : next, [clearState]);
+      }
 
       // Connected before? Use the stored token, after checking it still works.
       const store = await kv();
@@ -194,4 +227,4 @@ function callbackUrl(url) {
   return base.replace(/\/$/, "") + "/api/nucleus/google/callback";
 }
 
-export const config = { path: ["/api/nucleus/login", "/api/nucleus/me", "/api/nucleus/logout", "/api/nucleus/config", "/api/nucleus/google/start", "/api/nucleus/google/callback", "/api/nucleus/pipedrive/forget"] };
+export const config = { path: ["/api/nucleus/login", "/api/nucleus/me", "/api/nucleus/logout", "/api/nucleus/config", "/api/nucleus/google/start", "/api/nucleus/google/callback", "/api/nucleus/google/connect", "/api/nucleus/pipedrive/forget"] };
