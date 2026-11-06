@@ -28,9 +28,9 @@
     </a>
     <div class="n-actions">
       <span class="n-user" id="userChip" hidden></span>
-      <button class="n-iconbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span id="helpIcon"></span>Help</button>
+      <button class="n-iconbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span id="helpIcon"></span><span class="hide-sm">Help</span></button>
       <button class="n-iconbtn" id="themeBtn" type="button"></button>
-      <button class="n-iconbtn" id="signOutBtn" type="button" hidden><span id="outIcon"></span>Sign out</button>
+      <button class="n-iconbtn" id="signOutBtn" type="button" hidden><span id="outIcon"></span><span class="hide-sm">Sign out</span></button>
     </div>
   </div>
 </header>
@@ -75,24 +75,60 @@
 <!-- Hub -->
 <main class="n-main" id="hub" hidden>
   <div class="ao-container">
-    <section class="n-greet" aria-labelledby="greetH">
-      <div>
+    <section class="n-hero" aria-labelledby="greetH">
+      <div class="n-hero__text">
+        <p class="n-date" id="today"></p>
         <h1 id="greetH">Welcome</h1>
-        <p>Everything orbits the Nucleus. Pick a tool, a project or a system.</p>
+        <dl class="n-pulse" id="pulse" aria-label="Your Pipedrive today">
+          <div><dt>My open deals</dt><dd class="wait n-num" id="pMyDeals">—</dd></div>
+          <div><dt>My open pipeline</dt><dd class="wait n-num" id="pMyValue">—</dd></div>
+          <div><dt>My activities due</dt><dd class="wait n-num" id="pActs">—</dd></div>
+          <div><dt>Team open pipeline</dt><dd class="wait n-num" id="pTeam">—</dd></div>
+        </dl>
       </div>
+      <button type="button" class="n-hero__atom" id="orbitBtn" aria-haspopup="dialog" title="Orbit view: everything in the Nucleus as an atom">
+        <span id="coreMark"></span><span class="n-hero__atomlab">Orbit view</span>
+      </button>
     </section>
-    <dl class="n-pulse" id="pulse" aria-label="Your Pipedrive today">
-      <div><dt>My open deals</dt><dd class="wait n-num" id="pMyDeals">—</dd></div>
-      <div><dt>My open pipeline</dt><dd class="wait n-num" id="pMyValue">—</dd></div>
-      <div><dt>My activities due</dt><dd class="wait n-num" id="pActs">—</dd></div>
-      <div><dt>Team open pipeline</dt><dd class="wait n-num" id="pTeam">—</dd></div>
-    </dl>
-  </div>
 
+    <button type="button" class="n-find" id="findBtn" aria-haspopup="dialog">
+      <span class="n-find__icon" id="findIcon"></span><span class="n-find__ph">Search tools, reports, projects and systems</span><kbd class="n-kbd" id="findKbd">Ctrl K</kbd>
+    </button>
+
+    <section class="n-recent" id="recentWrap" aria-labelledby="recentH" hidden>
+      <h2 class="n-h2" id="recentH">Jump back in</h2>
+      <div class="n-recent__row" id="recent"></div>
+    </section>
+
+    <div class="n-layout">
+      <section class="n-tools" aria-labelledby="toolsH">
+        <h2 class="n-h2" id="toolsH">Tools</h2>
+        <div id="areas"></div>
+      </section>
+      <aside class="n-side">
+        <section aria-labelledby="projH"><h2 class="n-h2" id="projH">Project sites</h2><ul class="n-list" id="projects"></ul></section>
+        <section aria-labelledby="sysH"><h2 class="n-h2" id="sysH">Connected systems <small>open in a new tab</small></h2><ul class="n-list n-list--sys" id="systems"></ul></section>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- Search / command palette -->
+<dialog class="n-pal" id="palDlg" aria-label="Search the Nucleus">
+  <div class="n-pal__bar"><span class="n-find__icon" id="palIcon"></span>
+    <input id="palQ" type="text" placeholder="Search tools, reports, projects and systems" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list">
+    <kbd class="n-kbd">Esc</kbd></div>
+  <ul class="n-pal__list" id="palList" role="listbox" aria-label="Results"></ul>
+  <div class="n-pal__foot"><span><kbd class="n-kbd">↑</kbd><kbd class="n-kbd">↓</kbd> move</span><span><kbd class="n-kbd">Enter</kbd> open</span><span><kbd class="n-kbd">/</kbd> or <kbd class="n-kbd">Ctrl K</kbd> from anywhere on the home page</span></div>
+</dialog>
+
+<!-- Orbit view -->
+<dialog class="n-dialog n-orbitdlg" id="orbitDlg" aria-labelledby="orbitDlgH">
+  <div class="n-dialog__head"><h2 id="orbitDlgH">Orbit view</h2><button class="n-x" type="button" data-close aria-label="Close"></button></div>
   <section class="n-atom-wrap" aria-label="The Nucleus and its orbits">
     <div class="n-atom" id="atom">
       <svg class="n-orbits" id="orbits" aria-hidden="true"></svg>
-      <div class="n-core"><span id="coreMark"></span><b>Nucleus</b></div>
+      <div class="n-core"><span id="atomCore"></span><b>Nucleus</b></div>
     </div>
     <div class="n-atom-legend" id="legend">
       <span><i class="tools"></i>Tools &amp; Marketing</span>
@@ -101,17 +137,7 @@
       <button type="button" id="pauseBtn" aria-pressed="false">Pause orbits</button>
     </div>
   </section>
-
-  <div class="ao-container">
-    <section class="n-dir" aria-labelledby="dirH">
-      <div class="n-dir__bar">
-        <h2 id="dirH">Everything in the Nucleus</h2>
-        <div class="n-search"><label class="n-sr" for="q">Search tools, projects and systems</label><input class="ao-input" id="q" type="search" placeholder="Search tools, projects and systems"></div>
-      </div>
-      <div id="dir"></div>
-    </section>
-  </div>
-</main>
+</dialog>
 
 <footer class="n-footer">
   <div class="ao-container">
@@ -141,7 +167,7 @@
 <dialog class="n-dialog" id="helpDlg" aria-labelledby="helpDlgH">
   <div class="n-dialog__head"><h2 id="helpDlgH">Help</h2><button class="n-x" type="button" data-close aria-label="Close"></button></div>
   <div class="n-dialog__body">
-    <p>The Nucleus is Atomic Orbital's home for systems, processes and tooling. It sits at the centre; our own tools, project sites and the systems we use orbit around it.</p>
+    <p>The Nucleus is Atomic Orbital's home for systems, processes and tooling: our own tools, project sites and the systems we use, in one place.</p>
 
     <h3>Signing in</h3>
     <ul>
@@ -156,9 +182,10 @@
 
     <h3>Getting around</h3>
     <ul>
-      <li><b>The atom.</b> The inner ring holds our <b>tools</b> and <b>marketing</b>, the middle ring the <b>project sites</b>, the outer dotted ring the <b>connected systems</b> (these open in a new tab). Hover over the atom or press <i>Pause orbits</i> to stop it moving. Orbits stand still if your device is set to reduce motion.</li>
-      <li><b>The directory</b> below the atom lists the same things as cards. Type in the search box to filter by name, description or tag.</li>
-      <li>A dashed outline means a tool is <b>reserved but its code hasn't been added yet</b>.</li>
+      <li><b>Search</b> (the bar under the greeting, or press <kbd>/</kbd> or <kbd>Ctrl K</kbd> / <kbd>⌘K</kbd>) finds any tool, project, system or Sales report by name, description or tag. Use the arrow keys and Enter, or click.</li>
+      <li><b>Jump back in</b> shows the last few things you opened on this device.</li>
+      <li><b>Tools</b> are grouped by area: Sales &amp; CRM, Operations &amp; delivery, Company, Studio &amp; motion capture, and Marketing. <b>Project sites</b> and <b>Connected systems</b> (which open in a new tab) are listed alongside.</li>
+      <li><b>Orbit view</b> (the spinning mark by the greeting) shows everything as an atom: tools and marketing on the inner ring, project sites in the middle, connected systems on the dotted outer ring. Hover or press <i>Pause orbits</i> to stop it; it stands still if your device is set to reduce motion.</li>
       <li>Tools open inside the Nucleus with a bar at the top: <i>Nucleus</i> takes you home, the menu jumps to another tool, and <i>Open on its own</i> opens the tool full-screen in a new tab.</li>
       <li>The figures under the greeting come live from Pipedrive for you: your open deals and their value, your overdue and due-today activities, and the whole team's open pipeline.</li>
     </ul>
@@ -204,7 +231,12 @@
   var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   $("brandMark").innerHTML = N.mark(34);
-  $("coreMark").innerHTML = N.mark(160, !reduceMotion, "Nucleus");
+  $("coreMark").innerHTML = N.mark(112, !reduceMotion, "Atomic Orbital");
+  $("atomCore").innerHTML = N.mark(160, !reduceMotion, "Nucleus");
+  $("findIcon").innerHTML = $("palIcon").innerHTML = N.ICONS.search;
+  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  $("findKbd").textContent = isMac ? "⌘K" : "Ctrl K";
+  $("today").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   $("helpIcon").innerHTML = N.ICONS.help; $("outIcon").innerHTML = N.ICONS.out;
   $("yr").textContent = new Date().getFullYear();
   $("ver").textContent = "v" + N.VERSION; $("helpVer").textContent = "v" + N.VERSION;
@@ -312,7 +344,7 @@
     chip.title = "Your account" + (user.google ? " · " + user.google.email : user.email ? " · " + user.email : "");
     var h = new Date().getHours(), first = String(user.name || "").split(" ")[0];
     $("greetH").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "");
-    renderDir(); buildAtom(); loadPulse();
+    renderHome(); loadPulse();
   }
 
   function loadPulse() {
@@ -333,34 +365,100 @@
     $("itemDlg").showModal();
   }
 
-  function cardHTML(it) {
-    var ext = it.status === "external";
-    var label = it.status === "awaiting" ? "Awaiting code" : ext ? "Opens in new tab" : "Live";
-    var links = (it.links || []).map(function (l) { return '<span class="ao-tag n-sublink" role="link" tabindex="0" data-href="' + esc(l.href) + '"' + (l.internal ? ' data-internal="1"' : "") + ">" + esc(l.label) + (l.internal ? " →" : " ↗") + "</span>"; }).join("");
-    return '<a class="n-card" href="' + esc(hrefFor(it)) + '" data-id="' + esc(it.id) + '" data-orbit="' + it.orbit + '" data-status="' + it.status + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">"
-      + '<div class="n-card__top"><span class="n-card__icon">' + (N.ICONS[it.icon] || "") + "</span><h4>" + esc(it.name) + "</h4></div>"
-      + "<p>" + esc(it.desc) + "</p>"
-      + '<div class="n-card__foot">' + (it.tags || []).map(function (t) { return '<span class="ao-tag">' + esc(t) + "</span>"; }).join("") + links
-      + '<span class="n-status ' + it.status + '">' + label + "</span></div></a>";
+  /* ---------------- home: tools by area, projects, systems, recent ---------------- */
+  function linkAttrs(it) { var ext = it.status === "external"; return 'href="' + esc(hrefFor(it)) + '" data-id="' + esc(it.id) + '"' + (ext ? ' target="_blank" rel="noopener"' : ""); }
+  function icon(it) { return '<span class="n-ico">' + (N.ICONS[it.icon] || "") + "</span>"; }
+  function tileHTML(it) {
+    return '<a class="n-tile" ' + linkAttrs(it) + ' data-status="' + it.status + '" title="' + esc(it.desc) + '">' + icon(it)
+      + '<span class="n-tile__txt"><b>' + esc(it.name) + "</b><span>" + esc(it.short || it.desc) + "</span></span>"
+      + (it.status === "awaiting" ? '<span class="n-tile__flag">Awaiting code</span>' : "") + "</a>";
   }
-  function renderDir() {
-    var q = $("q").value.trim().toLowerCase();
-    var html = R.orbits.map(function (o) {
-      var items = R.items.filter(function (i) { return i.orbit === o.id && (!q || (i.name + " " + i.desc + " " + (i.tags || []).join(" ")).toLowerCase().indexOf(q) >= 0); });
-      if (!items.length) return "";
-      return '<section class="n-group"><h3>' + esc(o.name) + " <small>" + esc(o.blurb) + '</small></h3><div class="n-grid">' + items.map(cardHTML).join("") + "</div></section>";
+  function renderHome() {
+    var tools = R.items.filter(function (i) { return i.orbit === "tools" || i.orbit === "marketing"; })
+      .sort(function (a, b) { return (b.featured ? 1 : 0) - (a.featured ? 1 : 0); }); // featured tools lead their area
+    $("areas").innerHTML = R.areas.map(function (a) {
+      var list = tools.filter(function (i) { return (i.area || "operations") === a.id; });
+      if (!list.length) return "";
+      return '<div class="n-area" style="--n:' + Math.min(3, list.length) + '"><h3>' + esc(a.name) + '</h3><div class="n-tiles">' + list.map(tileHTML).join("") + "</div></div>";
     }).join("");
-    $("dir").innerHTML = html || '<p class="n-empty">Nothing matches “' + esc(q) + "”.</p>";
+    var row = function (it) { return '<li><a class="n-row" ' + linkAttrs(it) + ' title="' + esc(it.desc) + '">' + icon(it) + '<span class="n-row__txt"><b>' + esc(it.name) + "</b><span>" + esc(it.short || "") + "</span></span>" + (it.status === "external" ? '<span class="n-row__ext">' + N.ICONS.ext + "</span>" : "") + "</a></li>"; };
+    $("projects").innerHTML = R.items.filter(function (i) { return i.orbit === "projects"; }).map(row).join("");
+    $("systems").innerHTML = R.items.filter(function (i) { return i.orbit === "systems"; }).map(row).join("");
+    renderRecent();
   }
-  $("q").addEventListener("input", renderDir);
-  $("dir").addEventListener("keydown", function (e) { var sub = e.target.closest("[data-href]"); if (sub && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSub(sub); } });
-  function openSub(sub) { if (sub.dataset.internal) location.href = sub.dataset.href; else window.open(sub.dataset.href, "_blank", "noopener"); }
-  $("dir").addEventListener("click", function (e) {
-    var sub = e.target.closest("[data-href]");
-    if (sub) { e.preventDefault(); openSub(sub); return; }
-    var a = e.target.closest(".n-card"); if (!a) return;
-    activate(N.item(a.dataset.id), e);
+  function renderRecent() {
+    var list = N.recent().map(N.item).filter(function (it) { return it && R.items.indexOf(it) >= 0; }).slice(0, 6);
+    $("recentWrap").hidden = !list.length;
+    $("recent").innerHTML = list.map(function (it) { return '<a class="n-chip" ' + linkAttrs(it) + ">" + icon(it) + "<span>" + esc(it.name) + "</span></a>"; }).join("");
+  }
+  $("hub").addEventListener("click", function (e) {
+    var a = e.target.closest("a[data-id]"); if (!a) return;
+    var it = N.item(a.dataset.id); if (!it) return;
+    activate(it, e);
+    if (it.status !== "awaiting") N.addRecent(it.id);
   });
+
+  /* ---------------- search (command palette) ---------------- */
+  var palItems = [], palSel = 0;
+  function palEntries() {
+    var out = [];
+    R.items.forEach(function (it) {
+      var where = it.orbit === "projects" ? "Project site" : it.orbit === "systems" ? "Opens in a new tab" : ((R.areas.filter(function (a) { return a.id === it.area; })[0] || {}).name || "Tool");
+      out.push({ it: it, label: it.name, sub: where, href: hrefFor(it), ext: it.status === "external", text: (it.name + " " + it.desc + " " + (it.tags || []).join(" ")).toLowerCase() });
+      (it.links || []).forEach(function (l) { out.push({ it: it, label: l.label, sub: it.name, href: l.href, ext: !l.internal, text: (l.label + " " + it.name).toLowerCase() }); });
+    });
+    return out;
+  }
+  function score(e, q) {
+    if (!q) return 1;
+    var name = e.label.toLowerCase(), words = q.split(/\s+/), s = 0;
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i]; if (!w) continue;
+      if (name.indexOf(w) === 0) s += 6; else if (name.indexOf(" " + w) >= 0) s += 4; else if (name.indexOf(w) >= 0) s += 3; else if (e.text.indexOf(w) >= 0) s += 1; else return 0;
+    }
+    return s;
+  }
+  function renderPal() {
+    var q = $("palQ").value.trim().toLowerCase(), all = palEntries(), rec = N.recent();
+    if (!q) {
+      var first = rec.map(function (id) { return all.filter(function (e) { return e.it.id === id && e.label === e.it.name; })[0]; }).filter(Boolean);
+      palItems = first.concat(all.filter(function (e) { return first.indexOf(e) < 0 && e.label === e.it.name; }));
+    } else {
+      palItems = all.map(function (e) { return { e: e, s: score(e, q) }; }).filter(function (x) { return x.s > 0; }).sort(function (a, b) { return b.s - a.s; }).map(function (x) { return x.e; });
+    }
+    palSel = Math.min(palSel, Math.max(0, palItems.length - 1));
+    $("palList").innerHTML = palItems.length ? palItems.map(function (e, i) {
+      return '<li role="option" id="pal' + i + '" aria-selected="' + (i === palSel) + '" data-i="' + i + '">' + icon(e.it) + '<span class="n-pal__txt"><b>' + esc(e.label) + "</b><span>" + esc(e.sub) + "</span></span>" + (e.ext ? '<span class="n-row__ext">' + N.ICONS.ext + "</span>" : "") + (!q && rec.indexOf(e.it.id) >= 0 ? '<span class="n-pal__tag">Recent</span>' : "") + "</li>";
+    }).join("") : '<li class="n-pal__none">Nothing matches “' + esc(q) + "”.</li>";
+    $("palQ").setAttribute("aria-activedescendant", palItems.length ? "pal" + palSel : "");
+    var sel = $("pal" + palSel); if (sel) sel.scrollIntoView({ block: "nearest" });
+  }
+  function openPal() { if ($("hub").hidden) return; $("palQ").value = ""; palSel = 0; renderPal(); $("palDlg").showModal(); $("palQ").focus(); }
+  function go(e) {
+    if (!e) return;
+    if (e.it.status === "awaiting" && e.label === e.it.name) { $("palDlg").close(); showItem(e.it); return; }
+    N.addRecent(e.it.id); $("palDlg").close();
+    if (e.ext) window.open(e.href, "_blank", "noopener"); else location.href = e.href;
+  }
+  $("findBtn").onclick = openPal;
+  $("palQ").addEventListener("input", function () { palSel = 0; renderPal(); });
+  $("palQ").addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown") { e.preventDefault(); palSel = Math.min(palItems.length - 1, palSel + 1); renderPal(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); palSel = Math.max(0, palSel - 1); renderPal(); }
+    else if (e.key === "Enter") { e.preventDefault(); go(palItems[palSel]); }
+  });
+  $("palList").addEventListener("click", function (e) { var li = e.target.closest("[data-i]"); if (li) go(palItems[+li.dataset.i]); });
+  $("palDlg").addEventListener("click", function (e) { if (e.target === $("palDlg")) $("palDlg").close(); });
+  document.addEventListener("keydown", function (e) {
+    var typing = /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || "")) || e.target.isContentEditable;
+    if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) { e.preventDefault(); if ($("palDlg").open) $("palDlg").close(); else openPal(); }
+    else if (e.key === "/" && !typing && !document.querySelector("dialog[open]")) { e.preventDefault(); openPal(); }
+  });
+
+  /* ---------------- orbit view ---------------- */
+  $("orbitBtn").onclick = function () { $("orbitDlg").showModal(); buildAtom(); };
+  $("orbitDlg").addEventListener("close", function () { cancelAnimationFrame(raf); raf = 0; last = 0; });
+  $("orbitDlg").addEventListener("click", function (e) { if (e.target === $("orbitDlg")) $("orbitDlg").close(); });
 
   /* ---------------- the atom ---------------- */
   // Each ring: size as a share of the stage, tilt, and how long one lap takes (negative = the other way).
@@ -394,7 +492,7 @@
         el.setAttribute("aria-label", it.name + (it.status === "awaiting" ? " (awaiting code)" : ext ? " (opens in a new tab)" : ""));
         el.title = it.name;
         el.innerHTML = '<span class="dot">' + (N.ICONS[it.icon] || "") + '</span><span class="lab">' + esc(it.name) + "</span>";
-        el.addEventListener("click", function (e) { activate(it, e); });
+        el.addEventListener("click", function (e) { activate(it, e); if (it.status !== "awaiting") N.addRecent(it.id); });
         el.addEventListener("focus", function () { hover = true; });
         el.addEventListener("blur", function () { hover = false; });
         atom.appendChild(el);
@@ -434,7 +532,7 @@
     raf = requestAnimationFrame(tick);
   }
   $("pauseBtn").onclick = function () { paused = !paused; this.setAttribute("aria-pressed", String(paused)); this.textContent = paused ? "Resume orbits" : "Pause orbits"; };
-  var ro = new ResizeObserver(function () { if (!$("hub").hidden) { measure(); place(); } });
+  var ro = new ResizeObserver(function () { if ($("orbitDlg").open && nodes.length) { measure(); place(); } });
   ro.observe($("atom"));
 
   /* ---------------- boot ---------------- */

@@ -2,8 +2,9 @@
 /* Nucleus shared helpers: version, icons, the themable mark, theme switch, session. */
 (function () {
   var N = window.Nucleus = window.Nucleus || {};
-  N.VERSION = "1.8.0";
+  N.VERSION = "1.9.0";
   N.CHANGELOG = [
+    ["v1.9.0", "2026-11-06", "New home page built for getting things done. Search everything (tools, Sales reports, projects, systems) from the bar under the greeting or with / or Ctrl K / ⌘K, with arrow keys and Enter. Jump back in shows what you opened last. Tools are grouped by area (Sales & CRM, Operations & delivery, Company, Studio & motion capture, Marketing) as compact tiles, with project sites and connected systems alongside. The atom moves to Orbit view, opened from the mark beside the greeting. Works on phones too. Google sign-in is now open to atomicorbital.co.uk accounts as well as target3d.co.uk."],
     ["v1.8.0", "2026-11-05", "One Sales tool: the team Sales dashboard and the Sales Hub are merged. A new Sales overview opens first, showing FY to date against the minimum pace, what is still to find per working day, gross profit, this week, a league table by owner, and deals closing in 30 days or past their close date, using the same deals and targets as the Revenue Scoreboard so the figures agree. The six reports are one click away, and the Sales tab in Team performance now goes there."],
     ["v1.7.0", "2026-11-05", "Sales Hub added under Tools: Allan's six live reports (Revenue Scoreboard, Pipeline Triage, Sales Report, Weekly Pulse, Weekly Deals Report, Supplier Forecast), now on the Nucleus sign-in instead of Firebase, in Atomic Orbital style, with its own Help. Open to the sales team and administrators only; it doesn't appear in the hub for anyone else."],
     ["v1.6.0", "2026-11-05", "Sign in with Google: the first time you connect your Pipedrive token, then Google is all you need (token stored encrypted against your Google account; change it from Your account). Administrators set by email. Team dashboards added: Sales dashboard and Team performance (overview, company, Performance Hub for administrators, My dashboard, plan milestones) with KPI entries, notes and progress shared across the team. Checklists & templates: 19 operations documents rebranded to Atomic Orbital."],
@@ -42,6 +43,7 @@
     out:     '<svg ' + P + ' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14M10 16.5 14.5 12 10 7.5M14.5 12H4"/></svg>',
     close:   '<svg ' + P + ' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
     ext:     '<svg ' + P + ' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    search:  '<svg ' + P + ' fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>',
     back:    '<svg ' + P + ' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>'
   };
 
@@ -76,5 +78,8 @@
   };
   N.me = function () { return N.api("/api/nucleus/me").then(function (j) { return j.signedIn ? j.user : null; }).catch(function () { return null; }); };
   N.signOut = function () { return N.api("/api/nucleus/logout", { method: "POST" }).then(function () { location.href = "/"; }); };
+  // Recently opened tools, newest first, kept per browser for "Jump back in" and search.
+  N.recent = function () { try { var r = JSON.parse(localStorage.getItem("nucleus:recent") || "[]"); return Array.isArray(r) ? r.filter(function (x) { return typeof x === "string"; }) : []; } catch (e) { return []; } };
+  N.addRecent = function (id) { if (!id) return; try { var r = N.recent().filter(function (x) { return x !== id; }); r.unshift(id); localStorage.setItem("nucleus:recent", JSON.stringify(r.slice(0, 8))); } catch (e) {} };
   N.item = function (id) { return (window.NUCLEUS_REGISTRY.items || []).filter(function (i) { return i.id === id; })[0] || null; };
 })();

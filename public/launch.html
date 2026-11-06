@@ -31,7 +31,7 @@
   var N = window.Nucleus, R = window.NUCLEUS_REGISTRY, $ = function (id) { return document.getElementById(id); }, esc = N.esc;
   $("mk").innerHTML = N.mark(28); $("extIcon").innerHTML = N.ICONS.ext;
   N.bindThemeButton($("themeBtn"));
-  var id = new URLSearchParams(location.search).get("t"), it = N.item(id);
+  var id = new URLSearchParams(location.search).get("t"), it = N.item(id); if (it && it.status !== "awaiting") N.addRecent(it.id);
 
   var opts = R.items.filter(function (i) { return i.status === "live"; });
   $("jump").innerHTML = '<option value="">Go to…</option>' + R.orbits.map(function (o) {

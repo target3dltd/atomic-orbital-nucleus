@@ -312,6 +312,13 @@ await t("one Sales tool: old team Sales page redirects, registry has a single Sa
   ok(pub("tools/sales-hub/index.html").includes('<script src="overview.js"></script>'));
   for (const n of ["revenue-scoreboard", "pipeline-triage", "weekly-pulse"]) ok(pub("tools/sales-hub/" + n + ".html").includes('<a href="./">📋 Overview</a>'), n);
 });
+await t("home page: every tool has a known area and a short summary; privacy page is public", async () => {
+  const w = {}; new Function("window", pub("nucleus/registry.js"))(w); const R = w.NUCLEUS_REGISTRY, areas = R.areas.map((a) => a.id);
+  for (const i of R.items) { ok(i.short, i.id + " has no short"); if (i.orbit === "tools" || i.orbit === "marketing") ok(areas.includes(i.area), i.id + " area " + i.area); }
+  const h = pub("index.html"); ok(h.includes('id="palDlg"') && h.includes('id="orbitDlg"') && !h.includes('id="dir"'));
+  ok(fs.existsSync(path.join(root, "public/privacy.html")));
+  ok(!gate.config.path.some((g) => new RegExp("^" + g.replace(/\*/g, ".*") + "$").test("/privacy.html")), "privacy page must not be behind the gate");
+});
 await t("every live registry entry has an index.html", async () => {
   const src = pub("nucleus/registry.js"); const w = {}; new Function("window", src)(w);
   for (const i of w.NUCLEUS_REGISTRY.items) if (i.status === "live") ok(fs.existsSync(path.join(root, "public", i.href, i.href.endsWith(".html") ? "" : "index.html")), i.href);

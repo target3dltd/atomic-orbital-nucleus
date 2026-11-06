@@ -1,4 +1,4 @@
-# Atomic Orbital Nucleus (v1.8.0)
+# Atomic Orbital Nucleus (v1.9.0)
 
 Software © 2026 Ashley Keeler. All rights reserved. The published pages are minified and carry this notice; see "The scramble build" below.
 
@@ -12,6 +12,12 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 | **Marketing** (shares the inner ring) | Assets & Press Kit: logos, colours, fonts, letterheads, the Brand Style Guide 2026 and press copy. |
 | **Project sites** (middle ring) | Clays, Drift and Little Lion (LLE). |
 | **Connected systems** (outer ring) | Pipedrive, QuickBooks, Google Drive, Gmail, the Operations Google Site, Netlify, Claude. These open in a new tab. |
+
+## The home page (v1.9.0)
+
+The hub is a launcher: greeting and your Pipedrive figures, a search bar (also `/` or Ctrl K / ⌘K) that finds any tool, project, system or Sales report, **Jump back in** (the last tools opened on that device, kept in the browser), tools grouped by **area**, and project sites and connected systems in the side column. The atom is still there as **Orbit view**, opened from the mark beside the greeting.
+
+In `registry.js`: `areas` lists the groups in order; each tool has `area`, a one-line `short` for its tile, and optionally `featured: true` to lead its area and `links` (sub-pages that search can open directly, as the Sales reports do).
 
 ## What's in this folder
 
@@ -31,7 +37,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 | `netlify/lib/` | Shared code (`session.mjs` is the security core) and a bundled copy of Netlify Blobs |
 | `public/nucleus/dash-runtime.js`, `dash-runtime.css`, `vendor/d3-7.9.0.min.js` | Lets pages built with Claude's Dashboard type run here (used by the Support dashboard) |
 | `netlify/functions/nucleus-gmail.mjs`, `netlify/lib/support/` | Reads the support@ inbox for the Support dashboard |
-| `tests/` | `nucleus_test.mjs` (77 server checks against a fake Pipedrive) and a local test server |
+| `tests/` | `nucleus_test.mjs` (78 server checks against a fake Pipedrive) and a local test server |
 
 ## How sign-in works and why it's safe
 
@@ -52,7 +58,7 @@ The Nucleus is Atomic Orbital's home for systems, processes and tooling. Team me
 
 ## Setting up Google sign-in
 
-> **Live setup (5 Nov 2026):** Google Cloud project "My First Project" (`ancient-cortex-501112-e0`) under ashley.k@target3d.co.uk → Google Auth Platform: app "Atomic Orbital Nucleus", audience **Internal**, OAuth client "Nucleus (atomic-orbital.netlify.app)". Netlify has `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NUCLEUS_PUBLIC_URL`, `NUCLEUS_ADMINS` (Ashley, Allan), `NUCLEUS_SECRET`, `PIPEDRIVE_API_TOKEN` (Ashley's token for now). Internal means only accounts in the target3d.co.uk Google Workspace can sign in; switch the audience to External if people with separate atomicorbital.co.uk accounts need in.
+> **Live setup (5 Nov 2026):** Google Cloud project "My First Project" (`ancient-cortex-501112-e0`) under ashley.k@target3d.co.uk → Google Auth Platform: app "Atomic Orbital Nucleus", audience **Internal**, OAuth client "Nucleus (atomic-orbital.netlify.app)". Netlify has `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NUCLEUS_PUBLIC_URL`, `NUCLEUS_ADMINS` (Ashley, Allan), `NUCLEUS_SECRET`, `PIPEDRIVE_API_TOKEN` (Ashley's token for now). Since 6 Nov 2026 the audience is **External, In production** (so separate atomicorbital.co.uk Google accounts can sign in), with home page `https://atomic-orbital.netlify.app/` and privacy notice `/privacy.html`. Nucleus itself still only admits the domains in `NUCLEUS_GOOGLE_DOMAINS`. The client has a second secret (created 5 Nov 23:14) in use; the first can be disabled and deleted.
 
 Do this once, in a browser, after the site's address is final (`https://atomic-orbital.netlify.app`).
 
